@@ -1,48 +1,50 @@
-# Оркестратор Prompt Hospital (бэкенд)
+# Prompt Hospital Orchestrator (backend)
 
-Единый источник истины по задачам и моделям ИИ-команды. Фронтенд (офис) читает и пишет
-сюда через API, диспетчер реально запускает модели.
+> [Русский](README.ru.md) · English
 
-## Файлы
+Single source of truth for the tasks and models of an AI team. The frontend (office) reads
+and writes here through the API; the dispatcher actually runs the models.
 
-- `journal.json` — журнал (модели, очередь задач, лог). Источник истины.
-- `journal.py` — CLI операций. Те же операции, что OPS фронтенда.
+## Files
+
+- `journal.json` — the journal (models, task queue, log). Source of truth.
+- `journal.py` — operation CLI. Same operations as the frontend OPS.
 - `server.py` — HTTP API: `GET /journal`, `GET /health`, `POST /op {name, args}`.
-- `dispatch.py` — диспетчер: задача на модели → реальный запуск исполнителя → complete/block.
-- `review-backend.py` — ревью/рефакторинг этого бэкенда бесплатной моделью OpenRouter.
+- `dispatch.py` — dispatcher: task on a model → actually run the executor → complete/block.
+- `review-backend.py` — review/refactor of this backend via a free OpenRouter model.
 
-## Запуск
+## Run
 
 ```bash
-python3 journal.py list          # состояние журнала
-python3 journal.py add-task "Задача" 3   # завести задачу (приоритет 1-3)
-python3 journal.py assign T-1 w1         # назначить
-python3 journal.py complete w1           # закрыть
+python3 journal.py list                 # view the journal
+python3 journal.py add-task "Task" 3    # create a task (priority 1-3)
+python3 journal.py assign T-1 w1        # assign
+python3 journal.py complete w1          # close
 
-python3 server.py 8090           # API (в проде — docker-контейнер orchestrator-api)
+python3 server.py 8090                  # API (in prod — docker container orchestrator-api)
 
 ORCHESTRATOR_API=https://example.com \
 ORCHESTRATOR_AUTH='user:pass' \
-python3 dispatch.py --loop 30    # диспетчер в цикле (каждые 30 с)
+python3 dispatch.py --loop 30           # dispatcher on a loop (every 30 s)
 ```
 
-## Переменные окружения (dispatch.py)
+## Environment variables (dispatch.py)
 
-- `ORCHESTRATOR_API` — базовый URL API (по умолчанию `http://localhost:8090`).
-- `ORCHESTRATOR_AUTH` — `user:pass` (Basic) или `token:<токен>` (Bearer). Без секретов в коде.
-- `ORCHESTRATOR_WORKDIR` — рабочая папка исполнителя (по умолчанию `~/prompt-hospital`).
+- `ORCHESTRATOR_API` — base URL of the API (default `http://localhost:8090`).
+- `ORCHESTRATOR_AUTH` — `user:pass` (Basic) or `token:<token>` (Bearer). No secrets in code.
+- `ORCHESTRATOR_WORKDIR` — executor working directory (default `~/prompt-hospital`).
 
-## Как добавить исполнителя
+## Adding an executor
 
-В `dispatch.py` → `tick()` добавь ветку под `model` своей модели и функцию запуска
-(аналог `run_codex`). Диспетчер сам запишет `complete` при успехе / `block` при ошибке,
-с повторной проверкой `assignedTo` перед записью (защита от переназначения).
+In `dispatch.py` → `tick()`, add a branch for your model and a launch function (like
+`run_codex`). The dispatcher records `complete` on success / `block` on failure, re-checking
+`assignedTo` before writing (guards against reassignment mid-run).
 
-## Инварианты журнала
+## Journal invariants
 
 - `worker.task != null` ⇔ `status ∈ {run, blocked}`.
-- `task.assignedTo` — существующая модель; `worker.task` — существующая задача.
-- `assign` задачи на другую модель снимает её с прежней (reassign).
-- Запись в файл — под `flock` (защита от гонок параллельных POST).
+- `task.assignedTo` — an existing model; `worker.task` — an existing task.
+- `assign` a task to another model detaches it from the previous one (reassign).
+- Writes to the file are under `flock` (guards against races across parallel POSTs).
 
-Проверка согласованности: `validate_journal.py` (генерируется по задаче, лежит рядом с фронтом).
+Consistency check: `validate_journal.py`.
