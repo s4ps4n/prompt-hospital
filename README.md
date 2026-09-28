@@ -2,6 +2,14 @@
 
 > English · [Русский](README.ru.md)
 
+https://github.com/user-attachments/assets/0c18869a-997c-45b7-9600-4d6642f35a36
+
+
+
+
+
+
+
 ![Node 18+](https://img.shields.io/badge/Node-18+-339933?logo=nodedotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
