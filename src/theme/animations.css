@@ -1,0 +1,21 @@
+@keyframes ph-nod { 50% { transform: rotate(3deg) translateY(1px); } }
+@keyframes ph-sway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes ph-type-a { 50% { transform: translateY(-3px); } }
+@keyframes ph-type-b { 0%,100% { transform: translateY(-3px); } 50% { transform: translateY(0); } }
+@keyframes ph-pulse { 50% { opacity: .65; } }
+@keyframes ph-lamp { 50% { opacity: .25; } }
+@keyframes ph-eye { 0%,92%,100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+.ph-head, .ph-eyes { transform-box: fill-box; transform-origin: 50% 100%; }
+.ph-eyes { transform-origin: center; }
+.ph-motion[data-status='run'] .ph-head { animation: ph-nod .55s ease-in-out infinite; }
+.ph-motion[data-status='wait'] .ph-head { animation: ph-sway 3.4s ease-in-out infinite; }
+.ph-motion[data-status='run'] .ph-arm-a { animation: ph-type-a .26s ease-in-out infinite; }
+.ph-motion[data-status='run'] .ph-arm-b { animation: ph-type-b .26s ease-in-out infinite; }
+.ph-motion .ph-eyes { animation: ph-eye 5s infinite; }
+.ph-motion[data-status='run'] .ph-screen { animation: ph-pulse 1.1s ease-in-out infinite; }
+.ph-motion[data-status='blocked'] .ph-lamp { animation: ph-lamp .9s infinite; }
+/* Explicit opt-out also wins inside an animated parent. */
+.ph-still, .ph-still * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .ph-motion, .ph-motion * { animation: none !important; }
+}
