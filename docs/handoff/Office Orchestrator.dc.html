@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+html,body{margin:0;background:#2b2117;}
+*{box-sizing:border-box;}
+a{color:#7a4a22;} a:hover{color:#241a0c;}
+@keyframes nod{0%,100%{transform:translateY(0)}50%{transform:translateY(1.8px)}}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes typeA{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes typeB{0%,100%{transform:translateY(-3px)}50%{transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes blinkLamp{0%,55%{opacity:1}56%,100%{opacity:.15}}
+@keyframes blinkEye{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes walkLane{0%,100%{transform:translate(var(--x0),var(--y0))}50%{transform:translate(var(--x1),var(--y1))}}
+@keyframes face{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
+@keyframes stepA{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes stepB{0%,100%{transform:translateY(-3px)}50%{transform:translateY(0)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+@keyframes zfloat{0%{transform:translate(0,0);opacity:0}20%{opacity:1}100%{transform:translate(-8px,-26px);opacity:0}}
+@keyframes steam{0%{transform:translateY(0);opacity:0}30%{opacity:.9}100%{transform:translateY(-10px);opacity:0}}
+@keyframes drool{0%,100%{transform:scaleY(.6)}50%{transform:scaleY(1.3)}}
+@keyframes sip{0%,70%,100%{transform:translate(0,0)}80%,90%{transform:translate(1px,-8px)}}
+@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+@keyframes nope{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;gap:8px;padding:8px;font-family:Verdana,Tahoma,sans-serif;color:#241a0c;background:#2b2117;">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;background:#6b4220;border:3px solid #120c05;border-radius:6px;box-shadow:inset 0 2px 0 #8a5a30;">
+    <div style="font-weight:800;font-size:16px;color:#f7d23a;letter-spacing:.06em;text-transform:uppercase;text-shadow:2px 2px 0 #241a0c;">Офис оркестратора</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <sc-for list="{{ counters }}" as="c" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:#241a0c;border-radius:4px;color:#f6edd6;font-size:11px;font-family:'Courier New',monospace;font-weight:700;">
+          <div style="width:12px;height:10px;border:1.5px solid #f6edd6;background:{{ c.color }};"></div>
+          <div>{{ c.label }}: {{ c.n }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button onClick="{{ openAdd }}" style="padding:6px 10px;font:inherit;font-size:12px;font-weight:800;background:#f7d23a;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;" style-active="transform:translateY(2px);box-shadow:0 1px 0 #241a0c;">＋ Модель</button>
+      <button onClick="{{ zoomOut }}" style="width:32px;padding:6px 0;font:inherit;font-size:13px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;">−</button>
+      <button onClick="{{ zoomFit }}" style="padding:6px 8px;font:inherit;font-size:12px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;">Вписать</button>
+      <button onClick="{{ zoomIn }}" style="width:32px;padding:6px 0;font:inherit;font-size:13px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;">＋</button>
+      <button onClick="{{ openJournal }}" style="padding:6px 10px;font:inherit;font-size:12px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;">Журнал</button>
+      <button onClick="{{ resetAll }}" style="padding:6px 10px;font:inherit;font-size:12px;font-weight:800;background:#e0584a;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#fff;">Сброс</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:stretch;flex:1;">
+    <div data-drop="queue" style="flex:0 0 250px;display:flex;flex-direction:column;gap:8px;padding:10px;background:#f6edd6;border:3px solid {{ queueBorder }};border-radius:6px;height:calc(100vh - 128px);min-height:380px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+        <div style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em;">Лоток Гермеса</div>
+        <div style="font-size:11px;color:#7a6a4e;">{{ queueCountLabel }}</div>
+      </div>
+      <div style="font-size:11px;color:#7a6a4e;line-height:1.45;text-wrap:pretty;">Тащите конверт на комнату модели. Бросите на другой конверт в лотке — встанет перед ним и возьмёт его приоритет.</div>
+      <div style="display:flex;flex-direction:column;gap:6px;overflow:auto;flex:1;min-height:0;padding:2px;">
+        <sc-for list="{{ queueItems }}" as="q" hint-placeholder-count="5">
+          <div data-drop="queue" data-task-slot="{{ q.id }}" onPointerDown="{{ q.onDown }}" style="display:flex;gap:8px;align-items:center;padding:7px 8px;background:#fffaf0;border:2px solid #241a0c;border-radius:4px;cursor:grab;touch-action:none;user-select:none;box-shadow:2px 2px 0 rgba(36,26,12,.25);">
+            <div style="flex:0 0 auto;width:10px;height:24px;background:{{ q.flag }};border:2px solid #241a0c;"></div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+              <div style="font-size:12px;font-weight:700;line-height:1.25;text-wrap:pretty;">{{ q.title }}</div>
+              <div style="font-size:10px;color:#7a6a4e;">{{ q.meta }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <button onPointerDown="{{ stop }}" onClick="{{ q.up }}" title="Повысить приоритет" style="width:22px;height:18px;padding:0;font-size:9px;background:#f6edd6;border:1.5px solid #241a0c;border-radius:3px;cursor:pointer;color:#241a0c;">▲</button>
+              <button onPointerDown="{{ stop }}" onClick="{{ q.down }}" title="Понизить приоритет" style="width:22px;height:18px;padding:0;font-size:9px;background:#f6edd6;border:1.5px solid #241a0c;border-radius:3px;cursor:pointer;color:#241a0c;">▼</button>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ queueEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:16px 8px;text-align:center;font-size:12px;color:#7a6a4e;border:2px dashed #c9b58a;border-radius:4px;">Лоток пуст</div>
+        </sc-if>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:2px dashed #c9b58a;">
+        <input value="{{ ntTitle }}" onChange="{{ onNtTitle }}" onKeyDown="{{ onNtKey }}" placeholder="Новая задача…" style="padding:7px 8px;font:inherit;font-size:12px;border:2px solid #241a0c;border-radius:4px;background:#fffaf0;color:#241a0c;">
+        <div style="display:flex;gap:6px;">
+          <select value="{{ ntPrio }}" onChange="{{ onNtPrio }}" style="flex:1;min-width:0;padding:5px;font:inherit;font-size:11px;border:2px solid #241a0c;border-radius:4px;background:#fffaf0;color:#241a0c;">
+            <option value="3">высокий</option>
+            <option value="2">средний</option>
+            <option value="1">низкий</option>
+          </select>
+          <select value="{{ ntKind }}" onChange="{{ onNtKind }}" style="flex:1;min-width:0;padding:5px;font:inherit;font-size:11px;border:2px solid #241a0c;border-radius:4px;background:#fffaf0;color:#241a0c;">
+            <option value="">любая роль</option>
+            <sc-for list="{{ roles }}" as="r"><option value="{{ r }}">{{ r }}</option></sc-for>
+          </select>
+        </div>
+        <button onClick="{{ onAddTask }}" style="padding:7px 10px;font:inherit;font-size:12px;font-weight:800;background:#f7d23a;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;" style-active="transform:translateY(2px);box-shadow:0 1px 0 #241a0c;">＋ В лоток</button>
+      </div>
+    </div>
+
+    <div ref="{{ wrapRef }}" style="flex:1 1 480px;min-width:300px;height:calc(100vh - 128px);min-height:380px;overflow:auto;background:#45a236;border:3px solid #120c05;border-radius:6px;position:relative;">
+      <div style="width:{{ scaledW }}px;height:{{ scaledH }}px;position:relative;margin:0 auto;">
+        <div ref="{{ sceneRef }}" style="position:absolute;left:0;top:0;width:{{ sceneW }}px;height:{{ sceneH }}px;transform:scale({{ k }});transform-origin:0 0;">
+          {{ sceneSvg }}
+          <div style="position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;">
+            <sc-for list="{{ signs }}" as="s" hint-placeholder-count="0">
+              <div data-drop="{{ s.drop }}" onClick="{{ s.onClick }}" style="position:absolute;left:{{ s.x }}px;top:{{ s.y }}px;width:{{ s.w }}px;transform:translate(-50%,-100%) scale({{ cs }});transform-origin:50% 100%;background:{{ s.bg }};border:3px solid {{ s.border }};border-radius:3px;box-shadow:3px 3px 0 rgba(36,26,12,.45);padding:4px 8px 5px;display:flex;flex-direction:column;gap:1px;pointer-events:auto;cursor:pointer;">
+                <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+                  <div style="flex:0 0 auto;width:12px;height:12px;border-radius:50%;background:{{ s.lamp }};border:2px solid #241a0c;animation:{{ s.lampAnim }};"></div>
+                  <div style="font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ s.name }}</div>
+                </div>
+                <div style="font-size:11px;font-weight:700;color:#6a4a10;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ s.role }}</div>
+                <sc-if value="{{ s.hasTask }}">
+                  <div style="font-size:11px;font-weight:700;color:#241a0c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-top:1.5px solid rgba(36,26,12,.35);padding-top:2px;">▸ {{ s.task }}</div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <sc-for list="{{ envs }}" as="e" hint-placeholder-count="0">
+              <div data-drop="{{ e.drop }}" title="{{ e.title }}" onPointerDown="{{ e.onDown }}" style="position:absolute;left:{{ e.x }}px;top:{{ e.y }}px;width:34px;height:23px;transform:scale({{ cs }});transform-origin:50% 100%;background:{{ e.bg }};border:2px solid #241a0c;border-radius:3px;box-shadow:2px 2px 0 rgba(36,26,12,.45);cursor:grab;touch-action:none;pointer-events:auto;user-select:none;">
+                <svg viewBox="0 0 30 19" width="30" height="19" style="position:absolute;left:0;top:0;"><path d="M1 1 L15 11 L29 1" fill="none" stroke="#241a0c" stroke-width="1.8"></path></svg>
+                <div style="position:absolute;right:-6px;top:-11px;width:9px;height:12px;background:{{ e.flag }};border:2px solid #241a0c;"></div>
+              </div>
+            </sc-for>
+            <sc-for list="{{ mores }}" as="m" hint-placeholder-count="0">
+              <div style="position:absolute;left:{{ m.x }}px;top:{{ m.y }}px;padding:1px 5px;background:#241a0c;color:#f7d23a;font-size:11px;font-weight:800;border-radius:8px;transform:scale({{ cs }});transform-origin:0 100%;">{{ m.text }}</div>
+            </sc-for>
+            <sc-for list="{{ freeCells }}" as="f" hint-placeholder-count="0">
+              <div onClick="{{ openAdd }}" style="position:absolute;left:{{ f.x }}px;top:{{ f.y }}px;transform:translate(-50%,-50%) scale({{ cs }});padding:6px 10px;background:#fffaf0;border:2px dashed #241a0c;border-radius:4px;font-size:12px;font-weight:800;pointer-events:auto;cursor:pointer;white-space:nowrap;">＋ свободная комната</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:0 0 290px;display:flex;flex-direction:column;gap:12px;padding:12px;background:#f6edd6;border:3px solid #241a0c;border-radius:6px;height:calc(100vh - 128px);min-height:380px;overflow:auto;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="flex:0 0 auto;width:64px;height:84px;display:flex;align-items:flex-end;justify-content:center;background:{{ sel.roleColor }};border:2px solid #241a0c;border-radius:4px;overflow:hidden;">{{ sel.avatar }}</div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;">{{ sel.name }}</div>
+            <div style="font-size:12px;color:#7a6a4e;">{{ sel.provider }} · {{ sel.id }}</div>
+            <div style="display:flex;align-items:center;gap:6px;align-self:flex-start;padding:3px 8px;background:{{ sel.statusColor }};color:#fff;border:2px solid #241a0c;border-radius:4px;font-size:11px;font-weight:800;">{{ sel.statusLabel }}</div>
+          </div>
+          <button onClick="{{ closeSel }}" style="width:26px;height:26px;padding:0;font-size:14px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;cursor:pointer;color:#241a0c;">✕</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#7a6a4e;">Роль</div>
+          <div onClick="{{ sel.onRoleTry }}" style="border-radius:4px;animation:{{ sel.roleAnim }};">
+            <select value="{{ sel.role }}" onChange="{{ sel.onRole }}" disabled="{{ sel.roleLocked }}" style="width:100%;padding:7px 8px;font:inherit;font-size:13px;font-weight:700;border:2px solid {{ sel.roleBorder }};border-radius:4px;background:{{ sel.roleBg }};color:#241a0c;pointer-events:{{ sel.rolePE }};">
+              <sc-for list="{{ sel.roleOptions }}" as="r"><option value="{{ r }}">{{ r }}</option></sc-for>
+            </select>
+          </div>
+          <sc-if value="{{ sel.showLockNote }}">
+            <div style="font-size:11px;font-weight:700;color:{{ sel.lockColor }};line-height:1.4;">{{ sel.lockNote }}</div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ sel.isWorker }}">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#7a6a4e;">Текущая задача</div>
+            <sc-if value="{{ sel.hasCurrent }}">
+              <div style="display:flex;gap:8px;align-items:center;padding:7px 8px;background:#fffaf0;border:2px solid #241a0c;border-radius:4px;">
+                <div style="flex:0 0 auto;width:10px;height:22px;background:{{ sel.curFlag }};border:2px solid #241a0c;"></div>
+                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;">
+                  <div style="font-size:12px;font-weight:700;">{{ sel.curTitle }}</div>
+                  <div style="font-size:10px;color:#7a6a4e;">{{ sel.curMeta }}</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button onClick="{{ sel.onComplete }}" style="padding:6px 9px;font:inherit;font-size:11px;font-weight:800;background:#6fd08a;border:2px solid #241a0c;border-radius:4px;box-shadow:0 2px 0 #241a0c;cursor:pointer;color:#241a0c;">✓ Завершить</button>
+                <button onClick="{{ sel.onBlock }}" style="padding:6px 9px;font:inherit;font-size:11px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;box-shadow:0 2px 0 #241a0c;cursor:pointer;color:#241a0c;">{{ sel.blockLabel }}</button>
+                <button onClick="{{ sel.onUnassign }}" style="padding:6px 9px;font:inherit;font-size:11px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;box-shadow:0 2px 0 #241a0c;cursor:pointer;color:#241a0c;">↩ В лоток</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ sel.noCurrent }}">
+              <div style="padding:8px;font-size:12px;color:#7a6a4e;border:2px dashed #c9b58a;border-radius:4px;">Свободен — перетащите сюда конверт</div>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ sel.hasQueue }}">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#7a6a4e;">Очередь модели</div>
+              <sc-for list="{{ sel.queue }}" as="q">
+                <div style="display:flex;gap:8px;align-items:center;padding:6px 8px;background:#fffaf0;border:2px solid #241a0c;border-radius:4px;">
+                  <div style="flex:0 0 auto;width:9px;height:20px;background:{{ q.flag }};border:2px solid #241a0c;"></div>
+                  <div style="flex:1;min-width:0;font-size:11px;font-weight:700;">{{ q.title }}</div>
+                  <button onClick="{{ q.up }}" style="width:22px;height:20px;padding:0;font-size:9px;background:#f6edd6;border:1.5px solid #241a0c;border-radius:3px;cursor:pointer;color:#241a0c;">▲</button>
+                  <button onClick="{{ q.down }}" style="width:22px;height:20px;padding:0;font-size:9px;background:#f6edd6;border:1.5px solid #241a0c;border-radius:3px;cursor:pointer;color:#241a0c;">▼</button>
+                  <button onClick="{{ q.back }}" title="Вернуть в лоток" style="width:22px;height:20px;padding:0;font-size:10px;background:#f6edd6;border:1.5px solid #241a0c;border-radius:3px;cursor:pointer;color:#241a0c;">↩</button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#7a6a4e;">Выполнено: {{ sel.doneCount }}</div>
+            <sc-for list="{{ sel.history }}" as="hh">
+              <div style="font-size:11px;color:#4a3a22;">✓ {{ hh }}</div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:10px;border-top:2px dashed #c9b58a;">
+            <button onClick="{{ sel.onClone }}" style="padding:6px 9px;font:inherit;font-size:11px;font-weight:800;background:#f7d23a;border:2px solid #241a0c;border-radius:4px;box-shadow:0 2px 0 #241a0c;cursor:pointer;color:#241a0c;">＋ Экземпляр с другой ролью</button>
+            <button onClick="{{ sel.onRemove }}" style="padding:6px 9px;font:inherit;font-size:11px;font-weight:800;background:#e0584a;border:2px solid #241a0c;border-radius:4px;box-shadow:0 2px 0 #241a0c;cursor:pointer;color:#fff;">Убрать из офиса</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ sel.isCoord }}">
+          <div style="font-size:12px;line-height:1.5;color:#4a3a22;text-wrap:pretty;">Координатор раздаёт задачи. В лотке {{ queueCountLabel }}. Возьмите конверт со стола или из лотка слева и бросьте на комнату модели.</div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#120c05;border:3px solid #6b4220;border-radius:6px;font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:{{ msgColor }};min-height:40px;">▸ {{ msgText }}</div>
+
+  <sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeAdd }}" style="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(18,12,5,.6);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;">
+      <div onClick="{{ stop }}" style="width:min(660px,100%);max-height:90vh;overflow:auto;background:#f6edd6;border:3px solid #241a0c;border-radius:6px;box-shadow:6px 6px 0 #120c05;padding:16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Каталог моделей</div>
+        <div style="font-size:12px;color:#7a6a4e;">Выберите модель и роль — в офисе появится новая комната. Одна модель может занимать несколько комнат с разными ролями.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
+          <sc-for list="{{ catalogItems }}" as="c" hint-placeholder-count="8">
+            <div onClick="{{ c.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border:{{ c.border }};border-radius:4px;background:{{ c.bg }};cursor:pointer;">
+              {{ c.avatar }}
+              <div style="font-size:13px;font-weight:800;">{{ c.name }}</div>
+              <div style="font-size:10px;color:#7a6a4e;">{{ c.provider }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <div style="font-size:12px;font-weight:800;">Роль:</div>
+          <select value="{{ addRole }}" onChange="{{ onAddRole }}" style="padding:6px 8px;font:inherit;font-size:13px;font-weight:700;border:2px solid #241a0c;border-radius:4px;background:#fffaf0;color:#241a0c;">
+            <sc-for list="{{ roles }}" as="r"><option value="{{ r }}">{{ r }}</option></sc-for>
+          </select>
+          <div style="flex:1;"></div>
+          <button onClick="{{ closeAdd }}" style="padding:7px 12px;font:inherit;font-size:12px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;">Отмена</button>
+          <button onClick="{{ confirmAdd }}" style="padding:7px 12px;font:inherit;font-size:12px;font-weight:800;background:#f7d23a;border:2px solid #241a0c;border-radius:4px;box-shadow:0 3px 0 #241a0c;cursor:pointer;color:#241a0c;">Добавить в офис</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ journalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeJournal }}" style="position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(18,12,5,.6);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;">
+      <div onClick="{{ stop }}" style="width:min(760px,100%);max-height:90vh;display:flex;flex-direction:column;gap:10px;background:#f6edd6;border:3px solid #241a0c;border-radius:6px;box-shadow:6px 6px 0 #120c05;padding:16px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;flex:1;">Журнал оркестратора</div>
+          <button onClick="{{ closeJournal }}" style="width:28px;height:28px;padding:0;font-size:14px;font-weight:800;background:#f6edd6;border:2px solid #241a0c;border-radius:4px;cursor:pointer;color:#241a0c;">✕</button>
+        </div>
+        <pre style="margin:0;flex:1;min-height:0;overflow:auto;padding:10px;background:#120c05;color:#bfe6a0;font-size:11px;line-height:1.45;border-radius:4px;">{{ journalText }}</pre>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ dragging }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:{{ ghostX }}px;top:{{ ghostY }}px;z-index:100;pointer-events:none;transform:translate(-50%,-70%) rotate(-8deg);display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="position:relative;width:44px;height:30px;background:#fdf6e3;border:2px solid #241a0c;border-radius:3px;box-shadow:4px 4px 0 rgba(36,26,12,.4);">
+        <svg viewBox="0 0 40 26" width="40" height="26" style="position:absolute;left:0;top:0;"><path d="M1 1 L20 14 L39 1" fill="none" stroke="#241a0c" stroke-width="2"></path></svg>
+        <div style="position:absolute;right:-7px;top:-13px;width:11px;height:14px;background:{{ ghostFlag }};border:2px solid #241a0c;"></div>
+      </div>
+      <div style="padding:2px 7px;background:#241a0c;color:#f7d23a;font-size:11px;font-weight:800;border-radius:3px;white-space:nowrap;">{{ ghostTitle }}</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ flying }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:{{ flyX }}px;top:{{ flyY }}px;z-index:100;pointer-events:none;transform:translate(-50%,-50%) rotate(-8deg);transition:left .45s cubic-bezier(.4,0,.2,1), top .45s cubic-bezier(.3,-0.6,.6,1);">
+      <div style="position:relative;width:40px;height:27px;background:#fdf6e3;border:2px solid #241a0c;border-radius:3px;box-shadow:4px 4px 0 rgba(36,26,12,.4);">
+        <svg viewBox="0 0 36 23" width="36" height="23" style="position:absolute;left:0;top:0;"><path d="M1 1 L18 12 L35 1" fill="none" stroke="#241a0c" stroke-width="2"></path></svg>
+        <div style="position:absolute;right:-7px;top:-12px;width:10px;height:13px;background:{{ flyFlag }};border:2px solid #241a0c;"></div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;cols&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:4,&quot;min&quot;:3,&quot;max&quot;:6,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Офис&quot;},&quot;motion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Офис&quot;}}">
+const OUT='#241a0c';
+const LS_KEY='orch-office-journal-v1';
+const ROLES=['исполнитель','архитектор','фулстак','сисадмин','дизайнер','UX/UI','приёмщик'];
+const ROLE_C={'координатор':'#cf5d5d','исполнитель':'#e89b98','архитектор':'#a99ae0','фулстак':'#88b4ea','сисадмин':'#8fd0a0','дизайнер':'#f0c07a','UX/UI':'#e6a2d2','приёмщик':'#c9b98e'};
+const PRIO={3:{label:'высокий',c:'#e0402e'},2:{label:'средний',c:'#f2c230'},1:{label:'низкий',c:'#a3a3a3'}};
+const ST={run:{label:'в работе',c:'#2f86e0',scr:'#4cb8ff'},done:{label:'выполнено',c:'#2f9e4f',scr:'#52e07a'},blocked:{label:'блокировано',c:'#c8322a',scr:'#8c1616'},wait:{label:'ожидает',c:'#77705f',scr:'#1d2532'}};
+const CATALOG=[
+ {model:'deepseek',name:'DeepSeek',provider:'DeepSeek',hair:'#3cc8dc',color:'#0fa0be',skin:'#f2c9a0',style:'cap',acc:'wings'},
+ {model:'claude',name:'Claude',provider:'Anthropic',hair:'#e09060',color:'#d07040',skin:'#f5d2b0',style:'bob'},
+ {model:'gpt5',name:'GPT-5',provider:'OpenAI',hair:'#5fbf8a',color:'#3f9f6a',skin:'#e0a878',style:'quiff',acc:'glasses'},
+ {model:'gemini',name:'Gemini',provider:'Google',hair:'#7aa0e8',color:'#4a74c8',skin:'#f2c9a0',style:'bun'},
+ {model:'qwen',name:'Qwen',provider:'Alibaba',hair:'#b080e8',color:'#8a58c8',skin:'#f5d2b0',style:'spiky',acc:'headset'},
+ {model:'mistral',name:'Mistral',provider:'Mistral AI',hair:'#e8b060',color:'#c88830',skin:'#c68a5a',style:'quiff'},
+ {model:'grok',name:'Grok',provider:'xAI',hair:'#8fb8c0',color:'#5f8f98',skin:'#e0a878',style:'spiky'},
+ {model:'llama',name:'Llama',provider:'Meta',hair:'#b0bcc8',color:'#7f8f9f',skin:'#f2c9a0',style:'cap',acc:'glasses'}
+];
+const CAT={}; CATALOG.forEach(c=>{CAT[c.model]=c;});
+const L=160,G=110,PITCH=L+G,M=55,H=64,T=6,E=22;
+const h=React.createElement;
+function shade(hex,f){const n=parseInt(hex.slice(1),16);const cl=v=>Math.max(0,Math.min(255,Math.round(v*f)));return '#'+((1<<24)|(cl(n>>16&255)<<16)|(cl(n>>8&255)<<8)|cl(n&255)).toString(16).slice(1);}
+const r1=v=>Math.round(v*10)/10;
+function P(x,y,z){return [x-y,(x+y)/2-(z||0)];}
+function pts(a){return a.map(p=>r1(p[0])+','+r1(p[1])).join(' ');}
+function poly(key,a,fill,ex){return h('polygon',Object.assign({key,points:pts(a),fill,stroke:OUT,strokeWidth:2,strokeLinejoin:'round'},ex||{}));}
+function box(key,x,y,z,w,d,hh,c,o){o=o||{};
+ const top=[P(x,y,z+hh),P(x+w,y,z+hh),P(x+w,y+d,z+hh),P(x,y+d,z+hh)];
+ const fy=[P(x,y+d,z),P(x+w,y+d,z),P(x+w,y+d,z+hh),P(x,y+d,z+hh)];
+ const fx=[P(x+w,y,z),P(x+w,y+d,z),P(x+w,y+d,z+hh),P(x+w,y,z+hh)];
+ return h('g',{key},poly('y',fy,o.fy||shade(c,.84)),poly('x',fx,o.fx||shade(c,.68)),poly('t',top,o.top||c));}
+function qX(x,y0,y1,z0,z1){return [P(x,y0,z0),P(x,y1,z0),P(x,y1,z1),P(x,y0,z1)];}
+function qY(y,x0,x1,z0,z1){return [P(x0,y,z0),P(x1,y,z0),P(x1,y,z1),P(x0,y,z1)];}
+function fr(x0,y0,x1,y1,z){z=z||0;return [P(x0,y0,z),P(x1,y0,z),P(x1,y1,z),P(x0,y1,z)];}
+const cmpT=(a,b)=>b.priority-a.priority||a.order-b.order;
+
+function plant(key,x,y){
+ const [cx,cy]=P(x+8,y+8,15);
+ const lf=(k,dx,dy,r,f)=>h('circle',{key:k,cx:cx+dx,cy:cy+dy,r,fill:f,stroke:OUT,strokeWidth:2});
+ return h('g',{key},box('p',x,y,0,16,16,15,'#c8703c'),lf('a',-9,-7,8,'#3f9a3a'),lf('b',9,-8,8,'#3f9a3a'),lf('c',0,-13,9,'#56b848'),lf('d',-6,-23,7,'#56b848'),lf('e',7,-21,7,'#6cc85a'),lf('f',0,-31,6,'#6cc85a'));
+}
+function hairEls(cat){
+ const o={fill:cat.hair,stroke:OUT,strokeWidth:2,strokeLinejoin:'round'},s=cat.style,out=[];
+ const cap='M-18,-42 C-19,-58 -8,-63 0,-63 C8,-63 19,-58 18,-42 C12,-50 4,-52 0,-51 C-6,-52 -13,-50 -18,-42 Z';
+ if(s==='bun') out.push(h('circle',Object.assign({key:'bn',cx:1,cy:-64,r:7},o)));
+ if(s==='bob') out.push(h('path',Object.assign({key:'hb',d:'M-20,-27 C-23,-50 -14,-65 0,-65 C14,-65 23,-50 20,-27 L13,-27 C15,-37 14,-45 11,-50 C3,-47 -8,-48 -13,-45 C-15,-39 -15,-33 -13,-27 Z'},o)));
+ else if(s==='spiky') out.push(h('path',Object.assign({key:'hs',d:'M-18,-42 L-21,-56 L-12,-55 L-11,-67 L-3,-59 L2,-70 L6,-59 L15,-65 L13,-54 L21,-55 L18,-42 C12,-50 4,-52 0,-51 C-6,-52 -13,-50 -18,-42 Z'},o)));
+ else out.push(h('path',Object.assign({key:'hc',d:cap},o)));
+ if(s==='quiff') out.push(h('path',Object.assign({key:'hq',d:'M-6,-60 C-4,-73 10,-74 15,-64 C9,-67 3,-64 -6,-60 Z'},o)));
+ return out;
+}
+function accEls(cat){
+ const a=cat.acc;
+ if(a==='glasses') return [h('g',{key:'gl',fill:'rgba(255,255,255,.2)',stroke:OUT,strokeWidth:1.8},h('circle',{cx:-7,cy:-43,r:6,key:1}),h('circle',{cx:5,cy:-43,r:6,key:2}),h('path',{d:'M11,-43 L16,-45',key:3,fill:'none'}))];
+ if(a==='wings') return [h('path',{key:'wl',d:'M-15,-56 C-27,-64 -31,-54 -24,-50 C-29,-47 -24,-43 -16,-48 Z',fill:'#fff',stroke:OUT,strokeWidth:1.8}),h('path',{key:'wr',d:'M13,-56 C25,-64 29,-54 22,-50 C27,-47 22,-43 14,-48 Z',fill:'#fff',stroke:OUT,strokeWidth:1.8})];
+ if(a==='headset') return [h('path',{key:'hs',d:'M-18,-46 C-18,-70 18,-70 18,-46',fill:'none',stroke:'#3a3a44',strokeWidth:3.2}),h('rect',{key:'hc',x:14,y:-51,width:7,height:11,rx:2,fill:'#3a3a44',stroke:OUT,strokeWidth:1.5}),h('path',{key:'hm',d:'M17,-40 Q12,-31 2,-31',fill:'none',stroke:'#3a3a44',strokeWidth:2})];
+ return [];
+}
+function armEl(k,d,hx,hy,cl,sk,style){return h('g',{key:k,style},h('path',{key:1,d,fill:'none',stroke:OUT,strokeWidth:10,strokeLinecap:'round'}),h('path',{key:2,d,fill:'none',stroke:cl,strokeWidth:6,strokeLinecap:'round'}),h('circle',{key:3,cx:hx,cy:hy,r:4.4,fill:sk,stroke:OUT,strokeWidth:1.8}));}
+function character(cat,st,anim,seed,pose){
+ const sleep=pose==='sleep';
+ const sk=cat.skin,cl=cat.color,S=OUT;
+ const an=(name,dur,org)=>anim?{animation:name+' '+dur+'s ease-in-out infinite',animationDelay:'-'+((seed*0.37)%dur).toFixed(2)+'s',transformBox:'fill-box',transformOrigin:org||'50% 50%'}:undefined;
+ const headStyle=sleep||pose==='stand'?undefined:st==='run'?an('nod',.55,'50% 100%'):st==='wait'?an('sway',3.4,'50% 100%'):undefined;
+ const brows=st==='blocked'?['M-11,-49 L-3,-52','M1,-52 L9,-49']:['M-11,-50 Q-7,-52.5 -3,-50','M1,-50 Q5,-52.5 9,-50'];
+ const mouth=sleep?'M-4.5,-33 A2.5,2 0 1 0 0.5,-33 A2.5,2 0 1 0 -4.5,-33 Z':{run:'M-6,-33 Q-2,-30 2,-33',wait:'M-6,-33 Q-2,-31 2,-33',blocked:'M-6,-31 Q-2,-35 2,-31',done:'M-7,-34 Q-2,-27 3,-34 Z'}[st]||'M-6,-33 Q-2,-31 2,-33';
+ const face=[
+  h('circle',{key:'ear',cx:15,cy:-42,r:4.5,fill:sk,stroke:S,strokeWidth:2}),
+  h('circle',{key:'hd',cx:0,cy:-44,r:17,fill:sk,stroke:S,strokeWidth:2.4}),
+  h('ellipse',{key:'bl1',cx:-12,cy:-35.5,rx:3.6,ry:2.2,fill:'#f28a86',opacity:.75}),
+  h('ellipse',{key:'bl2',cx:9,cy:-35.5,rx:3.6,ry:2.2,fill:'#f28a86',opacity:.75})
+ ].concat(hairEls(cat),[
+  sleep?h('g',{key:'eyes'},h('path',{key:1,d:'M-11,-43 Q-7,-40 -3,-43',fill:'none',stroke:S,strokeWidth:2,strokeLinecap:'round'}),h('path',{key:2,d:'M1,-43 Q5,-40 9,-43',fill:'none',stroke:S,strokeWidth:2,strokeLinecap:'round'})):h('g',{key:'eyes',style:anim?{animation:'blinkEye 5s infinite',animationDelay:'-'+((seed*0.9)%5).toFixed(2)+'s',transformBox:'fill-box',transformOrigin:'50% 50%'}:undefined},
+   h('ellipse',{key:1,cx:-7,cy:-43,rx:4.3,ry:5.3,fill:'#fff',stroke:S,strokeWidth:1.6}),
+   h('ellipse',{key:2,cx:5,cy:-43,rx:4.3,ry:5.3,fill:'#fff',stroke:S,strokeWidth:1.6}),
+   h('circle',{key:3,cx:-8.2,cy:-41.8,r:2.2,fill:S}),
+   h('circle',{key:4,cx:3.8,cy:-41.8,r:2.2,fill:S})),
+  h('path',{key:'br1',d:brows[0],fill:'none',stroke:S,strokeWidth:2.2,strokeLinecap:'round'}),
+  h('path',{key:'br2',d:brows[1],fill:'none',stroke:S,strokeWidth:2.2,strokeLinecap:'round'}),
+  h('path',{key:'mo',d:mouth,fill:sleep||st==='done'?'#8a2a1a':'none',stroke:S,strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'})
+ ],accEls(cat));
+ if(sleep) face.push(h('path',{key:'drl',d:'M-3,-31 Q-4,-25 -2,-22 Q0,-25 -1,-31 Z',fill:'#9fd8ff',stroke:'#3a78a8',strokeWidth:1,style:anim?{animation:'drool 2.4s ease-in-out infinite',transformBox:'fill-box',transformOrigin:'50% 0%'}:undefined}));
+ const body=[
+  h('ellipse',{key:'sh',cx:0,cy:4,rx:18,ry:5,fill:'rgba(36,26,12,.25)'}),
+  h('path',{key:'to',d:'M-16,3 C-17,-10 -14,-21 -8,-25 L8,-25 C14,-21 17,-10 16,3 Z',fill:cl,stroke:S,strokeWidth:2.4,strokeLinejoin:'round'}),
+  h('path',{key:'co',d:'M-6,-25 L0,-17 L6,-25 Z',fill:'#fff',stroke:S,strokeWidth:1.6,strokeLinejoin:'round'}),
+  sleep?null:h('g',{key:'head',style:headStyle},face)
+ ].filter(Boolean);
+ if(st==='blocked') body.push(h('g',{key:'lamp',style:anim?{animation:'blinkLamp .9s infinite'}:undefined},
+  h('circle',{key:1,cx:0,cy:-86,r:12,fill:'#ff3b30',opacity:.3}),
+  h('circle',{key:2,cx:0,cy:-86,r:6.5,fill:'#ff3b30',stroke:S,strokeWidth:2}),
+  h('circle',{key:3,cx:-2,cy:-88,r:1.8,fill:'#fff'})));
+ const arm=(k,d,hx,hy,style)=>h('g',{key:k,style},
+  h('path',{key:1,d,fill:'none',stroke:S,strokeWidth:10,strokeLinecap:'round'}),
+  h('path',{key:2,d,fill:'none',stroke:cl,strokeWidth:6,strokeLinecap:'round'}),
+  h('circle',{key:3,cx:hx,cy:hy,r:4.4,fill:sk,stroke:S,strokeWidth:1.8}));
+ if(sleep){
+  const z=(k,x,y,sz,dl)=>h('text',{key:k,x,y,fontSize:sz,fontWeight:900,fontFamily:'Verdana',fill:'#fff',stroke:S,strokeWidth:1.2,style:anim?{animation:'zfloat 2.4s linear infinite',animationDelay:dl+'s'}:undefined},'z');
+  return {body,arms:[armEl('al','M-12,-17 Q-26,-6 -36,0',-36,0,cl,sk),armEl('ar','M11,-17 Q2,-4 -8,5',-8,5,cl,sk),h('g',{key:'head',transform:'translate(2,26) rotate(-28)'},face),h('g',{key:'zz'},z(1,-8,-30,11,0),z(2,-2,-36,14,-.8),z(3,4,-42,17,-1.6))]};
+ }
+ const ty=st==='run';
+ const arms=[arm('al','M-12,-17 Q-22,-8 -29,3',-29,3,ty?an('typeA',.26):undefined),arm('ar','M11,-17 Q5,-2 -17,7',-17,7,ty?an('typeB',.26):undefined)];
+ return {body,arms};
+}
+function standing(cat,st,mode,anim,seed){
+ const sk=cat.skin,cl=cat.color,S=OUT,c=character(cat,st,anim,seed,'stand'),walk=mode==='walk';
+ const an=(n,d)=>anim?{animation:n+' '+d+'s ease-in-out infinite',transformBox:'fill-box',transformOrigin:'50% 100%'}:undefined;
+ const leg=(k,x,style)=>h('g',{key:k,style},h('rect',{key:1,x,y:-17,width:7,height:15,fill:'#3a3550',stroke:S,strokeWidth:2}),h('ellipse',{key:2,cx:x+3.5,cy:-2,rx:5,ry:3,fill:S}));
+ let arms;
+ if(walk) arms=[armEl('al','M-13,-18 Q-18,-8 -16,1',-16,1,cl,sk,an('stepA',.45)),armEl('ar','M12,-18 Q17,-8 15,1',15,1,cl,sk,an('stepB',.45))];
+ else arms=[armEl('al','M-13,-18 Q-18,-8 -16,1',-16,1,cl,sk),h('g',{key:'cupArm',style:anim?{animation:'sip 4s ease-in-out infinite',animationDelay:'-'+(seed%4)+'s'}:undefined},
+   h('path',{key:1,d:'M12,-18 Q11,-5 -1,-8',fill:'none',stroke:S,strokeWidth:10,strokeLinecap:'round'}),h('path',{key:2,d:'M12,-18 Q11,-5 -1,-8',fill:'none',stroke:cl,strokeWidth:6,strokeLinecap:'round'}),
+   h('rect',{key:3,x:-9,y:-17,width:10,height:11,rx:1.5,fill:'#fff',stroke:S,strokeWidth:1.8}),h('rect',{key:4,x:-9,y:-14,width:10,height:3,fill:'#e0402e'}),
+   h('circle',{key:5,cx:-1,cy:-8,r:4.2,fill:sk,stroke:S,strokeWidth:1.8}),
+   h('path',{key:6,d:'M-6,-20 q-2,-3 0,-6 q2,-3 0,-6',fill:'none',stroke:'#fff',strokeWidth:1.8,strokeLinecap:'round',style:anim?{animation:'steam 1.6s ease-out infinite'}:undefined}))];
+ return h('g',{},h('ellipse',{key:'sh',cx:0,cy:0,rx:13,ry:4.5,fill:'rgba(36,26,12,.3)'}),leg('l1',-8,walk?an('stepA',.45):undefined),leg('l2',1,walk?an('stepB',.45):undefined),
+  h('g',{key:'up',transform:'translate(0,-15)'},h('g',{style:walk?an('bob',.45):undefined},c.body.slice(1),arms)));
+}
+function avatar(cat,st,w,hh){
+ const c=character(cat,st||'wait',false,0);
+ return h('svg',{viewBox:'-34 -92 68 100',width:w||56,height:hh||82,style:{display:'block'}},c.body,c.arms);
+}
+const CFG_W={S:L,cx:95,cy:44,dw:80,dd:34,dh:26,deskX:-55,win:[98],post:[20],rad:[100],plants:[[134,T+4]],stack:[17,42]};
+const CFG_B={S:2*L+G,cx:206,cy:132,dw:150,dd:46,dh:28,deskX:-76,win:[70,210],post:[196],rad:[72,212],plants:[[2*L+G-26,T+4]],front:[[T+10,2*L+G-38]],boss:true,stack:[52,42]};
+function workstation(c,st,anim){
+ const x0=c.cx+c.deskX,y0=c.cy+16,dh=c.dh,wood='#b9773f';
+ return {
+  chair:[box('cs',c.cx-11,c.cy-12,0,22,22,17,'#3f63d6'),box('cbk',c.cx-11,c.cy-17,17,22,5,26,'#3f63d6')],
+  desk:[box('dk',x0,y0,0,c.dw,c.dd,dh,wood),
+   poly('dr',qY(y0+c.dd,x0+c.dw-28,x0+c.dw-6,5,dh-6),shade(wood,.7),{strokeWidth:1.5}),
+   box('mb',x0+10,y0+6,dh,16,16,3,'#8f8a7c'),
+   box('crt',x0+6,y0+2,dh+3,26,26,22,'#e2d9bf'),
+   poly('scr',qX(x0+32,y0+5,y0+23,dh+7,dh+21),ST[st].scr,{style:st==='run'&&anim?{animation:'pulse 1.1s ease-in-out infinite'}:undefined}),
+   box('kb',c.cx-15,c.cy+20,dh,30,12,3,'#d9d5c9')]
+ };
+}
+function drawRoom(key,w,cfg,ox,oy,st,o){
+ const S=cfg.S,rc=ROLE_C[w.role]||'#cccccc',cat=CAT[w.model]||CATALOG[1],cream='#f3ead2',wt='#d9c79c',k=[];
+ k.push(poly('fl',fr(0,0,S,S),rc));
+ k.push(poly('rug',fr(S*.18,S*.66,S*.8,S*.92),shade(rc,1.1),{strokeWidth:1.5}));
+ if(o.over) k.push(poly('hl',fr(3,3,S-3,S-3),'#fff27a',{opacity:.6,stroke:'#fff27a',strokeWidth:4}));
+ k.push(box('wy',0,0,0,T,S,H,cream,{fx:shade(cream,.92),fy:shade(cream,.78),top:wt}));
+ k.push(box('wx',T,0,0,S-T,T,H,cream,{fy:cream,fx:shade(cream,.78),top:wt}));
+ k.push(poly('wsy',qX(T,T,S,0,18),shade(rc,.8)));
+ k.push(poly('wsx',qY(T,T,S,0,18),shade(rc,.9)));
+ cfg.post.forEach((b,i)=>{k.push(poly('po'+i,qX(T,b,b+28,26,52),'#fffdf5'));k.push(poly('pi'+i,qX(T,b+4,b+24,30,48),shade(rc,.7),{strokeWidth:1.2}));});
+ cfg.win.forEach((a,i)=>{k.push(poly('wf'+i,qY(T,a,a+38,24,52),'#fffdf5'));k.push(poly('wg'+i,qY(T,a+4,a+34,28,48),'#92d6f4',{strokeWidth:1.2}));k.push(poly('wm'+i,qY(T,a+18,a+20,28,48),'#fffdf5',{strokeWidth:0}));});
+ cfg.rad.forEach((a,i)=>k.push(box('rd'+i,a,T,0,30,5,15,'#eef1f4')));
+ if(cfg.boss){
+  k.push(box('bs',T,40,0,20,74,58,'#8a5a30'));
+  const bc=['#d04a3a','#3a6ad0','#e8b840','#3a9a5a','#8a4ac0'];let n=0;
+  [[8,24],[32,50]].forEach(z=>{for(let y=44;y<108;y+=9){k.push(poly('bk'+(n++),qX(T+20,y,y+7,z[0],z[1]),bc[n%5],{strokeWidth:1.2}));}});
+  k.push(box('cc',250,T,0,64,24,26,'#b9773f'));
+  k.push(box('cm',260,T+3,26,22,18,28,'#5a6470'));
+  k.push(poly('cmr',qY(T+21,264,278,36,48),'#e0402e',{strokeWidth:1.5}));
+  k.push(box('cup',290,T+8,26,7,7,8,'#ffffff'));
+ }
+ cfg.plants.forEach((p,i)=>k.push(plant('pl'+i,p[0],p[1])));
+ const ws=workstation(cfg,st,o.anim);
+ k.push.apply(k,ws.chair);
+ const away=o.pose==='away';
+ const ch=character(cat,st,o.anim,o.seed,o.pose);
+ const a=P(cfg.cx,cfg.cy,22);
+ if(!away) k.push(h('g',{key:'cbody'+o.pose,style:o.anim?{animation:'fadeIn .9s ease-out'}:undefined,transform:'translate('+a[0]+','+a[1]+')'},ch.body));
+ k.push.apply(k,ws.desk);
+ if(cfg.boss) k.push(box('pp',248,164,28,22,16,6,'#f4efe2'));
+ if(!away) k.push(h('g',{key:'carms'+o.pose,style:o.anim?{animation:'fadeIn .9s ease-out'}:undefined,transform:'translate('+a[0]+','+a[1]+')'},ch.arms));
+ (cfg.front||[]).forEach((p,i)=>k.push(plant('pfr'+i,p[0],p[1])));
+ const dA=Math.round(S*.3),dB=dA+44;
+ k.push(box('fy1',T,S-T,0,dA-T,T,12,cream,{top:wt}));
+ k.push(box('fy2',dB,S-T,0,S-T-dB,T,12,cream,{top:wt}));
+ k.push(box('fxw',S-T,T,0,T,S-T,12,cream,{top:wt}));
+ return h('g',{key,transform:'translate('+(ox-oy)+','+((ox+oy)/2)+')','data-drop':o.drop,onClick:o.onClick,style:{cursor:'pointer'}},k);
+}
+function drawLounge(key,ox,oy){
+ const k=[];
+ k.push(box('bb',30,64,8,70,4,14,'#5cc070'));
+ k.push(box('bs',30,68,0,70,18,8,'#5cc070'));
+ k.push(box('wc',118,20,0,18,18,34,'#e6eef4'));
+ k.push(box('wb',121,23,34,12,12,14,'#8fd0f4'));
+ k.push(plant('pl',20,20));
+ k.push(plant('pl2',124,124));
+ return h('g',{key,transform:'translate('+(ox-oy)+','+((ox+oy)/2)+')'},k);
+}
+function layout(j,C){
+ const others=j.workers.filter(w=>w.id!=='w0'),placed=[],free=[];let n=0,row=0;
+ while(true){for(let i=0;i<C;i++){if(i<2&&row<2)continue;if(n<others.length){placed.push({w:others[n],i,j:row});n++;}else free.push({i,j:row});}row++;if(n>=others.length&&row>=2)break;}
+ return {placed,free,rows:row};
+}
+const byT=(j,id)=>j.queue.find(t=>t.id===id);
+const byW=(j,id)=>j.workers.find(w=>w.id===id);
+const wq=(j,wid)=>{const w=byW(j,wid);return j.queue.filter(t=>t.assignedTo===wid&&(!w||t.id!==w.task)).sort(cmpT);};
+function detach(j,t){if(!t.assignedTo)return;const w=byW(j,t.assignedTo);t.assignedTo=null;if(w&&w.task===t.id){const nx=wq(j,w.id)[0];w.task=nx?nx.id:null;w.status=nx?'run':'wait';}}
+function renumber(j){j.queue.slice().sort(cmpT).forEach((t,i)=>{t.order=i+1;});}
+const OPS={
+ assign(j,a){const t=byT(j,a.task),w=byW(j,a.worker);if(!t||!w)return{err:'Нет такой задачи или модели'};
+  if(w.role==='координатор')return OPS.unassign(j,{task:a.task});
+  if(t.assignedTo===w.id)return{noop:true};
+  if(t.kind&&t.kind!==w.role)return{err:'Нельзя: «'+t.title+'» только для роли «'+t.kind+'», а у '+w.name+' роль «'+w.role+'».'};
+  detach(j,t);t.assignedTo=w.id;t.order=++j.seq;
+  if(!w.task){w.task=t.id;w.status='run';return{msg:t.id+' → '+w.name+' ('+w.role+'): в работе'};}
+  return{msg:t.id+' встала в очередь к '+w.name+' — №'+(wq(j,w.id).findIndex(x=>x.id===t.id)+2)+', текущая задача продолжается'};},
+ reassign(j,a){return OPS.assign(j,{task:a.task,worker:a.to});},
+ unassign(j,a){const t=byT(j,a.task);if(!t)return{err:'Нет задачи'};if(!t.assignedTo)return{noop:true};detach(j,t);t.order=++j.seq;return{msg:t.id+' вернулась в лоток Гермеса'};},
+ setRole(j,a){const w=byW(j,a.worker);if(!w)return{err:'Нет модели'};if(w.role==='координатор')return{err:'Роль координатора закреплена за Гермесом'};
+  if(w.task)return{err:'Нельзя сменить роль: '+w.name+' в работе. Сначала заверши или сними задачу.'};
+  if(ROLES.indexOf(a.role)<0)return{err:'Нет такой роли'};w.role=a.role;return{msg:w.name+': роль «'+a.role+'»'};},
+ setPriority(j,a){const t=byT(j,a.task);if(!t)return{err:'Нет задачи'};const p=Math.max(1,Math.min(3,a.priority));if(p===t.priority)return{err:'Приоритет уже '+PRIO[p].label};t.priority=p;return{msg:t.id+': приоритет '+PRIO[p].label};},
+ reorder(j,a){const t=byT(j,a.task),b=byT(j,a.before);if(!t||!b)return{err:'Нет задачи'};if(t.assignedTo)detach(j,t);t.priority=b.priority;t.order=b.order-0.5;renumber(j);return{msg:t.id+' встала перед '+b.id+', приоритет '+PRIO[t.priority].label};},
+ complete(j,a){const w=byW(j,a.worker);if(!w||!w.task)return{err:'Нет текущей задачи'};const t=byT(j,w.task);
+  j.queue=j.queue.filter(x=>x.id!==t.id);w.history.unshift(t.title);w.history=w.history.slice(0,6);w.doneCount++;
+  const nx=wq(j,w.id)[0];w.task=nx?nx.id:null;w.status=nx?'run':'done';return{msg:w.name+' завершил «'+t.title+'»'+(nx?', берёт '+nx.id:'')};},
+ block(j,a){const w=byW(j,a.worker);if(!w||!w.task)return{err:'Блокировать можно только задачу в работе'};w.status=w.status==='blocked'?'run':'blocked';return{msg:w.name+': '+(w.status==='blocked'?'блокировано':'снова в работе')};},
+ addWorker(j,a){const c=CAT[a.model];if(!c)return{err:'Нет модели в каталоге'};if(ROLES.indexOf(a.role)<0)return{err:'Выберите роль'};
+  const id='w'+(++j.seq);j.workers.push({id,model:c.model,name:c.name,provider:c.provider,role:a.role,color:c.color,status:'wait',task:null,doneCount:0,history:[]});
+  return{msg:'В офисе новая комната: '+c.name+' — '+a.role,id};},
+ removeWorker(j,a){const w=byW(j,a.worker);if(!w)return{err:'Нет модели'};if(w.id==='w0')return{err:'Гермеса убрать нельзя'};
+  if(w.task||wq(j,w.id).length)return{err:'Нельзя убрать '+w.name+': у модели есть задачи. Сначала заверши или верни их в лоток.'};
+  j.workers=j.workers.filter(x=>x.id!==w.id);return{msg:w.name+' ('+w.role+') покинул офис'};},
+ addTask(j,a){const title=(a.title||'').trim();if(!title)return{err:'Введите название задачи'};const id='T-'+(++j.seq);j.queue.push({id,title,priority:a.priority,order:j.seq,assignedTo:null,kind:a.kind||null});return{msg:id+' добавлена в лоток'};}
+};
+function initialJ(){
+ const W=(id,model,role,ex)=>{const c=CAT[model];return Object.assign({id,model,name:c.name,provider:c.provider,role,color:c.color,status:'wait',task:null,doneCount:0,history:[]},ex||{});};
+ return {
+  workers:[W('w0','deepseek','координатор',{name:'Гермес'}),
+   W('w1','claude','исполнитель',{status:'run',task:'T-07',doneCount:3,history:['обновить README движка','поправить линтер','миграция prisma']}),
+   W('w2','gpt5','архитектор'),W('w3','gemini','фулстак'),
+   W('w4','qwen','сисадмин',{status:'blocked',task:'T-09',doneCount:1,history:['ротация логов']}),
+   W('w5','mistral','дизайнер'),
+   W('w6','grok','UX/UI',{status:'done',doneCount:2,history:['аудит формы оплаты','прототип онбординга']}),
+   W('w7','llama','приёмщик')],
+  queue:[
+   {id:'T-07',title:'рефакторинг роутера admin-api',priority:2,order:1,assignedTo:'w1',kind:null},
+   {id:'T-08',title:'тесты корзины',priority:1,order:2,assignedTo:'w1',kind:null},
+   {id:'T-09',title:'обновить сертификаты',priority:3,order:3,assignedTo:'w4',kind:'сисадмин'},
+   {id:'T-12',title:'починить смоук karkas',priority:3,order:4,assignedTo:null,kind:null},
+   {id:'T-13',title:'схема БД для заказов',priority:2,order:5,assignedTo:null,kind:'архитектор'},
+   {id:'T-14',title:'иконки для дашборда',priority:2,order:6,assignedTo:null,kind:'дизайнер'},
+   {id:'T-16',title:'форма входа: адаптив',priority:2,order:7,assignedTo:null,kind:'UX/UI'},
+   {id:'T-15',title:'проверить релиз 2.4',priority:1,order:8,assignedTo:null,kind:'приёмщик'},
+   {id:'T-17',title:'API поиска товаров',priority:1,order:9,assignedTo:null,kind:'фулстак'}
+  ],
+  log:[],seq:20
+ };
+}
+function loadJ(){try{const s=localStorage.getItem(LS_KEY);if(s){const j=JSON.parse(s);if(j&&Array.isArray(j.workers)&&Array.isArray(j.queue))return j;}}catch(e){}return initialJ();}
+
+class Component extends DCLogic {
+  state={j:loadJ(),sel:null,drag:null,fly:null,zoom:1,box:{w:900,h:600},msg:null,add:null,showJ:false,nt:{title:'',prio:'2',kind:''},flash:false,tick:0};
+  wrapRef=React.createRef();
+  sceneRef=React.createRef();
+  componentDidMount(){this._iv=setInterval(()=>this.setState(s=>({tick:s.tick+1})),5000);const el=this.wrapRef.current;if(el&&window.ResizeObserver){this._ro=new ResizeObserver(()=>this.setState({box:{w:el.clientWidth,h:el.clientHeight}}));this._ro.observe(el);}}
+  componentWillUnmount(){clearInterval(this._iv);this._ro&&this._ro.disconnect();clearTimeout(this._mt);clearTimeout(this._ft);}
+  say(text,kind){clearTimeout(this._mt);this.setState({msg:{text,kind}});this._mt=setTimeout(()=>this.setState({msg:null}),6000);}
+  run(name,args){
+    const j=JSON.parse(JSON.stringify(this.state.j));const r=OPS[name](j,args)||{};
+    if(r.err){this.say(r.err,'err');return r;} if(r.noop)return r;
+    j.log.unshift({op:name,args,at:new Date().toLocaleTimeString('ru-RU')});j.log=j.log.slice(0,40);
+    try{localStorage.setItem(LS_KEY,JSON.stringify(j));}catch(e){}
+    const upd={j};if(this.state.sel&&!byW(j,this.state.sel))upd.sel=null;
+    this.setState(upd);if(r.msg)this.say(r.msg,'ok');return r;
+  }
+  check(name,args){return OPS[name](JSON.parse(JSON.stringify(this.state.j)),args)||{};}
+  hit(x,y){const el=document.elementFromPoint(x,y);if(!el||!el.closest)return null;const s=el.closest('[data-task-slot]'),d=el.closest('[data-drop]');return{drop:d?d.getAttribute('data-drop'):null,slot:s?s.getAttribute('data-task-slot'):null};}
+  startDrag(e,tid,clickW){
+    if(e.button>0)return;e.preventDefault();const sx=e.clientX,sy=e.clientY;let on=false;
+    const move=ev=>{if(!on&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<5)return;on=true;this.setState({drag:{task:tid,x:ev.clientX,y:ev.clientY,over:this.hit(ev.clientX,ev.clientY)}});};
+    const up=ev=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);
+      if(!on){if(clickW)this.setState({sel:clickW});return;}
+      const ht=this.hit(ev.clientX,ev.clientY);this.setState({drag:null});this.dropOn(tid,ht,ev.clientX,ev.clientY);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
+  }
+  pagePos(id){const p=this._stack&&this._stack[id],el=this.sceneRef.current;if(!p||!el)return null;const r=el.getBoundingClientRect();return{x:r.left+p.x*this._k,y:r.top+p.y*this._k};}
+  dropOn(tid,ht,x,y){
+    const t=byT(this.state.j,tid);if(!t)return;
+    if(!ht||!ht.drop){this.say('Мимо — задача осталась на месте','info');return;}
+    if(ht.drop==='queue'){if(ht.slot&&ht.slot!==tid){this.run('reorder',{task:tid,before:ht.slot});return;}if(t.assignedTo)this.run('unassign',{task:tid});return;}
+    if(t.assignedTo===ht.drop)return;
+    const name=t.assignedTo?'reassign':'assign',args=t.assignedTo?{task:tid,from:t.assignedTo,to:ht.drop}:{task:tid,worker:ht.drop};
+    const r=this.check(name,args);if(r.err){this.say(r.err,'err');return;}
+    const to=this.pagePos(ht.drop);if(!to){this.run(name,args);return;}
+    this.setState({fly:{x,y,flag:PRIO[t.priority].c}});
+    requestAnimationFrame(()=>requestAnimationFrame(()=>this.setState(s=>s.fly?{fly:Object.assign({},s.fly,{x:to.x,y:to.y})}:null)));
+    clearTimeout(this._ft);this._ft=setTimeout(()=>{this.setState({fly:null});this.run(name,args);},480);
+  }
+  renderVals(){
+    const s=this.state,j=s.j,C=Math.max(3,Math.min(6,parseInt(this.props.cols??4)||4)),anim=this.props.motion??true;
+    const lay=layout(j,C);
+    const Wb=2*M+C*PITCH-G,Hb=2*M+lay.rows*PITCH-G;
+    const minX=-Hb-2*E,maxX=Wb+2*E,minY=-92,maxY=(Wb+Hb+2*E)/2+10,W=maxX-minX,Hh=maxY-minY;
+    const fit=Math.min((s.box.w-8)/W,(s.box.h-8)/Hh);const k=Math.max(.55,fit)*s.zoom;this._k=k;const cs=Math.min(1.5,Math.max(1,0.8/k));
+    const over=s.drag&&s.drag.over?s.drag.over.drop:null;
+    const unq=j.queue.filter(t=>!t.assignedTo).sort(cmpT);
+    const boss=byW(j,'w0');
+    const dispSt=w=>w.id==='w0'?(unq.length?'run':'wait'):w.status;
+    const SP=(x,y,z)=>{const p=P(x,y,z);return{x:r1(p[0]-minX),y:r1(p[1]-minY)};};
+    const sel=id=>()=>this.setState({sel:id});
+    const kids=[];
+    kids.push(h('defs',{key:'defs'},
+      h('pattern',{key:'g',id:'grass',width:60,height:60,patternUnits:'userSpaceOnUse',patternTransform:'matrix(1,0.5,-1,0.5,0,0)'},h('rect',{width:60,height:60,fill:'#4dae3e'}),h('rect',{width:30,height:60,fill:'#44a236'})),
+      h('pattern',{key:'t',id:'tiles',width:40,height:40,patternUnits:'userSpaceOnUse',patternTransform:'matrix(1,0.5,-1,0.5,0,0)'},h('rect',{width:40,height:40,fill:'#d3d3de'}),h('rect',{width:20,height:20,fill:'#babbcc'}),h('rect',{x:20,y:20,width:20,height:20,fill:'#babbcc'})),
+      h('pattern',{key:'bx',id:'brickX',width:20,height:10,patternUnits:'userSpaceOnUse',patternTransform:'skewY(26.565)'},h('rect',{width:20,height:10,fill:'#b5623a'}),h('path',{d:'M0 0.5 H20 M0 5.5 H20 M5 0 V5 M15 5 V10',stroke:'#e2b48a',strokeWidth:1})),
+      h('pattern',{key:'by',id:'brickY',width:20,height:10,patternUnits:'userSpaceOnUse',patternTransform:'skewY(-26.565)'},h('rect',{width:20,height:10,fill:'#a9573a'}),h('path',{d:'M0 0.5 H20 M0 5.5 H20 M5 0 V5 M15 5 V10',stroke:'#dba882',strokeWidth:1}))));
+    kids.push(h('rect',{key:'bg',x:minX,y:minY,width:W,height:Hh,fill:'url(#grass)'}));
+    kids.push(poly('floor',fr(0,0,Wb,Hb),'url(#tiles)'));
+    const cream='#efe2c6';
+    kids.push(box('ey',-10,-10,0,10,Hb+10,H+10,'#c9784a',{fx:cream,fy:'url(#brickY)'}));
+    kids.push(box('ex',0,-10,0,Wb,10,H+10,'#c9784a',{fy:cream,fx:'url(#brickY)'}));
+    for(let x=60;x<Wb-40;x+=120){kids.push(poly('ew'+x,qY(0,x,x+44,44,68),'#92d6f4'));}
+    for(let y=80;y<Hb-40;y+=120){kids.push(poly('ev'+y,qX(0,y,y+44,44,68),'#92d6f4'));}
+    const items=[{kind:'boss',w:boss,i:0,j:0}].concat(lay.placed.map(p=>({kind:'w',w:p.w,i:p.i,j:p.j})),lay.free.map(f=>({kind:'free',i:f.i,j:f.j})));
+    items.sort((a,b)=>(a.i+a.j)-(b.i+b.j)||a.j-b.j);
+    const signs=[],envs=[],mores=[],freeCells=[],walkers=[];this._stack={};
+    const ACTS=['walk','coffee','sleep'];const draws=[];
+    const selId=s.sel;
+    items.forEach(it=>{
+      const ox=M+it.i*PITCH,oy=M+it.j*PITCH;
+      if(it.kind==='free'){draws.push({d:ox+oy+L,el:drawLounge('fr'+it.i+'_'+it.j,ox,oy)});const c=SP(ox+80,oy+80,40);freeCells.push({key:'f'+it.i+it.j,x:c.x,y:c.y});return;}
+      const w=it.w,cfg=it.kind==='boss'?CFG_B:CFG_W,st=dispSt(w),drop=it.kind==='boss'?'queue':w.id;
+      const isOver=over===drop;
+      const seed=parseInt(w.id.slice(1))||1;
+      const idle=it.kind!=='boss'&&(st==='wait'||st==='done');
+      const act=idle?ACTS[Math.floor((s.tick+seed*4)/9+seed)%3]:'desk';
+      draws.push({d:ox+oy+cfg.S,el:drawRoom('r'+w.id,w,cfg,ox,oy,st,{anim,seed,drop,over:isOver,onClick:sel(w.id),pose:act==='sleep'?'sleep':act==='desk'?'desk':'away'})});
+      if(act==='walk'||act==='coffee'){const ly=oy+L+34,p0=P(ox+10,ly,0),p1=P(ox+L+G*.55,ly,0),pc=P(ox+70+(seed%3)*8,ly,0);walkers.push({w,mode:act,p0,p1,pc,seed,depth:ox+80+ly});}
+      const sp=SP(ox+cfg.S/2,oy,H+4);
+      const cur=w.task?byT(j,w.task):null;
+      signs.push({key:'s'+w.id,drop,onClick:sel(w.id),x:sp.x,y:sp.y,w:it.kind==='boss'?200:150,
+        name:w.name,role:it.kind==='boss'?'координатор · '+w.provider:w.role+' · '+w.provider,
+        hasTask:it.kind==='boss'?true:!!cur,task:it.kind==='boss'?('в лотке: '+unq.length):(cur?cur.title:''),
+        lamp:ST[st].c,lampAnim:st==='blocked'&&anim?'blinkLamp .9s infinite':'none',
+        border:isOver?'#e0402e':'#241a0c',bg:selId===w.id?'#ffe978':'#f7d23a'});
+      const a=SP(ox+cfg.cx+cfg.stack[0],oy+cfg.cy+cfg.stack[1],cfg.dh);
+      this._stack[drop]=a;
+      let list=it.kind==='boss'?unq.slice(0,6).reverse():[cur].concat(wq(j,w.id)).filter(Boolean);
+      const cap=it.kind==='boss'?6:4,extra=(it.kind==='boss'?unq.length:list.length)-cap;
+      if(it.kind!=='boss')list=list.slice(0,cap);
+      list.forEach((t,i)=>envs.push({key:'e'+t.id,id:t.id,x:r1(a.x-17+i*2),y:r1(a.y-14-i*7),drop,
+        title:t.id+' · '+t.title+' · '+PRIO[t.priority].label+(t.kind?' · только '+t.kind:''),
+        flag:PRIO[t.priority].c,bg:cur&&t.id===cur.id?'#ffffff':'#f3e6c4',
+        onDown:e=>this.startDrag(e,t.id,it.kind==='boss'?null:w.id)}));
+      if(extra>0)mores.push({key:'m'+w.id,x:r1(a.x+20),y:r1(a.y-14-cap*7),text:'+'+extra});
+    });
+    walkers.forEach(wk=>{
+      const cat=CAT[wk.w.model]||CATALOG[1],fig=standing(cat,dispSt(wk.w),wk.mode,anim,wk.seed);
+      const walk=wk.mode==='walk'&&anim;
+      const style=walk?{'--x0':wk.p0[0]+'px','--y0':wk.p0[1]+'px','--x1':wk.p1[0]+'px','--y1':wk.p1[1]+'px',animation:'walkLane 11s ease-in-out infinite',animationDelay:'-'+(wk.seed*1.7%11).toFixed(1)+'s'}:undefined;
+      const pos=wk.mode==='walk'?wk.p0:wk.pc;
+      draws.push({d:wk.depth,el:h('g',{key:'wk'+wk.w.id+wk.mode,transform:walk?undefined:'translate('+pos[0]+','+pos[1]+')',style,'data-drop':wk.w.id,onClick:sel(wk.w.id),cursor:'pointer'},
+        h('g',{style:anim?{animation:'fadeIn 1s ease-out'}:undefined},h('g',{style:walk?{animation:'face 11s linear infinite',animationDelay:'-'+(wk.seed*1.7%11).toFixed(1)+'s',transformBox:'fill-box',transformOrigin:'50% 50%'}:undefined},fig)))});
+    });
+    draws.sort((a,b)=>a.d-b.d).forEach(x=>kids.push(x.el));
+    kids.push(box('fy1',0,Hb,0,Wb,10,20,'#c9784a',{fy:'url(#brickX)',fx:'url(#brickY)'}));
+    kids.push(box('fxw',Wb,-10,0,10,Hb+20,20,'#c9784a',{fy:'url(#brickX)',fx:'url(#brickY)'}));
+    kids.push(box('hg1',-10,Hb+24,0,Wb+24,14,16,'#3e9a3a'));
+    kids.push(box('hg2',Wb+24,-10,0,14,Hb+48,16,'#3e9a3a'));
+    const sceneSvg=h('svg',{viewBox:minX+' '+minY+' '+W+' '+Hh,width:W,height:Hh,style:{display:'block'}},kids);
+
+    const counts={run:0,blocked:0,wait:0,done:0};j.workers.forEach(w=>{if(w.id!=='w0')counts[w.status]=(counts[w.status]||0)+1;});
+    const counters=['run','blocked','wait','done'].map(key=>({key,label:ST[key].label,n:counts[key],color:ST[key].scr}));
+    const plural=n=>n+' '+(n%10===1&&n%100!==11?'задача':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'задачи':'задач'));
+    const queueItems=unq.map(t=>({key:t.id,id:t.id,title:t.title,flag:PRIO[t.priority].c,meta:t.id+' · '+PRIO[t.priority].label+' · '+(t.kind?'только '+t.kind:'любая роль'),
+      onDown:e=>this.startDrag(e,t.id,null),up:()=>this.run('setPriority',{task:t.id,priority:t.priority+1}),down:()=>this.run('setPriority',{task:t.id,priority:t.priority-1})}));
+
+    let selV=null;const sw=s.sel?byW(j,s.sel):null;
+    if(sw){
+      const st=dispSt(sw),isC=sw.id==='w0',cur=sw.task?byT(j,sw.task):null,locked=isC||!!sw.task,cat=CAT[sw.model];
+      selV={id:sw.id,name:sw.name,provider:sw.provider,role:sw.role,statusLabel:ST[st].label,statusColor:ST[st].c,roleColor:ROLE_C[sw.role]||'#ccc',
+        avatar:avatar(cat,st,60,84),isWorker:!isC,isCoord:isC,
+        roleOptions:isC?['координатор']:ROLES,roleLocked:locked,rolePE:locked?'none':'auto',
+        roleBorder:s.flash?'#e0402e':'#241a0c',roleBg:locked?'#e6dcc2':'#fffaf0',roleAnim:s.flash?'nope .4s':'none',
+        showLockNote:locked,lockColor:s.flash?'#c8322a':'#7a6a4e',
+        lockNote:isC?'Роль координатора закреплена.':'Нельзя сменить роль, пока модель в работе. Сначала заверши или сними задачу.',
+        onRole:e=>this.run('setRole',{worker:sw.id,role:e.target.value}),
+        onRoleTry:()=>{if(!locked)return;this.setState({flash:true});this.say(isC?'Роль координатора закреплена за Гермесом':'Нельзя сменить роль: '+sw.name+' в работе. Сначала заверши или сними задачу.','err');clearTimeout(this._fl);this._fl=setTimeout(()=>this.setState({flash:false}),650);},
+        hasCurrent:!!cur,noCurrent:!cur,curTitle:cur?cur.title:'',curFlag:cur?PRIO[cur.priority].c:'#ccc',curMeta:cur?cur.id+' · '+PRIO[cur.priority].label:'',
+        blockLabel:sw.status==='blocked'?'Снять блок':'⛔ Блок',
+        onComplete:()=>this.run('complete',{worker:sw.id}),onBlock:()=>this.run('block',{worker:sw.id}),onUnassign:()=>cur&&this.run('unassign',{task:cur.id}),
+        queue:wq(j,sw.id).map(t=>({key:t.id,title:t.title,flag:PRIO[t.priority].c,up:()=>this.run('setPriority',{task:t.id,priority:t.priority+1}),down:()=>this.run('setPriority',{task:t.id,priority:t.priority-1}),back:()=>this.run('unassign',{task:t.id})})),
+        doneCount:sw.doneCount,history:sw.history.slice(0,5),
+        onClone:()=>this.setState({add:{model:sw.model,role:ROLES.find(r=>r!==sw.role)||ROLES[0]}}),
+        onRemove:()=>this.run('removeWorker',{worker:sw.id})};
+      selV.hasQueue=selV.queue.length>0;
+    }
+    const ad=s.add;
+    const catalogItems=CATALOG.map(c=>({key:c.model,name:c.name,provider:c.provider,avatar:avatar(c,'wait',48,70),
+      bg:ad&&ad.model===c.model?'#ffe978':'#fffaf0',border:ad&&ad.model===c.model?'3px solid #241a0c':'2px solid #241a0c',
+      pick:()=>this.setState(st=>({add:Object.assign({},st.add,{model:c.model})}))}));
+    const dt=s.drag?byT(j,s.drag.task):null,fl=s.fly;
+    const msg=s.msg;
+    return {
+      counters,queueItems,queueEmpty:unq.length===0,queueCountLabel:plural(unq.length),queueBorder:over==='queue'?'#e0402e':'#241a0c',
+      roles:ROLES,stop:e=>e.stopPropagation(),
+      ntTitle:s.nt.title,ntPrio:s.nt.prio,ntKind:s.nt.kind,
+      onNtTitle:e=>{const v=e.target.value;this.setState(st=>({nt:Object.assign({},st.nt,{title:v})}));},
+      onNtPrio:e=>{const v=e.target.value;this.setState(st=>({nt:Object.assign({},st.nt,{prio:v})}));},
+      onNtKind:e=>{const v=e.target.value;this.setState(st=>({nt:Object.assign({},st.nt,{kind:v})}));},
+      onAddTask:()=>this.addTask(),onNtKey:e=>{if(e.key==='Enter')this.addTask();},
+      wrapRef:this.wrapRef,sceneRef:this.sceneRef,sceneSvg,sceneW:W,sceneH:Hh,k:r1(k*1000)/1000,cs:r1(cs*100)/100,scaledW:Math.ceil(W*k),scaledH:Math.ceil(Hh*k),
+      signs,envs,mores,freeCells,
+      hasSel:!!selV,sel:selV||{},closeSel:()=>this.setState({sel:null}),
+      openAdd:()=>this.setState({add:{model:'claude',role:ROLES[0]}}),closeAdd:()=>this.setState({add:null}),addOpen:!!ad,addRole:ad?ad.role:ROLES[0],
+      onAddRole:e=>{const v=e.target.value;this.setState(st=>({add:Object.assign({},st.add,{role:v})}));},
+      confirmAdd:()=>{const r=this.run('addWorker',{model:ad.model,role:ad.role});if(!r.err)this.setState({add:null,sel:r.id||null});},
+      catalogItems,
+      journalOpen:s.showJ,openJournal:()=>this.setState({showJ:true}),closeJournal:()=>this.setState({showJ:false}),
+      journalText:s.showJ?JSON.stringify({workers:j.workers,catalog:CATALOG.map(c=>({model:c.model,name:c.name,provider:c.provider,color:c.color})),queue:j.queue.slice().sort(cmpT),operations:j.log.slice(0,20)},null,2):'',
+      resetAll:()=>{if(!window.confirm('Сбросить офис к стартовому составу?'))return;const n=initialJ();try{localStorage.setItem(LS_KEY,JSON.stringify(n));}catch(e){}this.setState({j:n,sel:null});this.say('Офис сброшен к стартовому составу','ok');},
+      zoomIn:()=>this.setState(st=>({zoom:Math.min(3,st.zoom*1.2)})),zoomOut:()=>this.setState(st=>({zoom:Math.max(.5,st.zoom/1.2)})),zoomFit:()=>this.setState({zoom:1}),
+      dragging:!!dt,ghostX:s.drag?s.drag.x:0,ghostY:s.drag?s.drag.y:0,ghostFlag:dt?PRIO[dt.priority].c:'#ccc',ghostTitle:dt?dt.id+' · '+dt.title:'',
+      flying:!!fl,flyX:fl?fl.x:0,flyY:fl?fl.y:0,flyFlag:fl?fl.flag:'#ccc',
+      msgText:msg?msg.text:'Перетащите конверт из лотка Гермеса на комнату модели. Клик по комнате открывает карточку.',
+      msgColor:msg?(msg.kind==='err'?'#ff7a6a':msg.kind==='ok'?'#8fe07a':'#f6edd6'):'#c9b58a'
+    };
+  }
+  addTask(){const nt=this.state.nt;const r=this.run('addTask',{title:nt.title,priority:parseInt(nt.prio)||2,kind:nt.kind||null});if(!r.err)this.setState(s=>({nt:Object.assign({},s.nt,{title:''})}));}
+}
+</script>
+</body>
+</html>
