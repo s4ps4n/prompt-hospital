@@ -1,5 +1,7 @@
 # Prompt Hospital
 
+> English · [Русский](README.ru.md)
+
 ![Node 18+](https://img.shields.io/badge/Node-18+-339933?logo=nodedotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
@@ -9,44 +11,44 @@
 ![Traefik](https://img.shields.io/badge/Traefik-3-24A1C1?logo=traefikproxy&logoColor=white)
 ![Vitest](https://img.shields.io/badge/tests-Vitest-6E9F18?logo=vitest&logoColor=white)
 
-Мультяшный офис-визуализация ИИ-команды в стиле Theme Hospital. Единый пульт оркестратора: смотришь, кто чем занят, перетаскиваешь задачи на модели, добавляешь модели — а под капотом это пишется в реальный журнал и реально запускает модели.
+A cartoon office visualization of an AI team, in the spirit of Theme Hospital. A single orchestrator control panel: see who is doing what, drag tasks onto models, add models — and under the hood it writes to a real journal and actually runs the models.
 
-## Что это
+## What it is
 
-Изометрическая сцена, где каждая модель команды сидит в своей комнате. Задачи — конверты в лотке Гермеса (координатор). Перетащил конверт на модель → задача ушла в журнал оркестратора → диспетчер реально запустил модель с этой задачей.
+An isometric scene where each model of the team sits in its own room. Tasks are envelopes in Hermes's tray (the coordinator). Drag an envelope onto a model → the task lands in the orchestrator journal → the dispatcher actually runs the model with that task.
 
-- **Фронтенд** — Vite + React + TypeScript + SVG, офлайн, без внешних графических библиотек.
-- **Журнал** — единый источник истины (`journal.json`), хранит модели, задачи, статусы, историю.
-- **API** — `server.py`, отдаёт журнал и принимает операции.
-- **Диспетчер** — `dispatch.py`, подхватывает назначенные задачи и запускает исполнителей.
+- **Frontend** — Vite + React + TypeScript + SVG, offline, no external graphics libraries.
+- **Journal** — single source of truth (`journal.json`): models, tasks, statuses, history.
+- **API** — `server.py`, serves the journal and accepts operations.
+- **Dispatcher** — `dispatch.py`, picks up assigned tasks and runs executors.
 
-## Состав
+## Layout
 
 ```
-prompt-hospital/          # фронтенд (этот репозиторий)
-  src/journal/            #   журнал: types, ops (чистые операции), selectors, store, remote
-  src/scene/              #   изометрическая сцена, комнаты
-  src/characters/         #   чиби-персонажи, статусы
-  src/animations/         #   idle-анимации (гуляет/кофе/сон), походка
-  src/app/ src/ui/        #   компоновка, карточка модели, лоток, drag-and-drop
-  src/theme/              #   палитра, CSS-анимации
+prompt-hospital/          # frontend (this repository)
+  src/journal/            #   journal: types, ops (pure operations), selectors, store, remote
+  src/scene/              #   isometric scene, rooms
+  src/characters/         #   chibi characters, statuses
+  src/animations/         #   idle animations (walk/coffee/sleep), gait
+  src/app/ src/ui/        #   layout, model card, tray, drag-and-drop
+  src/theme/              #   palette, CSS animations
 
-orchestrator/             # бэкенд пульта (в этом же репозитории)
-  journal.example.json    #   стартовый журнал — скопируй в journal.json
-  journal.py              #   CLI операций (те же, что OPS фронтенда)
+orchestrator/             # control-panel backend (in this same repository)
+  journal.example.json    #   starter journal — copy to journal.json
+  journal.py              #   operation CLI (same ops as the frontend OPS)
   server.py               #   HTTP API: GET /journal, POST /op
-  dispatch.py             #   диспетчер: задача → реальный запуск модели
-  review-backend.py       #   ревью/рефакторинг бэкенда бесплатной моделью
+  dispatch.py             #   dispatcher: task → actually run the model
+  review-backend.py       #   backend review/refactor via a free model
 ```
 
-## Архитектура
+## Architecture
 
 ```
                      ┌────────────────────────────────────────────┐
-                     │  Офис (React, prompthospital.site)         │
-                     │  drag-and-drop, карточка, каталог, лоток   │
+                     │  Office (React, prompthospital.site)       │
+                     │  drag-and-drop, card, catalog, tray        │
                      └───────────────┬────────────────────────────┘
-                          GET /journal│          POST /op (операции)
+                          GET /journal│          POST /op (operations)
                                      ▼
                      ┌────────────────────────────────────────────┐
                      │  nginx (Basic Auth)                        │
@@ -59,87 +61,84 @@ orchestrator/             # бэкенд пульта (в этом же репо
                      └───────────────┬────────────────────────────┘
                                      ▼
                      ┌────────────────────────────────────────────┐
-                     │  journal.json (источник истины)            │
+                     │  journal.json (source of truth)            │
                      └───────────────┬────────────────────────────┘
-                                     │ читает в цикле (--loop)
+                                     │ polls on a loop (--loop)
                                      ▼
                      ┌────────────────────────────────────────────┐
-                     │  dispatch.py — реально запускает модели    │
+                     │  dispatch.py — actually runs models        │
                      │  codex exec / claude -p                    │
                      └────────────────────────────────────────────┘
 ```
 
-## Установка
+## Installation
 
-### 1. Фронтенд
+### 1. Frontend
 
 ```bash
 git clone https://github.com/s4ps4n/prompt-hospital.git
 cd prompt-hospital
 npm install
-npm run dev        # dev-сервер http://localhost:5173
+npm run dev        # dev server at http://localhost:5173
 ```
 
-Режим интеграции с журналом включается env-переменной при сборке:
+Journal integration is enabled with an env var at build time:
 
 ```bash
-VITE_JOURNAL_URL=/journal npm run build   # офис будет читать/писать журнал по /journal
+VITE_JOURNAL_URL=/journal npm run build   # office reads/writes the journal at /journal
 npm run preview                          # http://localhost:4173
 ```
 
-Без `VITE_JOURNAL_URL` офис работает автономно (журнал в localStorage, захардкоженные задачи).
+Without `VITE_JOURNAL_URL` the office runs standalone (journal in localStorage, seeded tasks).
 
-### 2. Оркестратор (бэкенд)
+### 2. Orchestrator (backend)
 
 ```bash
 cd orchestrator
 cp journal.example.json journal.json
-python3 journal.py list          # посмотреть журнал
-python3 server.py 8090           # поднять API (локально)
-python3 dispatch.py --once       # разовый проход диспетчера
+python3 journal.py list          # view the journal
+python3 server.py 8090           # run the API (locally)
+python3 dispatch.py --once       # one dispatcher pass
 ```
 
-## Подключение (как связать всё вместе)
+## Wiring it together
 
-1. **Заведи журнал** — `cp orchestrator/journal.example.json orchestrator/journal.json`.
-
-2. **Подними API** — `python3 orchestrator/server.py 8090` (отдаёт `/journal`, принимает `/op`).
-
-3. **Собери фронт с `VITE_JOURNAL_URL=/journal`** и положи статику в nginx, проксируй
-   `/journal` и `/op` на API (см. «Деплой» ниже).
-
-4. **Запусти диспетчер**:
+1. **Create the journal** — `cp orchestrator/journal.example.json orchestrator/journal.json`.
+2. **Run the API** — `python3 orchestrator/server.py 8090` (serves `/journal`, accepts `/op`).
+3. **Build the frontend with `VITE_JOURNAL_URL=/journal`** and serve the static files behind
+   nginx, proxying `/journal` and `/op` to the API (see "Deploy").
+4. **Run the dispatcher**:
 
 ```bash
 ORCHESTRATOR_API=https://prompthospital.site \
 ORCHESTRATOR_AUTH='user:pass' \
-python3 dispatch.py --loop 30
+python3 orchestrator/dispatch.py --loop 30
 ```
 
-## Журнал: операции
+## Journal operations
 
-`journal.py` (и `POST /op {name, args}`) поддерживает те же операции, что фронтенд:
+`journal.py` (and `POST /op {name, args}`) supports the same operations as the frontend:
 
-| Операция | Аргументы | Что делает |
+| Operation | Arguments | What it does |
 |---|---|---|
-| `addTask` | title, priority(1-3), kind? | заводит задачу |
-| `assign` | task, worker | назначает на модель (снимает с прежней) |
-| `unassign` | task | возвращает в лоток |
-| `setRole` | worker, role | меняет роль (у свободной) |
-| `setPriority` | task, priority | меняет приоритет |
-| `reorder` | task, before | встаёт перед задачей |
-| `complete` | worker | закрывает текущую задачу |
-| `block` | worker | переключает blocked/run |
-| `addWorker` | model, name, provider, role | добавляет модель |
-| `removeWorker` | worker | убирает свободную модель |
+| `addTask` | title, priority(1-3), kind? | creates a task |
+| `assign` | task, worker | assigns to a model (detaches from the previous one) |
+| `unassign` | task | returns to the tray |
+| `setRole` | worker, role | changes role (idle model only) |
+| `setPriority` | task, priority | changes priority |
+| `reorder` | task, before | moves before a task |
+| `complete` | worker | closes the current task |
+| `block` | worker | toggles blocked/run |
+| `addWorker` | model, name, provider, role | adds a model |
+| `removeWorker` | worker | removes an idle model |
 
-Роли: `координатор, исполнитель, архитектор, фулстак, сисадмин, дизайнер, UX/UI, приёмщик, рецензент`.
+Roles: `coordinator, executor, architect, fullstack, sysadmin, designer, UX/UI, acceptor, reviewer`.
 
-**Правило ведения:** запустил модель на задачу → сразу `addTask` + `assign` в журнал; завершил → `complete`. Иначе офис показывает неправду.
+**Bookkeeping rule:** whenever you start a model on a task, immediately `addTask` + `assign` in the journal; when done, `complete`. Otherwise the office shows a lie.
 
-## Как добавить свою модель-исполнителя
+## Adding your own executor model
 
-В `dispatch.py` в функции `tick()` добавь ветку под свою модель:
+In `dispatch.py`, inside `tick()`, add a branch for your model:
 
 ```python
 model = (w.get('model') or '').lower()
@@ -149,14 +148,14 @@ elif 'my-model' in model:
     ok = run_my_model(task['title'])
 ```
 
-И напиши `run_my_model` — вызов твоего executor'а (CLI/API). Диспетчер сам запишет `complete`/`block` по результату.
+Then write `run_my_model` — the call to your executor (CLI/API). The dispatcher records `complete`/`block` by itself.
 
-## Деплой (как это развёрнуто в проде)
+## Deploy (as it runs in prod)
 
-Фронт и API — docker-контейнеры в одной сети, за Traefik (как `doc.studiocms.ru`).
+Frontend and API are docker containers on one network, behind Traefik (like `doc.studiocms.ru`).
 
 ```bash
-# 1. Статика в nginx, Basic Auth, прокси на API
+# 1. Static files in nginx, Basic Auth, proxy to the API
 cat > nginx.conf <<'EOF'
 server {
   listen 80;
@@ -170,12 +169,12 @@ server {
 }
 EOF
 
-# 2. API в docker-сети
+# 2. API in the docker network
 docker run -d --name orchestrator-api --network deploy_default \
   -v /root/orchestrator:/app -w /app --restart unless-stopped \
   python:3.11-alpine python server.py 8090
 
-# 3. Фронт с Traefik-лейблами (HTTPS через certResolver le)
+# 3. Frontend with Traefik labels (HTTPS via certResolver le)
 docker run -d --name prompt-hospital --network deploy_default \
   -v /root/prompt-hospital/site:/usr/share/nginx/html:ro \
   -v /root/prompt-hospital/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
@@ -189,32 +188,32 @@ docker run -d --name prompt-hospital --network deploy_default \
   nginx:alpine
 ```
 
-DNS: `A-запись prompthospital.site → <IP сервера>`. Сертификат выпустит Traefik (Let's Encrypt).
+DNS: an `A record prompthospital.site → <server IP>`. Traefik issues the certificate itself (Let's Encrypt).
 
-## Уровни интеграции (что уже готово)
+## Integration levels (all done)
 
-- **A. Журнал** — единый источник истины, CLI операций.
-- **B. Монитор** — офис читает журнал (read-only).
-- **C. Запись** — drag-and-drop пишет в журнал через `POST /op`.
-- **D. Исполнение** — диспетчер реально запускает модель по задаче и закрывает её.
+- **A. Journal** — single source of truth, operation CLI.
+- **B. Monitor** — office reads the journal (read-only).
+- **C. Write** — drag-and-drop writes to the journal via `POST /op`.
+- **D. Execute** — the dispatcher actually runs the model and closes the task.
 
-Все четыре готовы. По умолчанию офис работает на уровне C (пишет в журнал); D включается запуском `dispatch.py`.
+By default the office runs at level C (writes to the journal); D is enabled by running `dispatch.py`.
 
-## Команда
+## Team
 
-| Модель | Роль | Как подключена |
+| Model | Role | How it is wired |
 |---|---|---|
-| Гермес | координатор | DeepSeek (этот ассистент) |
-| Claude Code | исполнитель | локально, `claude -p` |
-| Codex | исполнитель | локально, `codex exec -s workspace-write` |
-| Nemotron / Qwen / Laguna | рецензент | OpenRouter `:free` |
+| Hermes | coordinator | DeepSeek (this assistant) |
+| Claude Code | executor | locally, `claude -p` |
+| Codex | executor | locally, `codex exec -s workspace-write` |
+| Nemotron / Qwen / Laguna | reviewer | OpenRouter `:free` |
 
-## Тесты и качество
+## Tests and quality
 
 ```bash
-npm test            # vitest — журнал, операции, интерактив, remote-режим
+npm test            # vitest — journal, operations, interaction, remote mode
 npm run lint        # oxlint
 npm run build       # tsc + vite build
 ```
 
-Ревью кода — через бесплатные модели OpenRouter (`orchestrator/review-backend.py`).
+Code review — via free OpenRouter models (`orchestrator/review-backend.py`).
