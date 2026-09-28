@@ -38,6 +38,27 @@ describe('SVG components', () => {
     expect(arms).not.toContain('ph-head')
     expect(body + arms).not.toContain('ph-screen')
   })
+  it('paints the head in painter order from the designer reference: seated under desk, asleep over arms', () => {
+    const at = (markup: string, needle: string) => {
+      const i = markup.indexOf(needle)
+      expect(i, needle).toBeGreaterThanOrEqual(0)
+      return i
+    }
+    const seated = renderToStaticMarkup(<svg><Character worker={worker} catalogEntry={CATALOG[0]} /></svg>)
+    expect(at(seated, 'ph-head')).toBeLessThan(at(seated, 'ph-screen'))
+    expect(at(seated, 'ph-screen')).toBeLessThan(at(seated, 'ph-arm-a'))
+
+    const sleep = renderToStaticMarkup(<svg><Character worker={worker} catalogEntry={CATALOG[0]} sleep /></svg>)
+    expect(at(sleep, 'ph-screen')).toBeLessThan(at(sleep, 'ph-arm-a'))
+    expect(at(sleep, 'ph-arm-a')).toBeLessThan(at(sleep, 'ph-arm-b'))
+    expect(at(sleep, 'ph-arm-b')).toBeLessThan(at(sleep, 'ph-head'))
+    expect(sleep.match(/class="ph-head"/g)).toHaveLength(1)
+
+    const sleepBody = renderToStaticMarkup(<Character worker={worker} catalogEntry={CATALOG[0]} layer="body" furniture={false} sleep />)
+    const sleepArms = renderToStaticMarkup(<Character worker={worker} catalogEntry={CATALOG[0]} layer="arms" furniture={false} sleep />)
+    expect(sleepBody).not.toContain('ph-head')
+    expect(at(sleepArms, 'ph-arm-b')).toBeLessThan(at(sleepArms, 'ph-head'))
+  })
   it('escapes task titles and preserves full text in the SVG title', () => {
     const markup = renderToStaticMarkup(<WorkerSign worker={worker} taskTitle={'<script> & длинная задача '.repeat(8)} />)
     expect(markup).not.toContain('<script>')

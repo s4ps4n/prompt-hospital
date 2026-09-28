@@ -67,6 +67,25 @@ export interface CharacterProps {
 /** Pure SVG group. Appearance comes from the catalogue, expression from the journal. */
 export function Character({ worker, catalogEntry: entry, motion = true, x = 0, y = 0, furniture = true, layer = 'all', sleep = false }: CharacterProps) {
   const phase = Array.from(worker.id).reduce((sum, ch) => (sum * 31 + ch.charCodeAt(0)) % 5000, 0) / 1000
+  /** Порядок слоёв — как в character() дизайнера: сидя голова в body (под столом и руками),
+   *  во сне — в arms после рук, т.к. лежит на столе в зоне рук. */
+  const head = <g transform={sleep ? SLEEP_HEAD : undefined} data-sleep={sleep || undefined}><g className="ph-head">
+    <circle cx={15} cy={-42} r={4.5} fill={entry.skin} />
+    <circle cx={0} cy={-44} r={17} fill={entry.skin} />
+    <g fill={CHARACTER.blush} stroke="none" opacity={.75}>
+      <ellipse cx={-12} cy={-35.5} rx={3.6} ry={2.2} /><ellipse cx={9} cy={-35.5} rx={3.6} ry={2.2} />
+    </g>
+    <Hair entry={entry} />
+    {sleep ? <path className="ph-eyes-closed" d={SLEEP_EYES} fill="none" strokeWidth={2} /> : <g className="ph-eyes" style={{ animationDelay: `-${phase}s` }}>
+      {[-7, 5].map(cx => <g key={cx}>
+        <ellipse cx={cx} cy={-43} rx={4.3} ry={5.3} fill={CHARACTER.white} strokeWidth={1.6} />
+        <circle cx={cx - 1.2} cy={-41.8} r={2.2} fill={OUTLINE} stroke="none" />
+      </g>)}
+    </g>}
+    <path d={worker.status === 'blocked' ? 'M-11,-49 L-3,-52 M1,-52 L9,-49' : 'M-11,-50 Q-7,-52.5 -3,-50 M1,-50 Q5,-52.5 9,-50'} fill="none" />
+    <path d={sleep ? SLEEP_MOUTH : MOUTH[worker.status]} fill={sleep || worker.status === 'done' ? CHARACTER.mouth : 'none'} />
+    <Accessory entry={entry} />
+  </g></g>
   return <g transform={`translate(${x} ${y})`} className={motion ? 'ph-motion' : 'ph-still'} data-status={worker.status}
     data-worker-id={worker.id} stroke={OUTLINE} strokeWidth={OUTLINE_WIDTH} strokeLinejoin="round" strokeLinecap="round">
     <title>{worker.name} — {worker.role}</title>
@@ -74,23 +93,7 @@ export function Character({ worker, catalogEntry: entry, motion = true, x = 0, y
       {furniture && <rect x={-18} y={-26} width={36} height={38} rx={6} fill={FURNITURE.chair} />}
       <path d="M-16,3 C-17,-10 -14,-21 -8,-25 L8,-25 C14,-21 17,-10 16,3 Z" fill={entry.color} />
       <path d="M-6,-25 L0,-17 L6,-25 Z" fill={CHARACTER.white} />
-      <g transform={sleep ? SLEEP_HEAD : undefined} data-sleep={sleep || undefined}><g className="ph-head">
-        <circle cx={15} cy={-42} r={4.5} fill={entry.skin} />
-        <circle cx={0} cy={-44} r={17} fill={entry.skin} />
-        <g fill={CHARACTER.blush} stroke="none" opacity={.75}>
-          <ellipse cx={-12} cy={-35.5} rx={3.6} ry={2.2} /><ellipse cx={9} cy={-35.5} rx={3.6} ry={2.2} />
-        </g>
-        <Hair entry={entry} />
-        {sleep ? <path className="ph-eyes-closed" d={SLEEP_EYES} fill="none" strokeWidth={2} /> : <g className="ph-eyes" style={{ animationDelay: `-${phase}s` }}>
-          {[-7, 5].map(cx => <g key={cx}>
-            <ellipse cx={cx} cy={-43} rx={4.3} ry={5.3} fill={CHARACTER.white} strokeWidth={1.6} />
-            <circle cx={cx - 1.2} cy={-41.8} r={2.2} fill={OUTLINE} stroke="none" />
-          </g>)}
-        </g>}
-        <path d={worker.status === 'blocked' ? 'M-11,-49 L-3,-52 M1,-52 L9,-49' : 'M-11,-50 Q-7,-52.5 -3,-50 M1,-50 Q5,-52.5 9,-50'} fill="none" />
-        <path d={sleep ? SLEEP_MOUTH : MOUTH[worker.status]} fill={sleep || worker.status === 'done' ? CHARACTER.mouth : 'none'} />
-        <Accessory entry={entry} />
-      </g></g>
+      {!sleep && head}
       {worker.status === 'blocked' && <StatusLamp status={worker.status} y={-86} motion={motion} />}
     </>}
     {furniture && layer === 'all' && <Workstation status={worker.status} motion={motion} />}
@@ -100,6 +103,7 @@ export function Character({ worker, catalogEntry: entry, motion = true, x = 0, y
         <path d={d} fill="none" stroke={entry.color} strokeWidth={6} />
         <circle cx={hx} cy={hy} r={4.4} fill={entry.skin} />
       </g>)}
+      {sleep && head}
     </>}
   </g>
 }
