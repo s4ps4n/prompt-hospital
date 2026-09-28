@@ -286,3 +286,82 @@ describe('App: отрисовка — функция от журнала', () =>
     expect(dump.textContent).toContain('"op": "assign"')
   })
 })
+
+describe('App: зум (состояние интерфейса, не журнала)', () => {
+  const scale = () => Number($('[data-scene-scale]').getAttribute('data-scene-scale'))
+  const signScale = (id: string) => Number(/scale\(([\d.]+)\)/.exec($(`[data-sign="${id}"]`).getAttribute('transform') ?? '')?.[1])
+  const click = (name: string) => fireEvent.click(screen.getByRole('button', { name }))
+
+  it('＋/− меняют масштаб сцены и размер SVG; журнал не трогают', () => {
+    const k0 = scale()
+    const w0 = Number($('svg[viewBox]').getAttribute('width'))
+    const before = store.getJournal()
+    click('＋')
+    expect(scale()).toBeCloseTo(k0 * 1.25)
+    expect(Number($('svg[viewBox]').getAttribute('width'))).toBeGreaterThan(w0)
+    expect($('[data-zoom]').textContent).toBe(`${Math.round(scale() * 100)}%`)
+    click('−')
+    expect(scale()).toBeCloseTo(k0)
+    expect(store.getJournal()).toBe(before)
+  })
+
+  it('− не опускает масштаб ниже 0.55', () => {
+    for (let n = 0; n < 10; n++) click('−')
+    expect(scale()).toBe(0.55)
+    expect(Number($('svg[viewBox]').getAttribute('width'))).toBeGreaterThan(0)
+  })
+
+  it('«Вписать» возвращает масштаб по контейнеру', () => {
+    const fit = scale()
+    click('＋')
+    click('＋')
+    expect(scale()).not.toBeCloseTo(fit)
+    click('Вписать')
+    expect(scale()).toBe(fit)
+  })
+
+  it('вывески и конверты контр-масштабируются при отдалении, не больше ×1.5', () => {
+    for (let n = 0; n < 10; n++) click('−')
+    expect(signScale('w2')).toBe(1.5)
+    expect($('[data-envelope="T-12"]').getAttribute('transform')).toContain('scale(1.5)')
+    for (let n = 0; n < 10; n++) click('＋')
+    expect(scale()).toBeGreaterThanOrEqual(1)
+    expect(signScale('w2')).toBe(1)
+  })
+})
+
+describe('App: Сброс', () => {
+  it('после подтверждения возвращает стартовый состав и закрывает карточку', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    dragTo($('[data-task-slot="T-13"]'), $('[data-room="w2"]'))
+    expect(task('T-13')?.assignedTo).toBe('w2')
+    fireEvent.click($('[data-room="w2"]'))
+    fireEvent.click(screen.getByRole('button', { name: 'Сброс' }))
+    expect(confirm).toHaveBeenCalled()
+    expect(task('T-13')?.assignedTo).toBeNull()
+    expect($('[data-task-slot="T-13"]')).toBeTruthy()
+    expect(screen.queryByRole('complementary', { name: 'Карточка модели' })).toBeNull()
+    expect(message().textContent).toContain('сброшен')
+    confirm.mockRestore()
+  })
+
+  it('без подтверждения ничего не меняет', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    dragTo($('[data-task-slot="T-13"]'), $('[data-room="w2"]'))
+    fireEvent.click(screen.getByRole('button', { name: 'Сброс' }))
+    expect(task('T-13')?.assignedTo).toBe('w2')
+    confirm.mockRestore()
+  })
+})
+
+describe('App: motion=false', () => {
+  it('ни одного анимированного узла — и после зума тоже', () => {
+    cleanup()
+    dom = render(<App store={store} motion={false} />)
+    const animated = () => dom.container.querySelectorAll('.ph-motion, .ph-idle-lane, .ph-idle-enter').length
+    expect(animated()).toBe(0)
+    expect(dom.container.querySelectorAll('.ph-still').length).toBeGreaterThan(0)
+    for (const name of ['−', '＋', '＋', 'Вписать']) fireEvent.click(screen.getByRole('button', { name }))
+    expect(animated()).toBe(0)
+  })
+})

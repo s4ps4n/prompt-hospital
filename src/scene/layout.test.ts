@@ -5,15 +5,21 @@ import type { Journal, Worker } from '../journal/types'
 import { BOSS_SIZE, G, L, M, PITCH } from './iso'
 import {
   MAX_COLS,
+  MAX_COUNTER_SCALE,
+  MAX_SCALE,
   MIN_COLS,
   MIN_SCALE,
+  ZOOM_STEP,
   clampCols,
+  clampScale,
   comparePaint,
   counterScale,
   displayStatus,
   fitScale,
   layoutOffice,
   sceneBounds,
+  sceneScale,
+  zoomBy,
   type Cell,
 } from './layout'
 
@@ -193,21 +199,77 @@ describe('масштаб', () => {
     expect(fitScale({ width: 808, height: 408 }, b)).toBeCloseTo(0.8)
   })
 
+  it('«Вписать» при разных контейнерах: по узкой стороне, в пределах [0.55, MAX_SCALE]', () => {
+    const b = { width: 1000, height: 500 }
+    // Узкий по ширине / по высоте — определяет меньшая сторона.
+    expect(fitScale({ width: 708, height: 2000 }, b)).toBeCloseTo(0.7)
+    expect(fitScale({ width: 2000, height: 358 }, b)).toBeCloseTo(0.7)
+    // Маленький контейнер — не меньше 0.55, дальше скролл.
+    expect(fitScale({ width: 300, height: 380 }, b)).toBe(MIN_SCALE)
+    expect(fitScale({ width: 0, height: 0 }, b)).toBe(MIN_SCALE)
+    // Огромный — не больше MAX_SCALE.
+    expect(fitScale({ width: 10_000, height: 10_000 }, b)).toBe(MAX_SCALE)
+    // Реальная сцена в окне 1280×720 и на телефоне.
+    const real = sceneBounds(layoutOffice(initialJournal().workers))
+    const desk = fitScale({ width: 1280, height: 720 }, real)
+    expect(desk).toBeGreaterThanOrEqual(MIN_SCALE)
+    expect(Math.ceil(real.width * desk) <= 1280 || desk === MIN_SCALE).toBe(true)
+    expect(fitScale({ width: 360, height: 640 }, real)).toBe(MIN_SCALE)
+  })
+
   it('не меньше 0.55', () => {
     expect(fitScale({ width: 100, height: 100 }, { width: 5000, height: 5000 })).toBe(MIN_SCALE)
   })
+})
 
-  it('зум умножает вписанный масштаб', () => {
-    expect(fitScale({ width: 100, height: 100 }, { width: 5000, height: 5000 }, 2)).toBeCloseTo(1.1)
+describe('зум', () => {
+  it('ручной зум не опускается ниже 0.55 и не поднимается выше MAX_SCALE', () => {
+    let k = 1
+    for (let n = 0; n < 20; n++) k = zoomBy(k, -1)
+    expect(k).toBe(MIN_SCALE)
+    expect(zoomBy(MIN_SCALE, -1)).toBe(MIN_SCALE)
+    for (let n = 0; n < 20; n++) k = zoomBy(k, 1)
+    expect(k).toBe(MAX_SCALE)
+    expect(zoomBy(0.6, -1)).toBe(MIN_SCALE)
   })
 
-  it('контр-масштаб подписей: 1 при k ≥ 0.8, растёт до 1.5', () => {
+  it('шаг −/＋ — множитель ZOOM_STEP', () => {
+    expect(zoomBy(1, 1)).toBeCloseTo(ZOOM_STEP)
+    expect(zoomBy(1, -1)).toBeCloseTo(1 / ZOOM_STEP)
+  })
+
+  it('масштаб сцены: «вписать» берёт fit, ручной — зажимается в [0.55, MAX_SCALE]', () => {
+    expect(sceneScale('fit', 0.7)).toBe(0.7)
+    expect(sceneScale(0.3, 0.7)).toBe(MIN_SCALE)
+    expect(sceneScale(0, 0.7)).toBe(MIN_SCALE)
+    expect(sceneScale(-1, 0.7)).toBe(MIN_SCALE)
+    expect(sceneScale(9, 0.7)).toBe(MAX_SCALE)
+    expect(sceneScale(1.3, 0.7)).toBe(1.3)
+    expect(clampScale(Number.NaN)).toBe(1)
+  })
+})
+
+describe('контр-масштаб вывесок/конвертов', () => {
+  it('1/k при отдалении, ограничен сверху ×1.5', () => {
     expect(counterScale(1)).toBe(1)
-    expect(counterScale(0.8)).toBe(1)
-    expect(counterScale(0.64)).toBeCloseTo(1.25)
-    expect(counterScale(MIN_SCALE)).toBeCloseTo(0.8 / 0.55)
-    expect(counterScale(0.5)).toBe(1.5)
+    expect(counterScale(0.8)).toBeCloseTo(1.25)
+    expect(counterScale(0.75)).toBeCloseTo(4 / 3)
+    expect(counterScale(2 / 3)).toBeCloseTo(1.5)
+    expect(counterScale(MIN_SCALE)).toBe(MAX_COUNTER_SCALE)
     expect(counterScale(0.1)).toBe(1.5)
+  })
+
+  it('при приближении не уменьшает (не меньше 1)', () => {
+    expect(counterScale(1.5)).toBe(1)
+    expect(counterScale(MAX_SCALE)).toBe(1)
+  })
+
+  it('на любом допустимом масштабе — в [1, 1.5]', () => {
+    for (let k = MIN_SCALE; k <= MAX_SCALE; k += 0.05) {
+      const c = counterScale(clampScale(k))
+      expect(c).toBeGreaterThanOrEqual(1)
+      expect(c).toBeLessThanOrEqual(MAX_COUNTER_SCALE)
+    }
   })
 })
 

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { IdleDirector, idlePose, useIdleClock } from '../animations'
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { IDLE_SLOT_MS, IdleDirector, canIdle, idlePose, nextIdleDelay, useIdleClock } from '../animations'
 import { Character, WorkerSign } from '../characters'
 import { COORDINATOR_ID, PRIORITY_LABEL, findCatalogEntry } from '../journal/catalog'
 import { currentTask, trayTasks, workerQueue } from '../journal/selectors'
@@ -17,10 +17,12 @@ import {
   rect,
   roomConfig,
   sceneBounds,
+  sceneScale,
   seatPoint,
   signAnchor,
   type RoomCell,
   type SceneItem,
+  type Zoom,
 } from '../scene'
 import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
 import { priorityColor } from './styles'
@@ -64,39 +66,44 @@ function Envelope({ task, x, y, scale, drop, current, onPointerDown, onClick }: 
   )
 }
 
-interface RoomPartsProps {
+/** Гуляет ли модель по коридору (тогда её персонаж — отдельный объект сцены). */
+function walking(w: Worker, now: number, motion: boolean): boolean {
+  return w.id !== COORDINATOR_ID && idlePose(w, now, motion) === 'walk'
+}
+
+/** Начало текущего idle-слота модели: поза внутри слота не меняется, мемо комнаты не сбивается. 0 — не бездельничает. */
+function idleSlotTime(w: Worker, now: number, motion: boolean): number {
+  if (w.id === COORDINATOR_ID || !canIdle(w, motion)) return 0
+  return now + nextIdleDelay(w.id, now) - IDLE_SLOT_MS
+}
+
+interface RoomContentProps {
   journal: Journal
   cell: RoomCell
   worker: Worker
+  /** 'room' — персонаж (если не гуляет), конверты и вывеска; 'walker' — только гуляющий персонаж. */
+  part: 'room' | 'walker'
   over: boolean
   selected: boolean
   signScale: number
   motion: boolean
+  /** Время idle-графика, квантованное до начала слота (0 — модель не бездельничает). */
   now: number
   onSelect: (id: string) => void
   onStartDrag: StartDrag
 }
 
-interface RoomParts {
-  drop: string
-  select: () => void
-  /** Подсветка пола при наведении конверта. */
-  floor: ReactNode
-  /** Содержимое комнаты в её painter-порядке: персонаж, конверты, вывеска. */
-  content: ReactNode
-  /** Гуляющий по коридору — отдельный объект сцены со своей глубиной. */
-  walker: SceneItem | null
-}
-
-/** Всё, что сцена рисует от журнала внутри комнаты модели; координаты — локальные (угол комнаты 0,0). */
-function roomParts({ journal, cell, worker: w, over, selected, signScale, motion, now, onSelect, onStartDrag }: RoomPartsProps): RoomParts {
+/**
+ * Всё, что сцена рисует от журнала внутри комнаты модели; координаты — локальные (угол комнаты 0,0).
+ * Мемоизировано: комната пересобирается, только когда меняются журнал, масштаб, подсветка или её idle-поза.
+ */
+const RoomContent = memo(function RoomContent({ journal, cell, worker: w, part, over, selected, signScale, motion, now, onSelect, onStartDrag }: RoomContentProps) {
   const boss = cell.kind === 'boss'
   const cfg = roomConfig(cell)
   const drop = boss ? TRAY_DROP : w.id
   const shown = { ...w, status: displayStatus(journal, w) }
   const entry = findCatalogEntry(w.model)
   const select = () => onSelect(w.id)
-  const S = cell.size
 
   const tray = trayTasks(journal)
   const cur = currentTask(journal, w.id)
@@ -112,7 +119,6 @@ function roomParts({ journal, cell, worker: w, over, selected, signScale, motion
 
   // Гермес не бездельничает (canIdle), а его drop-цель — лоток, поэтому он сидит как обычный Character.
   const route = idleRoute(cell)
-  const pose = boss ? null : idlePose(shown, now, motion)
   const character =
     entry &&
     (boss ? (
@@ -134,15 +140,7 @@ function roomParts({ journal, cell, worker: w, over, selected, signScale, motion
       />
     ))
 
-  const floor = (
-    <polygon
-      points={pts(rect(0, 0, S, S))}
-      data-room={w.id}
-      fill={over ? UI.button : 'transparent'}
-      fillOpacity={over ? 0.45 : 1}
-      stroke="none"
-    />
-  )
+  if (part === 'walker') return character
   const envelopes = (
     <g>
       {pile.map((t, i) => (
@@ -191,24 +189,26 @@ function roomParts({ journal, cell, worker: w, over, selected, signScale, motion
     </g>
   )
 
-  const [tx, ty] = P(cell.ox, cell.oy)
-  const walker: SceneItem | null =
-    pose === 'walk'
-      ? { key: `walk-${w.id}`, depth: route.depth, node: <g transform={`translate(${tx},${ty})`}>{character}</g> }
-      : null
-  return {
-    drop,
-    select,
-    floor,
-    content: (
-      <>
-        {!walker && character}
-        {envelopes}
-        {sign}
-      </>
-    ),
-    walker,
-  }
+  return (
+    <>
+      {!walking(w, now, motion) && character}
+      {envelopes}
+      {sign}
+    </>
+  )
+})
+
+/** Подсветка пола при наведении конверта. */
+function RoomFloor({ id, size, over }: { id: string; size: number; over: boolean }) {
+  return (
+    <polygon
+      points={pts(rect(0, 0, size, size))}
+      data-room={id}
+      fill={over ? UI.button : 'transparent'}
+      fillOpacity={over ? 0.45 : 1}
+      stroke="none"
+    />
+  )
 }
 
 interface SceneViewProps {
@@ -217,6 +217,10 @@ interface SceneViewProps {
   /** data-drop цели под курсором при перетаскивании. */
   overDrop: string | null
   cols?: number
+  /** Зум (состояние интерфейса): «вписать» или ручной масштаб; всегда не меньше MIN_SCALE. */
+  zoom?: Zoom
+  /** Итоговый масштаб сцены — сообщается при каждом изменении (для шага −/＋ и индикатора). */
+  onScale?: (k: number) => void
   /** false — анимации сцены и idle-график отключены. */
   motion?: boolean
   /** Фиксированное время idle-графика (мс); по умолчанию — настенные часы. */
@@ -228,13 +232,16 @@ interface SceneViewProps {
 
 /**
  * Сцена офиса целиком: персонажи, вывески и конверты — внутри комнат в painter-порядке,
- * гуляющие бездельники — объектами коридора. Всё — функция от журнала и idle-часов.
+ * гуляющие бездельники — объектами коридора. Всё — функция от журнала, зума и idle-часов.
+ * Мемоизирована: перетаскивание, сообщения и модалки в App сцену не пересобирают.
  */
-export function SceneView({
+export const SceneView = memo(function SceneView({
   journal,
   selectedId,
   overDrop,
   cols = DEFAULT_COLS,
+  zoom = 'fit',
+  onScale,
   motion = true,
   timeMs,
   onSelect,
@@ -253,28 +260,57 @@ export function SceneView({
     return () => ro.disconnect()
   }, [])
 
-  const layout = layoutOffice(journal.workers, cols)
+  const layout = useMemo(() => layoutOffice(journal.workers, cols), [journal.workers, cols])
   const b = sceneBounds(layout)
-  // Зум — этап 7; пока только «вписать».
-  const k = fitScale(box, b)
+  const k = sceneScale(zoom, fitScale(box, b))
   const cs = counterScale(k)
 
-  const parts = new Map<string, RoomParts>()
+  useEffect(() => onScale?.(k), [k, onScale])
+
+  // При смене масштаба держим на месте центр видимой области.
+  const prevK = useRef(k)
+  useLayoutEffect(() => {
+    const el = wrapRef.current
+    const r = k / prevK.current
+    prevK.current = k
+    if (!el || r === 1) return
+    el.scrollLeft = (el.scrollLeft + el.clientWidth / 2) * r - el.clientWidth / 2
+    el.scrollTop = (el.scrollTop + el.clientHeight / 2) * r - el.clientHeight / 2
+  }, [k])
+
+  const rooms = new Map<string, { cell: RoomCell; worker: Worker; drop: string; now: number }>()
   for (const cell of layout.cells) {
     if (cell.kind === 'lounge' || !cell.worker) continue
     const w = cell.worker
-    const drop = w.id === COORDINATOR_ID ? TRAY_DROP : w.id
-    parts.set(
-      w.id,
-      roomParts({ journal, cell, worker: w, over: overDrop === drop, selected: selectedId === w.id, signScale: cs, motion, now, onSelect, onStartDrag }),
-    )
+    rooms.set(w.id, { cell, worker: w, drop: w.id === COORDINATOR_ID ? TRAY_DROP : w.id, now: idleSlotTime(w, now, motion) })
   }
-  const partsOf = (cell: RoomCell) => (cell.worker ? parts.get(cell.worker.id) : undefined)
-  const walkers = [...parts.values()].flatMap((p) => (p.walker ? [p.walker] : []))
+  const roomOf = (cell: RoomCell) => (cell.worker ? rooms.get(cell.worker.id) : undefined)
+  const content = (r: { cell: RoomCell; worker: Worker; drop: string; now: number }, part: 'room' | 'walker') => (
+    <RoomContent
+      journal={journal}
+      cell={r.cell}
+      worker={r.worker}
+      part={part}
+      over={overDrop === r.drop}
+      selected={selectedId === r.worker.id}
+      signScale={cs}
+      motion={motion}
+      now={r.now}
+      onSelect={onSelect}
+      onStartDrag={onStartDrag}
+    />
+  )
+  const walkers: SceneItem[] = []
+  for (const r of rooms.values()) {
+    if (!walking(r.worker, r.now, motion)) continue
+    const [tx, ty] = P(r.cell.ox, r.cell.oy)
+    walkers.push({ key: `walk-${r.worker.id}`, depth: idleRoute(r.cell).depth, node: <g transform={`translate(${tx},${ty})`}>{content(r, 'walker')}</g> })
+  }
 
   return (
     <div
       ref={wrapRef}
+      data-scene-scale={k}
       style={{
         flex: '1 1 480px',
         minWidth: 300,
@@ -293,15 +329,21 @@ export function SceneView({
           scale={k}
           motion={motion}
           onAddRoom={onAddRoom}
-          renderFloor={(cell) => partsOf(cell)?.floor}
-          renderRoom={(cell) => partsOf(cell)?.content}
+          renderFloor={(cell) => {
+            const r = roomOf(cell)
+            return r && <RoomFloor id={r.worker.id} size={cell.size} over={overDrop === r.drop} />
+          }}
+          renderRoom={(cell) => {
+            const r = roomOf(cell)
+            return r && content(r, 'room')
+          }}
           roomTarget={(cell) => {
-            const p = partsOf(cell)
-            return p && { drop: p.drop, onClick: p.select }
+            const r = roomOf(cell)
+            return r && { drop: r.drop, onClick: () => onSelect(r.worker.id) }
           }}
           extras={walkers}
         />
       </div>
     </div>
   )
-}
+})

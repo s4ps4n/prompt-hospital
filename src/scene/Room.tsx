@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import type { WorkerStatus } from '../journal/types'
 import { FURNITURE, PANEL_SHADE, SCREEN, WALL, shade } from '../theme/colors'
 import { H, T, quadX, quadY, rect } from './iso'
@@ -72,16 +72,11 @@ interface RoomProps {
   children?: ReactNode
 }
 
-/** Комната в локальных координатах (угол в 0,0). */
-export function Room({ cfg, color, status, motion = true, floor, children }: RoomProps) {
+/** Стены, декор и рабочее место — всё, что за содержимым комнаты. Пропсы примитивные: cfg — константа. */
+const RoomBack = memo(function RoomBack({ cfg, color, status, motion }: { cfg: RoomConfig; color: string; status: WorkerStatus; motion: boolean }) {
   const S = cfg.size
-  const [dA, dB] = doorSpan(S)
   return (
-    <g>
-      <Poly points={rect(0, 0, S, S)} fill={color} />
-      <Poly points={rect(S * 0.18, S * 0.66, S * 0.8, S * 0.92)} fill={shade(color, 1.1)} strokeWidth={1.5} />
-      {floor}
-
+    <>
       <Box x={0} y={0} w={T} d={S} h={H} color={WALL.face} right={shade(WALL.face, 0.92)} left={shade(WALL.face, 0.78)} top={WALL.top} />
       <Box x={T} y={0} w={S - T} d={T} h={H} color={WALL.face} left={WALL.face} right={shade(WALL.face, 0.78)} top={WALL.top} />
       <Poly points={quadX(T, T, S, 0, 18)} fill={shade(color, PANEL_SHADE.alongY)} />
@@ -110,7 +105,16 @@ export function Room({ cfg, color, status, motion = true, floor, children }: Roo
 
       <Workstation cfg={cfg} status={status} motion={motion} />
       {cfg.boss && <Box x={248} y={164} z={28} w={22} d={16} h={6} color={FURNITURE.paper} />}
-      {children}
+    </>
+  )
+})
+
+/** Передние растения и передняя стенка — поверх содержимого комнаты. */
+const RoomFront = memo(function RoomFront({ cfg }: { cfg: RoomConfig }) {
+  const S = cfg.size
+  const [dA, dB] = doorSpan(S)
+  return (
+    <>
       {cfg.frontPlants.map(([x, y]) => (
         <Plant key={`pf${x}_${y}`} x={x} y={y} />
       ))}
@@ -120,12 +124,30 @@ export function Room({ cfg, color, status, motion = true, floor, children }: Roo
         <Box x={dB} y={S - T} w={S - T - dB} d={T} h={12} color={WALL.face} top={WALL.top} />
         <Box x={S - T} y={T} w={T} d={S - T} h={12} color={WALL.face} top={WALL.top} />
       </g>
+    </>
+  )
+})
+
+/**
+ * Комната в локальных координатах (угол в 0,0). Статичные слои мемоизированы:
+ * при смене содержимого (конверты, вывеска, idle-поза) стены и мебель не пересобираются.
+ */
+export function Room({ cfg, color, status, motion = true, floor, children }: RoomProps) {
+  const S = cfg.size
+  return (
+    <g>
+      <Poly points={rect(0, 0, S, S)} fill={color} />
+      <Poly points={rect(S * 0.18, S * 0.66, S * 0.8, S * 0.92)} fill={shade(color, 1.1)} strokeWidth={1.5} />
+      {floor}
+      <RoomBack cfg={cfg} color={color} status={status} motion={motion} />
+      {children}
+      <RoomFront cfg={cfg} />
     </g>
   )
 }
 
 /** Зона отдыха в пустой ячейке: скамья, кулер, два растения. */
-export function Lounge() {
+export const Lounge = memo(function Lounge() {
   return (
     <g>
       <Box x={30} y={64} z={8} w={70} d={4} h={14} color={FURNITURE.bench} />
@@ -136,4 +158,4 @@ export function Lounge() {
       <Plant x={124} y={124} />
     </g>
   )
-}
+})

@@ -5,6 +5,8 @@ import { FONT_MONO, STATUS_META, STATUS_ORDER, button } from './styles'
 
 interface TopBarProps {
   journal: Journal
+  /** Текущий масштаб сцены (1 = 100%). */
+  scale: number
   onAddModel: () => void
   onZoomOut: () => void
   onZoomFit: () => void
@@ -20,7 +22,7 @@ function counts(j: Journal): Record<WorkerStatus, number> {
   return c
 }
 
-export function TopBar({ journal, onAddModel, onZoomOut, onZoomFit, onZoomIn, onJournal, onReset }: TopBarProps) {
+export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoomIn, onJournal, onReset }: TopBarProps) {
   const c = counts(journal)
   return (
     <header
@@ -83,9 +85,12 @@ export function TopBar({ journal, onAddModel, onZoomOut, onZoomFit, onZoomIn, on
         <button type="button" className="ph-btn" style={{ ...button(), width: 32 }} onClick={onZoomOut} title="Уменьшить">
           −
         </button>
-        <button type="button" className="ph-btn" style={button()} onClick={onZoomFit}>
+        <button type="button" className="ph-btn" style={button()} onClick={onZoomFit} title={`Масштаб ${Math.round(scale * 100)}%`}>
           Вписать
         </button>
+        <span data-zoom={scale} style={{ alignSelf: 'center', minWidth: 38, textAlign: 'center', fontSize: 11, fontFamily: FONT_MONO, fontWeight: 700, color: UI.paper }}>
+          {Math.round(scale * 100)}%
+        </span>
         <button type="button" className="ph-btn" style={{ ...button(), width: 32 }} onClick={onZoomIn} title="Увеличить">
           ＋
         </button>

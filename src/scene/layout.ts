@@ -8,6 +8,10 @@ export const MIN_COLS = 3
 export const MAX_COLS = 6
 /** Нижняя граница масштаба «вписать»; меньше — скролл. */
 export const MIN_SCALE = 0.55
+/** Верхняя граница масштаба (и «вписать», и ручного зума). */
+export const MAX_SCALE = 2
+/** Множитель одного нажатия −/＋. */
+export const ZOOM_STEP = 1.25
 /** Предел контр-масштаба вывесок и конвертов. */
 export const MAX_COUNTER_SCALE = 1.5
 
@@ -110,17 +114,31 @@ export function sceneBounds(layout: Pick<OfficeLayout, 'width' | 'height'>): Sce
   return { minX, minY, width: maxX - minX, height: maxY - minY }
 }
 
-/** Масштаб «вписать в контейнер», но не меньше MIN_SCALE; `zoom` — ручной множитель. */
-export function fitScale(
-  container: { width: number; height: number },
-  bounds: Pick<SceneBounds, 'width' | 'height'>,
-  zoom = 1,
-): number {
-  const fit = Math.min((container.width - 8) / bounds.width, (container.height - 8) / bounds.height)
-  return Math.max(MIN_SCALE, fit) * zoom
+/** Масштаб сцены всегда в [MIN_SCALE, MAX_SCALE]. */
+export function clampScale(k: number): number {
+  if (!Number.isFinite(k)) return 1
+  return Math.max(MIN_SCALE, Math.min(MAX_SCALE, k))
 }
 
-/** Контр-масштаб вывесок/конвертов при общем масштабе `k`: от 1 до MAX_COUNTER_SCALE. */
+/** Масштаб «вписать в контейнер», но не меньше MIN_SCALE (дальше — скролл контейнера). */
+export function fitScale(container: { width: number; height: number }, bounds: Pick<SceneBounds, 'width' | 'height'>): number {
+  return clampScale(Math.min((container.width - 8) / bounds.width, (container.height - 8) / bounds.height))
+}
+
+/** Зум — состояние интерфейса (не журнала): «вписать» или ручной масштаб. */
+export type Zoom = 'fit' | number
+
+/** Итоговый масштаб сцены при зуме `zoom` и вписанном масштабе `fit`. */
+export function sceneScale(zoom: Zoom, fit: number): number {
+  return zoom === 'fit' ? fit : clampScale(zoom)
+}
+
+/** Шаг кнопок −/＋ от текущего масштаба `k`; не выходит за [MIN_SCALE, MAX_SCALE]. */
+export function zoomBy(k: number, dir: 1 | -1): number {
+  return clampScale(k * ZOOM_STEP ** dir)
+}
+
+/** Контр-масштаб вывесок/конвертов при общем масштабе `k`: 1/k, от 1 до MAX_COUNTER_SCALE. */
 export function counterScale(k: number): number {
-  return Math.min(MAX_COUNTER_SCALE, Math.max(1, 0.8 / k))
+  return Math.min(MAX_COUNTER_SCALE, Math.max(1, 1 / k))
 }

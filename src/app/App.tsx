@@ -19,6 +19,7 @@ import { decideDrop, flightTarget, type DropHit } from './dnd'
 import { useDrag } from './useDrag'
 import { useFlights } from './useFlights'
 import { useJournal, useMessage } from './useJournal'
+import { useZoom } from './useZoom'
 import './app.css'
 
 export interface AppProps {
@@ -30,7 +31,7 @@ export interface AppProps {
 
 /**
  * Приложение целиком. Всё, что относится к офису, читается из журнала;
- * локально — только состояние интерфейса (выделение, модалки, drag, сообщение).
+ * локально — только состояние интерфейса (выделение, модалки, drag, сообщение, зум).
  */
 export default function App({ store: injected, motion = true }: AppProps) {
   const [store] = useState(() => injected ?? createJournalStore())
@@ -39,6 +40,7 @@ export default function App({ store: injected, motion = true }: AppProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [catalog, setCatalog] = useState<CatalogChoice | null>(null)
   const [journalOpen, setJournalOpen] = useState(false)
+  const { zoom, scale, onScale, zoomIn, zoomOut, zoomFit } = useZoom()
 
   const run = useCallback(
     <K extends OpName>(name: K, args: OpArgs[K]): OpResult => {
@@ -76,7 +78,8 @@ export default function App({ store: injected, motion = true }: AppProps) {
   const dragTask = drag ? findTask(journal, drag.task) : undefined
   const overDrop = drag?.over?.drop ?? null
 
-  const zoomStub = () => say('Зум появится в этапе 7 — пока сцена вписывается в окно', 'info')
+  // Стабильные колбэки: SceneView мемоизирована и не пересобирается на drag/сообщениях/модалках.
+  const openCatalog = useCallback(() => setCatalog({ model: 'claude', role: ROLES[0] }), [])
   const reset = () => {
     if (typeof window.confirm === 'function' && !window.confirm('Сбросить офис к стартовому составу?')) return
     store.reset()
@@ -106,10 +109,11 @@ export default function App({ store: injected, motion = true }: AppProps) {
     >
       <TopBar
         journal={journal}
-        onAddModel={() => setCatalog({ model: 'claude', role: ROLES[0] })}
-        onZoomOut={zoomStub}
-        onZoomFit={zoomStub}
-        onZoomIn={zoomStub}
+        scale={scale}
+        onAddModel={openCatalog}
+        onZoomOut={zoomOut}
+        onZoomFit={zoomFit}
+        onZoomIn={zoomIn}
         onJournal={() => setJournalOpen(true)}
         onReset={reset}
       />
@@ -119,10 +123,12 @@ export default function App({ store: injected, motion = true }: AppProps) {
           journal={journal}
           selectedId={selected?.id ?? null}
           overDrop={overDrop}
+          zoom={zoom}
+          onScale={onScale}
           motion={motion}
           onSelect={setSelectedId}
           onStartDrag={start}
-          onAddRoom={() => setCatalog({ model: 'claude', role: ROLES[0] })}
+          onAddRoom={openCatalog}
         />
         {selected && (
           <WorkerCard
