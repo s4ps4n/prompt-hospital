@@ -76,7 +76,7 @@ How it runs at `https://example.com`. Requires docker and a configured Traefik (
 
 ```bash
 docker run -d --name orchestrator-api --network deploy_default \
-  -v /root/orchestrator:/app -w /app --restart unless-stopped \
+  -v ./orchestrator:/app -w /app --restart unless-stopped \
   python:3.11-alpine python server.py 8090
 ```
 
@@ -101,9 +101,9 @@ Build the static files with `VITE_JOURNAL_URL=/journal`, create `.htpasswd` (`op
 
 ```bash
 docker run -d --name prompt-hospital --network deploy_default \
-  -v /root/prompt-hospital/site:/usr/share/nginx/html:ro \
-  -v /root/prompt-hospital/nginx.conf:/etc/nginx/conf.d/default.conf:ro \
-  -v /root/prompt-hospital/.htpasswd:/etc/nginx/.htpasswd:ro \
+  -v ./site:/usr/share/nginx/html:ro \
+  -v ./nginx.conf:/etc/nginx/conf.d/default.conf:ro \
+  -v ./.htpasswd:/etc/nginx/.htpasswd:ro \
   --restart unless-stopped \
   --label traefik.enable=true \
   --label "traefik.http.routers.prompthospital.rule=Host(\`example.com\`)" \
