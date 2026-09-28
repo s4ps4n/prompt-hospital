@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import { UI, UI_EXTRA } from '../theme/colors'
 import { FONT_MONO } from './styles'
 
@@ -8,10 +9,10 @@ export interface Message {
 }
 
 const COLOR: Record<MessageKind, string> = { ok: UI.ok, err: UI.error, info: UI.paper }
-const HINT = 'Перетащите конверт из лотка Гермеса на комнату модели. Клик по комнате открывает карточку.'
 
 /** Нижняя строка: текст OpResult.msg / OpResult.err или подсказка. */
 export function MessageBar({ message }: { message: Message | null }) {
+  const t = useT()
   return (
     <div
       role="status"
@@ -33,7 +34,7 @@ export function MessageBar({ message }: { message: Message | null }) {
         boxSizing: 'border-box',
       }}
     >
-      ▸ {message?.text ?? HINT}
+      ▸ {message?.text ?? t('msg.hint')}
     </div>
   )
 }

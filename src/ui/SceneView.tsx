@@ -1,7 +1,8 @@
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { IDLE_SLOT_MS, IdleDirector, canIdle, idlePose, nextIdleDelay, useIdleClock } from '../animations'
 import { Character, WorkerSign } from '../characters'
-import { COORDINATOR_ID, PRIORITY_LABEL, resolveCatalogEntry } from '../journal/catalog'
+import { useT } from '../i18n'
+import { COORDINATOR_ID, resolveCatalogEntry } from '../journal/catalog'
 import { currentTask, trayTasks, workerQueue } from '../journal/selectors'
 import type { Journal, Task, Worker } from '../journal/types'
 import {
@@ -46,6 +47,8 @@ interface EnvelopeProps {
 }
 
 function Envelope({ task, x, y, scale, drop, current, onPointerDown, onClick }: EnvelopeProps) {
+  const t = useT()
+  const kind = task.kind ? ` · ${t('task.onlyKind', { kind: t.role(task.kind) })}` : ''
   return (
     <g
       transform={`translate(${x} ${y}) scale(${scale})`}
@@ -57,7 +60,7 @@ function Envelope({ task, x, y, scale, drop, current, onPointerDown, onClick }: 
       strokeWidth={2}
       strokeLinejoin="round"
     >
-      <title>{`${task.id} · ${task.title} · ${PRIORITY_LABEL[task.priority]}${task.kind ? ` · только ${task.kind}` : ''}`}</title>
+      <title>{`${task.id} · ${task.title} · ${t(`priority.${task.priority}`)}${kind}`}</title>
       <rect x={-15} y={-20} width={34} height={23} rx={3} fill="rgba(36,26,12,.45)" stroke="none" />
       <rect x={-17} y={-23} width={34} height={23} rx={3} fill={current ? UI_EXTRA.envelopeCurrent : UI_EXTRA.envelope} />
       <path d="M-16 -22 L0 -12 L16 -22" fill="none" strokeWidth={1.8} />
@@ -100,6 +103,7 @@ interface RoomContentProps {
  * Мемоизировано: комната пересобирается, только когда меняются журнал, масштаб, подсветка или её idle-поза.
  */
 const RoomContent = memo(function RoomContent({ journal, cell, worker: w, part, over, selected, signScale, motion, now, onSelect, onStartDrag }: RoomContentProps) {
+  const t = useT()
   const boss = cell.kind === 'boss'
   const cfg = roomConfig(cell)
   const drop = boss ? TRAY_DROP : w.id
@@ -187,7 +191,7 @@ const RoomContent = memo(function RoomContent({ journal, cell, worker: w, part, 
           strokeWidth={3}
         />
       )}
-      <WorkerSign worker={shown} taskTitle={boss ? `в лотке: ${tray.length}` : cur?.title} width={sw} motion={motion} />
+      <WorkerSign worker={shown} taskTitle={boss ? t('sign.inTray', { n: tray.length }) : cur?.title} width={sw} motion={motion} />
     </g>
   )
 

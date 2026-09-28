@@ -1,0 +1,75 @@
+key,ru,en
+lang.switchTo,Переключить на русский,Switch to English
+top.title,Prompt Hospital,Prompt Hospital
+top.addModel,＋ Модель,＋ Model
+top.zoomOut,Уменьшить,Zoom out
+top.zoomIn,Увеличить,Zoom in
+top.zoomFit,Вписать,Fit
+top.zoomTitle,Масштаб {pct}%,Zoom {pct}%
+top.journal,Журнал,Journal
+top.reset,Сброс,Reset
+status.run,в работе,running
+status.wait,ожидает,waiting
+status.blocked,заблокирован,blocked
+status.done,выполнено,done
+role.coordinator,координатор,coordinator
+role.executor,исполнитель,executor
+role.architect,архитектор,architect
+role.fullstack,фулстак,full-stack
+role.sysadmin,сисадмин,sysadmin
+role.designer,дизайнер,designer
+role.uxui,UX/UI,UX/UI
+role.acceptor,приёмщик,QA acceptor
+role.reviewer,рецензент,reviewer
+priority.3,высокий,high
+priority.2,средний,medium
+priority.1,низкий,low
+priority.up,Повысить приоритет,Raise priority
+priority.down,Понизить приоритет,Lower priority
+tasks.one,{n} задача,{n} task
+tasks.few,{n} задачи,{n} tasks
+tasks.many,{n} задач,{n} tasks
+tasks.other,{n} задачи,{n} tasks
+task.onlyKind,только {kind},{kind} only
+task.anyRole,любая роль,any role
+tray.title,Лоток Гермеса,Hermes' tray
+tray.hint,Тащите конверт на комнату модели. Бросите на другой конверт в лотке — встанет перед ним и возьмёт его приоритет.,Drag an envelope onto a model's room. Drop it on another envelope in the tray to put it in front and take its priority.
+tray.empty,Лоток пуст,Tray is empty
+tray.newTitle,Название задачи,Task title
+tray.newPlaceholder,Новая задача…,New task…
+tray.priority,Приоритет,Priority
+tray.kind,Роль задачи,Task role
+tray.add,＋ В лоток,＋ To tray
+card.label,Карточка модели,Model card
+card.close,Закрыть карточку,Close card
+card.role,Роль,Role
+card.coordLocked,Роль координатора закреплена.,The coordinator role is fixed.
+card.roleLocked,"Нельзя сменить роль, пока модель в работе. Сначала заверши или сними задачу.",Can't change the role while the model is working. Complete or unassign the task first.
+card.coordInfo,Координатор раздаёт задачи. В лотке {tasks}. Возьмите конверт со стола или из лотка слева и бросьте на комнату модели.,The coordinator hands out tasks. {tasks} in the tray. Grab an envelope from the desk or the tray on the left and drop it on a model's room.
+card.current,Текущая задача,Current task
+card.complete,✓ Завершить,✓ Complete
+card.block,⛔ Блок,⛔ Block
+card.unblock,Снять блок,Unblock
+card.toTray,↩ В лоток,↩ To tray
+card.free,Свободен — перетащите сюда конверт,Idle — drag an envelope here
+card.queue,Очередь модели,Model queue
+card.returnToTray,Вернуть в лоток,Return to tray
+card.done,Выполнено: {n},Done: {n}
+card.clone,＋ Экземпляр с другой ролью,＋ Instance with another role
+card.remove,Убрать из офиса,Remove from office
+catalog.title,Каталог моделей,Model catalog
+catalog.hint,Выберите модель и роль — в офисе появится новая комната. Одна модель может занимать несколько комнат с разными ролями.,Pick a model and a role — a new room will appear in the office. One model can occupy several rooms with different roles.
+catalog.models,Модели,Models
+catalog.role,Роль:,Role:
+catalog.cancel,Отмена,Cancel
+catalog.confirm,Добавить в офис,Add to office
+journal.title,Журнал оркестратора,Orchestrator journal
+modal.close,Закрыть,Close
+scene.freeRoom,＋ свободная комната,＋ free room
+sign.noTask,Нет текущей задачи,No current task
+sign.inTray,в лотке: {n},in tray: {n}
+msg.hint,Перетащите конверт из лотка Гермеса на комнату модели. Клик по комнате открывает карточку.,Drag an envelope from Hermes' tray onto a model's room. Click a room to open its card.
+msg.miss,Мимо — задача осталась на месте,Missed — the task stayed in place
+msg.resetRemote,"Сброс — только для локального офиса, не для журнала оркестратора","Reset is for the local office only, not for the orchestrator's journal"
+msg.resetConfirm,Сбросить офис к стартовому составу?,Reset the office to the starting lineup?
+msg.resetDone,Офис сброшен к стартовому составу,Office reset to the starting lineup

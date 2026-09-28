@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useT } from '../i18n'
 import type { Journal } from '../journal/types'
 import { CORRIDOR_TILES, FURNITURE, GRASS, HEDGE, OUTER_WALL, OUTLINE, UI, roleColor } from '../theme/colors'
 import { H, P, quadX, quadY, rect } from './iso'
@@ -49,6 +50,7 @@ interface FreeRoomButtonProps {
 
 /** Кнопка «＋ свободная комната» над зоной отдыха; контр-масштабируется как вывески. */
 function FreeRoomButton({ cell, labelScale, onClick }: FreeRoomButtonProps) {
+  const t = useT()
   const [x, y] = P(cell.ox + 80, cell.oy + 80, 40)
   const w = 150
   const h = 26
@@ -69,7 +71,7 @@ function FreeRoomButton({ cell, labelScale, onClick }: FreeRoomButtonProps) {
         fontWeight={800}
         fill={OUTLINE}
       >
-        ＋ свободная комната
+        {t('scene.freeRoom')}
       </text>
     </g>
   )

@@ -1,3 +1,4 @@
+import { useT } from '../i18n'
 import type { Journal } from '../journal/types'
 import { UI, UI_EXTRA } from '../theme/colors'
 import { journalDump } from './helpers'
@@ -5,8 +6,9 @@ import { Modal } from './Modal'
 import { FONT_MONO } from './styles'
 
 export function JournalModal({ journal, onClose }: { journal: Journal; onClose: () => void }) {
+  const t = useT()
   return (
-    <Modal title="Журнал оркестратора" width={760} onClose={onClose}>
+    <Modal title={t('journal.title')} width={760} onClose={onClose}>
       <pre
         style={{
           margin: 0,

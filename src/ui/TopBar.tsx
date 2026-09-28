@@ -1,3 +1,5 @@
+import { nextLang, useLanguage } from '../i18n'
+import { translations } from '../i18n/translations'
 import { COORDINATOR_ID } from '../journal/catalog'
 import type { Journal, WorkerStatus } from '../journal/types'
 import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
@@ -24,6 +26,11 @@ function counts(j: Journal): Record<WorkerStatus, number> {
 
 export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoomIn, onJournal, onReset }: TopBarProps) {
   const c = counts(journal)
+  const { lang, setLang, t } = useLanguage()
+  const next = nextLang(lang)
+  // Подсказка — на языке, на который переключаем («Switch to English» / «Переключить на русский»).
+  const switchTo = translations[next]['lang.switchTo']
+  const pct = Math.round(scale * 100)
   return (
     <header
       style={{
@@ -50,7 +57,7 @@ export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoo
           textShadow: `2px 2px 0 ${OUTLINE}`,
         }}
       >
-        Prompt Hospital
+        {t('top.title')}
       </h1>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {STATUS_ORDER.map((s) => (
@@ -72,7 +79,7 @@ export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoo
           >
             <div style={{ width: 12, height: 10, border: `1.5px solid ${UI.paper}`, background: STATUS_META[s].screen }} />
             <div>
-              {STATUS_META[s].label}: {c[s]}
+              {t(`status.${s}`)}: {c[s]}
             </div>
           </div>
         ))}
@@ -80,25 +87,28 @@ export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoo
       <div style={{ flex: 1 }} />
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <button type="button" className="ph-btn" style={button('primary')} onClick={onAddModel}>
-          ＋ Модель
+          {t('top.addModel')}
         </button>
-        <button type="button" className="ph-btn" style={{ ...button(), width: 32 }} onClick={onZoomOut} title="Уменьшить">
+        <button type="button" className="ph-btn" style={{ ...button(), width: 32 }} onClick={onZoomOut} title={t('top.zoomOut')}>
           −
         </button>
-        <button type="button" className="ph-btn" style={button()} onClick={onZoomFit} title={`Масштаб ${Math.round(scale * 100)}%`}>
-          Вписать
+        <button type="button" className="ph-btn" style={button()} onClick={onZoomFit} title={t('top.zoomTitle', { pct })}>
+          {t('top.zoomFit')}
         </button>
         <span data-zoom={scale} style={{ alignSelf: 'center', minWidth: 38, textAlign: 'center', fontSize: 11, fontFamily: FONT_MONO, fontWeight: 700, color: UI.paper }}>
-          {Math.round(scale * 100)}%
+          {pct}%
         </span>
-        <button type="button" className="ph-btn" style={{ ...button(), width: 32 }} onClick={onZoomIn} title="Увеличить">
+        <button type="button" className="ph-btn" style={{ ...button(), width: 32 }} onClick={onZoomIn} title={t('top.zoomIn')}>
           ＋
         </button>
         <button type="button" className="ph-btn" style={button()} onClick={onJournal}>
-          Журнал
+          {t('top.journal')}
         </button>
         <button type="button" className="ph-btn" style={button('danger')} onClick={onReset}>
-          Сброс
+          {t('top.reset')}
+        </button>
+        <button type="button" className="ph-btn" data-lang={lang} style={button()} onClick={() => setLang(next)} title={switchTo} aria-label={switchTo}>
+          {next.toUpperCase()}
         </button>
       </div>
     </header>

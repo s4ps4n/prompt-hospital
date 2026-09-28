@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../i18n'
 import { CATALOG, ROLES, isAssignableRole } from '../journal/catalog'
 import type { AssignableRole } from '../journal/types'
 import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
@@ -20,13 +21,12 @@ interface CatalogModalProps {
 
 /** Каталог моделей: выбор модели и роли → addWorker. */
 export function CatalogModal({ initial, onConfirm, onClose }: CatalogModalProps) {
+  const t = useT()
   const [choice, setChoice] = useState(initial)
   return (
-    <Modal title="Каталог моделей" width={660} onClose={onClose}>
-      <div style={{ fontSize: 12, color: UI_EXTRA.muted }}>
-        Выберите модель и роль — в офисе появится новая комната. Одна модель может занимать несколько комнат с разными ролями.
-      </div>
-      <div role="listbox" aria-label="Модели" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 8 }}>
+    <Modal title={t('catalog.title')} width={660} onClose={onClose}>
+      <div style={{ fontSize: 12, color: UI_EXTRA.muted }}>{t('catalog.hint')}</div>
+      <div role="listbox" aria-label={t('catalog.models')} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 8 }}>
         {CATALOG.map((c) => {
           const picked = c.model === choice.model
           return (
@@ -58,7 +58,7 @@ export function CatalogModal({ initial, onConfirm, onClose }: CatalogModalProps)
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <label htmlFor="ph-add-role" style={{ fontSize: 12, fontWeight: 800 }}>
-          Роль:
+          {t('catalog.role')}
         </label>
         <select
           id="ph-add-role"
@@ -71,16 +71,16 @@ export function CatalogModal({ initial, onConfirm, onClose }: CatalogModalProps)
         >
           {ROLES.map((r) => (
             <option key={r} value={r}>
-              {r}
+              {t.role(r)}
             </option>
           ))}
         </select>
         <div style={{ flex: 1 }} />
         <button type="button" className="ph-btn" style={button()} onClick={onClose}>
-          Отмена
+          {t('catalog.cancel')}
         </button>
         <button type="button" className="ph-btn" style={button('primary')} onClick={() => onConfirm(choice)}>
-          Добавить в офис
+          {t('catalog.confirm')}
         </button>
       </div>
     </Modal>

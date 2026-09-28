@@ -1,4 +1,5 @@
 import { useEffect, useState, type PointerEvent } from 'react'
+import { useT } from '../i18n'
 import { COORDINATOR_ID, COORDINATOR_ROLE, ROLES, isAssignableRole, resolveCatalogEntry } from '../journal/catalog'
 import { currentTask, trayTasks, workerQueue } from '../journal/selectors'
 import type { AssignableRole, Journal, Role, Worker } from '../journal/types'
@@ -12,8 +13,6 @@ import {
   flag,
   miniButton,
   panel,
-  pluralTasks,
-  priorityLabel,
   sectionLabel,
   STATUS_META,
   taskRow,
@@ -45,11 +44,12 @@ function otherRole(role: Role): AssignableRole {
 }
 
 export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, onClone, onStartDrag }: WorkerCardProps) {
+  const t = useT()
   const [flash, setFlash] = useState(false)
   useEffect(() => {
     if (!flash) return
-    const t = setTimeout(() => setFlash(false), FLASH_MS)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setFlash(false), FLASH_MS)
+    return () => clearTimeout(timer)
   }, [flash])
 
   const isCoord = w.id === COORDINATOR_ID
@@ -68,7 +68,7 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
   }
 
   return (
-    <aside aria-label="Карточка модели" style={{ ...panel, flex: '0 0 290px', gap: 12, padding: 12, minHeight: 380, overflow: 'auto' }}>
+    <aside aria-label={t('card.label')} style={{ ...panel, flex: '0 0 290px', gap: 12, padding: 12, minHeight: 380, overflow: 'auto' }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <div
           style={{
@@ -104,17 +104,17 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
               fontWeight: 800,
             }}
           >
-            {STATUS_META[status].label}
+            {t(`status.${status}`)}
           </div>
         </div>
-        <button type="button" aria-label="Закрыть карточку" onClick={onClose} style={{ ...miniButton, width: 26, height: 26, fontSize: 14, fontWeight: 800 }}>
+        <button type="button" aria-label={t('card.close')} onClick={onClose} style={{ ...miniButton, width: 26, height: 26, fontSize: 14, fontWeight: 800 }}>
           ✕
         </button>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <label htmlFor="ph-role" style={sectionLabel}>
-          Роль
+          {t('card.role')}
         </label>
         <div data-testid="role-lock" className={flash ? 'ph-nope' : undefined} onClick={tryLockedRole} style={{ borderRadius: 4 }}>
           <select
@@ -137,26 +137,26 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
           >
             {(isCoord ? [COORDINATOR_ROLE] : ROLES).map((r) => (
               <option key={r} value={r}>
-                {r}
+                {t.role(r)}
               </option>
             ))}
           </select>
         </div>
         {locked && (
           <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.4, color: flash ? UI.danger : UI_EXTRA.muted }}>
-            {isCoord ? 'Роль координатора закреплена.' : 'Нельзя сменить роль, пока модель в работе. Сначала заверши или сними задачу.'}
+            {isCoord ? t('card.coordLocked') : t('card.roleLocked')}
           </div>
         )}
       </div>
 
       {isCoord ? (
         <div style={{ fontSize: 12, lineHeight: 1.5, color: UI_EXTRA.history }}>
-          Координатор раздаёт задачи. В лотке {pluralTasks(trayTasks(journal).length)}. Возьмите конверт со стола или из лотка слева и бросьте на комнату модели.
+          {t('card.coordInfo', { tasks: t.plural('tasks', trayTasks(journal).length) })}
         </div>
       ) : (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={sectionLabel}>Текущая задача</div>
+            <div style={sectionLabel}>{t('card.current')}</div>
             {cur ? (
               <>
                 <div style={taskRow}>
@@ -164,54 +164,54 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <div style={{ fontSize: 12, fontWeight: 700 }}>{cur.title}</div>
                     <div style={{ fontSize: 10, color: UI_EXTRA.muted }}>
-                      {cur.id} · {priorityLabel(cur.priority)}
+                      {cur.id} · {t(`priority.${cur.priority}`)}
                     </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <button type="button" className="ph-btn" style={button('ok', true)} onClick={() => run('complete', { worker: w.id })}>
-                    ✓ Завершить
+                    {t('card.complete')}
                   </button>
                   <button type="button" className="ph-btn" style={button('paper', true)} onClick={() => run('block', { worker: w.id })}>
-                    {w.status === 'blocked' ? 'Снять блок' : '⛔ Блок'}
+                    {w.status === 'blocked' ? t('card.unblock') : t('card.block')}
                   </button>
                   <button type="button" className="ph-btn" style={button('paper', true)} onClick={() => run('unassign', { task: cur.id })}>
-                    ↩ В лоток
+                    {t('card.toTray')}
                   </button>
                 </div>
               </>
             ) : (
               <div style={{ padding: 8, fontSize: 12, color: UI_EXTRA.muted, border: `2px dashed ${UI_EXTRA.dashed}`, borderRadius: 4 }}>
-                Свободен — перетащите сюда конверт
+                {t('card.free')}
               </div>
             )}
           </div>
 
           {queue.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={sectionLabel}>Очередь модели</div>
-              <ul aria-label="Очередь модели" data-drop={w.id} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {queue.map((t) => {
-                  const up = bumpPriority(t.priority, 1)
-                  const down = bumpPriority(t.priority, -1)
+              <div style={sectionLabel}>{t('card.queue')}</div>
+              <ul aria-label={t('card.queue')} data-drop={w.id} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {queue.map((task) => {
+                  const up = bumpPriority(task.priority, 1)
+                  const down = bumpPriority(task.priority, -1)
                   return (
                     <li
-                      key={t.id}
-                      data-queue-task={t.id}
+                      key={task.id}
+                      data-queue-task={task.id}
                       data-drop={w.id}
-                      data-task-slot={t.id}
-                      onPointerDown={(e) => onStartDrag(e, t.id)}
+                      data-task-slot={task.id}
+                      onPointerDown={(e) => onStartDrag(e, task.id)}
                       style={{ ...taskRow, padding: '6px 8px', cursor: 'grab', touchAction: 'none', userSelect: 'none' }}
                     >
-                      <div style={flag(t.priority, 20)} />
-                      <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 700 }}>{t.title}</div>
-                      <button type="button" style={{ ...miniButton, height: 20 }} title="Повысить приоритет" disabled={!up} onPointerDown={stop} onClick={() => up && run('setPriority', { task: t.id, priority: up })}>
+                      <div style={flag(task.priority, 20)} />
+                      <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 700 }}>{task.title}</div>
+                      <button type="button" style={{ ...miniButton, height: 20 }} title={t('priority.up')} disabled={!up} onPointerDown={stop} onClick={() => up && run('setPriority', { task: task.id, priority: up })}>
                         ▲
                       </button>
-                      <button type="button" style={{ ...miniButton, height: 20 }} title="Понизить приоритет" disabled={!down} onPointerDown={stop} onClick={() => down && run('setPriority', { task: t.id, priority: down })}>
+                      <button type="button" style={{ ...miniButton, height: 20 }} title={t('priority.down')} disabled={!down} onPointerDown={stop} onClick={() => down && run('setPriority', { task: task.id, priority: down })}>
                         ▼
                       </button>
-                      <button type="button" style={{ ...miniButton, height: 20, fontSize: 10 }} title="Вернуть в лоток" onPointerDown={stop} onClick={() => run('unassign', { task: t.id })}>
+                      <button type="button" style={{ ...miniButton, height: 20, fontSize: 10 }} title={t('card.returnToTray')} onPointerDown={stop} onClick={() => run('unassign', { task: task.id })}>
                         ↩
                       </button>
                     </li>
@@ -222,7 +222,7 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
           )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={sectionLabel}>Выполнено: {w.doneCount}</div>
+            <div style={sectionLabel}>{t('card.done', { n: w.doneCount })}</div>
             {w.history.slice(0, 5).map((h, i) => (
               <div key={i} style={{ fontSize: 11, color: UI_EXTRA.history }}>
                 ✓ {h}
@@ -232,10 +232,10 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
 
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', paddingTop: 10, borderTop: `2px dashed ${UI_EXTRA.dashed}` }}>
             <button type="button" className="ph-btn" style={button('primary', true)} onClick={() => onClone(w.model, otherRole(w.role))}>
-              ＋ Экземпляр с другой ролью
+              {t('card.clone')}
             </button>
             <button type="button" className="ph-btn" style={button('danger', true)} onClick={() => run('removeWorker', { worker: w.id })}>
-              Убрать из офиса
+              {t('card.remove')}
             </button>
           </div>
         </>

@@ -30,6 +30,7 @@ import {
   type CatalogChoice,
 } from '../ui'
 import type { ScreenPoint } from '../animations'
+import { LanguageProvider, useT } from '../i18n'
 import { UI_EXTRA } from '../theme/colors'
 import { decideDrop, flightTarget, type DropHit } from './dnd'
 import { useDrag } from './useDrag'
@@ -51,17 +52,27 @@ export interface AppProps {
   pollMs?: number
 }
 
+/** Приложение целиком: офис внутри контекста языка интерфейса. */
+export default function App(props: AppProps) {
+  return (
+    <LanguageProvider>
+      <Office {...props} />
+    </LanguageProvider>
+  )
+}
+
 /**
- * Приложение целиком. Всё, что относится к офису, читается из журнала;
- * локально — только состояние интерфейса (выделение, модалки, drag, сообщение, зум).
+ * Офис. Всё, что относится к офису, читается из журнала;
+ * локально — только состояние интерфейса (выделение, модалки, drag, сообщение, зум, язык).
  */
-export default function App({
+function Office({
   store: injected,
   motion = true,
   journalUrl = import.meta.env.VITE_JOURNAL_URL,
   pollMs = JOURNAL_POLL_MS,
   opUrl = journalUrl ? opUrlFor(journalUrl) : '',
 }: AppProps) {
+  const t = useT()
   const [store] = useState(() => injected ?? createJournalStore())
   useRemoteJournal(store, journalUrl, pollMs)
   const journal = useJournal(store)
@@ -115,7 +126,7 @@ export default function App({
   const onDrop = useCallback(
     (task: TaskId, hit: DropHit | null, at: ScreenPoint) => {
       const d = decideDrop(store.getJournal(), task, hit)
-      if (d.kind === 'miss') say('Мимо — задача осталась на месте', 'info')
+      if (d.kind === 'miss') say(t('msg.miss'), 'info')
       if (d.kind !== 'op' || !hit) return
       const { name, args } = d.op
       const dry = motion ? check(name, args) : null
@@ -125,7 +136,7 @@ export default function App({
       }
       launch(task, at, flightTarget(hit, at), () => run(name, args))
     },
-    [store, run, check, say, motion, launch],
+    [store, run, check, say, motion, launch, t],
   )
   const { drag, start } = useDrag(onDrop)
 
@@ -142,13 +153,13 @@ export default function App({
       return
     }
     if (store.isRemote()) {
-      say('Сброс — только для локального офиса, не для журнала оркестратора', 'info')
+      say(t('msg.resetRemote'), 'info')
       return
     }
-    if (typeof window.confirm === 'function' && !window.confirm('Сбросить офис к стартовому составу?')) return
+    if (typeof window.confirm === 'function' && !window.confirm(t('msg.resetConfirm'))) return
     store.reset()
     setSelectedId(null)
-    say('Офис сброшен к стартовому составу', 'ok')
+    say(t('msg.resetDone'), 'ok')
   }
   const addWorker = (c: CatalogChoice) => {
     const r = run('addWorker', c)

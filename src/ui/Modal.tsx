@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useT } from '../i18n'
 import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
 import { miniButton, panel } from './styles'
 
@@ -10,6 +11,7 @@ interface ModalProps {
 }
 
 export function Modal({ title, width, onClose, children }: ModalProps) {
+  const t = useT()
   return (
     <div
       onClick={onClose}
@@ -42,7 +44,7 @@ export function Modal({ title, width, onClose, children }: ModalProps) {
           <h2 style={{ margin: 0, flex: 1, font: 'inherit', fontSize: 16, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: OUTLINE }}>
             {title}
           </h2>
-          <button type="button" aria-label="Закрыть" onClick={onClose} style={{ ...miniButton, width: 28, height: 28, fontSize: 14, fontWeight: 800 }}>
+          <button type="button" aria-label={t('modal.close')} onClick={onClose} style={{ ...miniButton, width: 28, height: 28, fontSize: 14, fontWeight: 800 }}>
             ✕
           </button>
         </div>

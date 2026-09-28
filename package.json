@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "i18n": "node scripts/i18n.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
