@@ -92,9 +92,8 @@ npm run preview                          # http://localhost:4173
 ### 2. Оркестратор (бэкенд)
 
 ```bash
-mkdir -p ~/orchestrator
-# положить туда journal.json, journal.py, server.py, dispatch.py
-cd ~/orchestrator
+cd orchestrator
+cp journal.example.json journal.json
 python3 journal.py list          # посмотреть журнал
 python3 server.py 8090           # поднять API (локально)
 python3 dispatch.py --once       # разовый проход диспетчера
@@ -102,19 +101,9 @@ python3 dispatch.py --once       # разовый проход диспетче�
 
 ## Подключение (как связать всё вместе)
 
-1. **Заведи журнал** — `journal.json` с моделями команды:
+1. **Заведи журнал** — `cp orchestrator/journal.example.json orchestrator/journal.json`.
 
-```json
-{
-  "workers": [
-    { "id": "w0", "model": "deepseek", "name": "Гермес", "provider": "DeepSeek",
-      "role": "координатор", "status": "run", "task": null, "doneCount": 0, "history": [] }
-  ],
-  "queue": [], "log": [], "seq": 0
-}
-```
-
-2. **Подними API** — `python3 server.py 8090` (отдаёт `/journal`, принимает `/op`).
+2. **Подними API** — `python3 orchestrator/server.py 8090` (отдаёт `/journal`, принимает `/op`).
 
 3. **Собери фронт с `VITE_JOURNAL_URL=/journal`** и положи статику в nginx, проксируй
    `/journal` и `/op` на API (см. «Деплой» ниже).
