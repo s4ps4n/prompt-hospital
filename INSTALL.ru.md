@@ -27,24 +27,11 @@ npm run dev
 
 ### Шаг 1. Заведи оркестратор (журнал + API)
 
-Создай каталог и положи туда `journal.json`, `journal.py`, `server.py`:
+Оркестратор уже в репозитории — каталог `orchestrator/` рядом с фронтом. Нужен только стартовый журнал:
 
 ```bash
-mkdir -p ~/orchestrator && cd ~/orchestrator
-```
-
-Создай стартовый журнал `journal.json` (модели команды):
-
-```json
-{
-  "workers": [
-    { "id": "w0", "model": "deepseek", "name": "Гермес", "provider": "DeepSeek",
-      "role": "координатор", "status": "run", "task": null, "doneCount": 0, "history": [] },
-    { "id": "w1", "model": "codex", "name": "Codex", "provider": "OpenAI",
-      "role": "исполнитель", "status": "wait", "task": null, "doneCount": 0, "history": [] }
-  ],
-  "queue": [], "log": [], "seq": 0
-}
+cd orchestrator
+cp journal.example.json journal.json
 ```
 
 Запусти API:
@@ -72,7 +59,7 @@ npx serve dist          # или любой статик-сервер
 ### Шаг 3. Диспетчер (чтобы модели реально работали)
 
 ```bash
-cd ~/orchestrator
+cd orchestrator
 ORCHESTRATOR_API=http://localhost:8090 \
 python3 dispatch.py --loop 30
 ```

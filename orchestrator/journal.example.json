@@ -1,0 +1,10 @@
+{
+  "workers": [
+    { "id": "w0", "model": "deepseek", "name": "Гермес", "provider": "DeepSeek", "role": "координатор", "status": "run", "task": null, "doneCount": 0, "history": [] },
+    { "id": "w1", "model": "codex", "name": "Codex", "provider": "OpenAI", "role": "исполнитель", "status": "wait", "task": null, "doneCount": 0, "history": [] },
+    { "id": "w2", "model": "claude-code", "name": "Claude Code", "provider": "Anthropic", "role": "исполнитель", "status": "wait", "task": null, "doneCount": 0, "history": [] }
+  ],
+  "queue": [],
+  "log": [],
+  "seq": 0
+}

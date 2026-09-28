@@ -1,5 +1,14 @@
 # Prompt Hospital
 
+![Node 18+](https://img.shields.io/badge/Node-18+-339933?logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Traefik](https://img.shields.io/badge/Traefik-3-24A1C1?logo=traefikproxy&logoColor=white)
+![Vitest](https://img.shields.io/badge/tests-Vitest-6E9F18?logo=vitest&logoColor=white)
+
 Мультяшный офис-визуализация ИИ-команды в стиле Theme Hospital. Единый пульт оркестратора: смотришь, кто чем занят, перетаскиваешь задачи на модели, добавляешь модели — а под капотом это пишется в реальный журнал и реально запускает модели.
 
 ## Что это
@@ -22,8 +31,8 @@ prompt-hospital/          # фронтенд (этот репозиторий)
   src/app/ src/ui/        #   компоновка, карточка модели, лоток, drag-and-drop
   src/theme/              #   палитра, CSS-анимации
 
-orchestrator/             # бэкенд пульта (отдельный каталог)
-  journal.json            #   журнал (источник истины)
+orchestrator/             # бэкенд пульта (в этом же репозитории)
+  journal.example.json    #   стартовый журнал — скопируй в journal.json
   journal.py              #   CLI операций (те же, что OPS фронтенда)
   server.py               #   HTTP API: GET /journal, POST /op
   dispatch.py             #   диспетчер: задача → реальный запуск модели
