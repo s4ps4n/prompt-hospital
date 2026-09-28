@@ -1,10 +1,11 @@
+import type { ReactNode } from 'react'
 import type { Journal } from '../journal/types'
 import { CORRIDOR_TILES, FURNITURE, GRASS, HEDGE, OUTER_WALL, OUTLINE, UI, roleColor } from '../theme/colors'
 import { H, P, quadX, quadY, rect } from './iso'
 import { DEFAULT_COLS, counterScale, displayStatus, layoutOffice, sceneBounds, type Cell } from './layout'
 import { Box, Poly } from './primitives'
 import { Lounge, Room } from './Room'
-import { BOSS_ROOM, WORKER_ROOM } from './rooms'
+import { roomConfig, type RoomCell } from './stations'
 
 const PAT = {
   grass: 'ph-grass',
@@ -81,10 +82,39 @@ export interface OfficeSceneProps {
   /** Итоговый масштаб сцены (например, из fitScale); влияет на размер SVG и контр-масштаб подписей. */
   scale?: number
   onAddRoom?: () => void
+  /** false — все анимации сцены отключены. */
+  motion?: boolean
+  /** Содержимое комнаты (персонаж, вывеска, конверты) — в её painter-порядке, за передней стенкой. */
+  renderRoom?: (cell: RoomCell) => ReactNode
+  /** Слой пола комнаты — над ковром, под стенами и мебелью. */
+  renderFloor?: (cell: RoomCell) => ReactNode
+  /** Вся комната — мишень drop (`data-drop`) и клика. */
+  roomTarget?: (cell: RoomCell) => { drop: string; onClick?: () => void } | undefined
+  /** Объекты вне комнат (гуляющие по коридору), сортируются вместе с ячейками по depth. */
+  extras?: readonly SceneItem[]
 }
 
+/** Объект сцены в координатах сцены; `depth` — ключ painter's algorithm, как у ячеек. */
+export interface SceneItem {
+  key: string
+  depth: number
+  node: ReactNode
+}
+
+type Painted = { depth: number; render: () => ReactNode }
+
 /** Изометрическая сцена офиса — чистая функция от журнала. */
-export function OfficeScene({ journal, cols = DEFAULT_COLS, scale = 1, onAddRoom }: OfficeSceneProps) {
+export function OfficeScene({
+  journal,
+  cols = DEFAULT_COLS,
+  scale = 1,
+  onAddRoom,
+  motion = true,
+  renderRoom,
+  renderFloor,
+  roomTarget,
+  extras = [],
+}: OfficeSceneProps) {
   const layout = layoutOffice(journal.workers, cols)
   const b = sceneBounds(layout)
   const Wb = layout.width
@@ -96,6 +126,55 @@ export function OfficeScene({ journal, cols = DEFAULT_COLS, scale = 1, onAddRoom
   for (let x = 60; x < Wb - 40; x += 120) backWindowsX.push(x)
   const backWindowsY: number[] = []
   for (let y = 80; y < Hb - 40; y += 120) backWindowsY.push(y)
+
+  const renderCell = (cell: Cell): ReactNode => {
+    const [tx, ty] = P(cell.ox, cell.oy)
+    const transform = `translate(${tx},${ty})`
+    if (cell.kind === 'lounge') {
+      return (
+        <g key={`lounge-${cell.i}-${cell.j}`} transform={transform} data-cell="lounge" data-depth={cell.depth}>
+          <Lounge />
+        </g>
+      )
+    }
+    const w = cell.worker
+    const target = roomTarget?.(cell)
+    return (
+      <g
+        key={`room-${w?.id ?? 'boss'}`}
+        transform={transform}
+        data-cell={cell.kind}
+        data-worker={w?.id}
+        data-depth={cell.depth}
+        data-drop={target?.drop}
+        onClick={target?.onClick}
+        style={target?.onClick ? { cursor: 'pointer' } : undefined}
+      >
+        <Room
+          cfg={roomConfig(cell)}
+          color={roleColor(w?.role ?? 'координатор')}
+          status={displayStatus(journal, w)}
+          motion={motion}
+          floor={renderFloor?.(cell)}
+        >
+          {renderRoom?.(cell)}
+        </Room>
+      </g>
+    )
+  }
+
+  // Ячейки уже в painter-порядке; сортировка стабильна, поэтому при равной глубине объект идёт после ячейки.
+  const painted: Painted[] = [
+    ...layout.cells.map((cell) => ({ depth: cell.depth, render: () => renderCell(cell) })),
+    ...extras.map((item) => ({
+      depth: item.depth,
+      render: () => (
+        <g key={`extra-${item.key}`} data-extra={item.key}>
+          {item.node}
+        </g>
+      ),
+    })),
+  ].sort((a, b) => a.depth - b.depth)
 
   return (
     <svg
@@ -120,30 +199,7 @@ export function OfficeScene({ journal, cols = DEFAULT_COLS, scale = 1, onAddRoom
         <Poly key={`ev${y}`} points={quadX(0, y, y + 44, 44, 68)} fill={FURNITURE.window} />
       ))}
 
-      {layout.cells.map((cell) => {
-        const [tx, ty] = P(cell.ox, cell.oy)
-        const transform = `translate(${tx},${ty})`
-        if (cell.kind === 'lounge') {
-          return (
-            <g key={`lounge-${cell.i}-${cell.j}`} transform={transform} data-cell="lounge" data-depth={cell.depth}>
-              <Lounge />
-            </g>
-          )
-        }
-        const w = cell.worker
-        const cfg = cell.kind === 'boss' ? BOSS_ROOM : WORKER_ROOM
-        return (
-          <g
-            key={`room-${w?.id ?? 'boss'}`}
-            transform={transform}
-            data-cell={cell.kind}
-            data-worker={w?.id}
-            data-depth={cell.depth}
-          >
-            <Room cfg={cfg} color={roleColor(w?.role ?? 'координатор')} status={displayStatus(journal, w)} />
-          </g>
-        )
-      })}
+      {painted.map((item) => item.render())}
 
       <Box x={0} y={Hb} w={Wb} d={10} h={20} color={OUTER_WALL.cap} left={url(PAT.brickX)} right={url(PAT.brickY)} />
       <Box x={Wb} y={-10} w={10} d={Hb + 20} h={20} color={OUTER_WALL.cap} left={url(PAT.brickX)} right={url(PAT.brickY)} />

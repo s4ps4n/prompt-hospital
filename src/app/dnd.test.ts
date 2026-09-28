@@ -33,6 +33,11 @@ describe('decideDrop', () => {
     expect(decideDrop(j, 'T-12', { drop: 'queue', slot: 'T-12' })).toEqual({ kind: 'none' })
   })
 
+  it('на задачу в очереди модели — reorder (владельца меняет сама операция)', () => {
+    expect(decideDrop(j, 'T-12', { drop: 'w1', slot: 'T-08' })).toEqual({ kind: 'op', op: { name: 'reorder', args: { task: 'T-12', before: 'T-08' } } })
+    expect(decideDrop(j, 'T-08', { drop: 'w1', slot: 'T-08' })).toEqual({ kind: 'none' })
+  })
+
   it('неизвестная задача — ничего', () => {
     expect(decideDrop(j, 'T-99', { drop: 'w2', slot: null })).toEqual({ kind: 'none' })
   })

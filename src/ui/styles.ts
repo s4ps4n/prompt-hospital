@@ -1,29 +1,7 @@
 import type { CSSProperties } from 'react'
 import { PRIORITY_LABEL } from '../journal/catalog'
 import type { Priority, WorkerStatus } from '../journal/types'
-import { LAMP, OUTLINE, PRIORITY_COLORS, SCREEN, UI } from '../theme/colors'
-
-/**
- * Цвета UI-панелей из прототипа, которых нет в theme/colors.ts
- * (тему правит другой исполнитель — перенести туда при слиянии).
- */
-export const UI_EXTRA = {
-  muted: '#7a6a4e',
-  dashed: '#c9b58a',
-  history: '#4a3a22',
-  locked: '#e6dcc2',
-  selected: '#ffe978',
-  complete: '#6fd08a',
-  highlight: '#e0402e',
-  envelope: '#f3e6c4',
-  envelopeCurrent: '#ffffff',
-  ghost: '#fdf6e3',
-  lawn: '#45a236',
-  json: '#bfe6a0',
-  hint: '#c9b58a',
-  woodLight: '#8a5a30',
-  overlay: 'rgba(18,12,5,.6)',
-} as const
+import { LAMP, OUTLINE, PRIORITY_COLORS, SCREEN, UI, UI_EXTRA } from '../theme/colors'
 
 export const FONT_UI = 'Verdana, Tahoma, sans-serif'
 export const FONT_MONO = "'Courier New', monospace"

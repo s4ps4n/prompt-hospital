@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { OUTLINE, UI } from '../theme/colors'
-import { UI_EXTRA, miniButton, panel } from './styles'
+import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
+import { miniButton, panel } from './styles'
 
 interface ModalProps {
   title: string

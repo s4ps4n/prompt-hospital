@@ -115,6 +115,46 @@ describe('OfficeScene', () => {
     expect(render(j, 4, 0.4)).toContain(`transform="translate(${x},${y}) scale(1.5)"`)
   })
 
+  it('слот комнаты: содержимое в painter-порядке комнаты — после мебели, до передней стенки', () => {
+    const j = initialJournal()
+    const html = renderToStaticMarkup(
+      <OfficeScene
+        journal={j}
+        renderFloor={(cell) => <g data-floor-probe={cell.worker?.id} />}
+        renderRoom={(cell) => <g data-probe={cell.worker?.id} />}
+      />,
+    )
+    for (const w of j.workers) {
+      const room = html.split(`data-worker="${w.id}"`)[1].split('data-cell=')[0]
+      const at = (s: string) => room.indexOf(s)
+      expect(at(`data-floor-probe="${w.id}"`)).toBeGreaterThan(-1)
+      expect(at(`data-floor-probe="${w.id}"`)).toBeLessThan(at(`fill="${WALL.face}"`))
+      expect(at(`data-probe="${w.id}"`)).toBeGreaterThan(at('data-screen='))
+      expect(at(`data-probe="${w.id}"`)).toBeLessThan(at('data-wall="front"'))
+    }
+  })
+
+  it('объекты вне комнат сортируются вместе с ячейками по depth', () => {
+    const j = initialJournal()
+    const cells = layoutOffice(j.workers, 4).cells
+    const k = cells.findIndex((c) => c.kind === 'room')
+    const html = renderToStaticMarkup(
+      <OfficeScene journal={j} extras={[{ key: 'probe', depth: cells[k].depth + 1, node: <g data-probe="x" /> }]} />,
+    )
+    const pos = html.indexOf('data-extra="probe"')
+    const depths = attrs(html.slice(0, pos), 'data-depth').map(Number)
+    expect(depths.at(-1)).toBeLessThanOrEqual(cells[k].depth + 1)
+    expect(Number(attrs(html.slice(pos), 'data-depth')[0])).toBeGreaterThan(cells[k].depth + 1)
+  })
+
+  it('roomTarget делает комнату целиком мишенью drop', () => {
+    const html = renderToStaticMarkup(
+      <OfficeScene journal={initialJournal()} roomTarget={(cell) => ({ drop: cell.kind === 'boss' ? 'queue' : cell.worker.id })} />,
+    )
+    expect(html).toMatch(/data-worker="w2" data-depth="\d+" data-drop="w2"/)
+    expect(html).toMatch(/data-worker="w0" data-depth="\d+" data-drop="queue"/)
+  })
+
   it('чистая функция: одинаковый журнал — одинаковая разметка, журнал не мутируется', () => {
     const j = initialJournal()
     const snapshot = JSON.stringify(j)

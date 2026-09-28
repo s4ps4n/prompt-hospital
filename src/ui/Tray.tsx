@@ -2,9 +2,8 @@ import { useState, type KeyboardEvent } from 'react'
 import { ROLES, isAssignableRole } from '../journal/catalog'
 import { trayTasks } from '../journal/selectors'
 import type { Journal, Priority } from '../journal/types'
-import { OUTLINE } from '../theme/colors'
+import { OUTLINE, UI_EXTRA } from '../theme/colors'
 import {
-  UI_EXTRA,
   bumpPriority,
   button,
   field,

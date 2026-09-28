@@ -102,6 +102,26 @@ export const UI = {
   error: '#ff7a6a',
 } as const
 
+/** Дополнительные цвета UI из прототипа: подписи, подсветки, конверты, фоны. */
+export const UI_EXTRA = {
+  muted: '#7a6a4e',
+  dashed: '#c9b58a',
+  history: '#4a3a22',
+  locked: '#e6dcc2',
+  selected: '#ffe978',
+  complete: '#6fd08a',
+  highlight: '#e0402e',
+  envelope: '#f3e6c4',
+  envelopeCurrent: '#ffffff',
+  ghost: '#fdf6e3',
+  lawn: '#45a236',
+  json: '#bfe6a0',
+  hint: '#c9b58a',
+  woodLight: '#8a5a30',
+  overlay: 'rgba(18,12,5,.6)',
+  backdrop: '#2b2117',
+} as const
+
 /** Умножает каналы #rrggbb на `f` с отсечкой в [0, 255]. */
 export function shade(hex: string, f: number): string {
   const n = parseInt(hex.slice(1), 16)

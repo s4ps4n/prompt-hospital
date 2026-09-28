@@ -1,5 +1,5 @@
-import { UI } from '../theme/colors'
-import { FONT_MONO, UI_EXTRA } from './styles'
+import { UI, UI_EXTRA } from '../theme/colors'
+import { FONT_MONO } from './styles'
 
 export type MessageKind = 'ok' | 'err' | 'info'
 export interface Message {

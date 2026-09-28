@@ -1,8 +1,8 @@
 import type { Journal } from '../journal/types'
-import { UI } from '../theme/colors'
+import { UI, UI_EXTRA } from '../theme/colors'
 import { journalDump } from './helpers'
 import { Modal } from './Modal'
-import { FONT_MONO, UI_EXTRA } from './styles'
+import { FONT_MONO } from './styles'
 
 export function JournalModal({ journal, onClose }: { journal: Journal; onClose: () => void }) {
   return (

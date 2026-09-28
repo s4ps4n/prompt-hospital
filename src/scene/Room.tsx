@@ -1,10 +1,12 @@
+import type { ReactNode } from 'react'
 import type { WorkerStatus } from '../journal/types'
 import { FURNITURE, PANEL_SHADE, SCREEN, WALL, shade } from '../theme/colors'
 import { H, T, quadX, quadY, rect } from './iso'
 import { Box, Plant, Poly } from './primitives'
 import { doorSpan, type RoomConfig } from './rooms'
+import '../theme/animations.css'
 
-function Workstation({ cfg, status }: { cfg: RoomConfig; status: WorkerStatus }) {
+function Workstation({ cfg, status, motion }: { cfg: RoomConfig; status: WorkerStatus; motion: boolean }) {
   const x0 = cfg.cx + cfg.deskX
   const y0 = cfg.cy + 16
   const dh = cfg.dh
@@ -17,8 +19,10 @@ function Workstation({ cfg, status }: { cfg: RoomConfig; status: WorkerStatus })
       <Poly points={quadY(y0 + cfg.dd, x0 + cfg.dw - 28, x0 + cfg.dw - 6, 5, dh - 6)} fill={shade(wood, 0.7)} strokeWidth={1.5} />
       <Box x={x0 + 10} y={y0 + 6} z={dh} w={16} d={16} h={3} color={FURNITURE.mousepad} />
       <Box x={x0 + 6} y={y0 + 2} z={dh + 3} w={26} d={26} h={22} color={FURNITURE.crt} />
-      <g data-screen={status}>
-        <Poly points={quadX(x0 + 32, y0 + 5, y0 + 23, dh + 7, dh + 21)} fill={SCREEN[status]} />
+      <g data-screen={status} data-status={status} className={motion ? 'ph-motion' : 'ph-still'}>
+        <g className="ph-screen">
+          <Poly points={quadX(x0 + 32, y0 + 5, y0 + 23, dh + 7, dh + 21)} fill={SCREEN[status]} />
+        </g>
       </g>
       <Box x={cfg.cx - 15} y={cfg.cy + 20} z={dh} w={30} d={12} h={3} color={FURNITURE.keyboard} />
     </g>
@@ -57,16 +61,26 @@ interface RoomProps {
   color: string
   /** Статус для экрана ЭЛТ. */
   status: WorkerStatus
+  /** false — экран не пульсирует. */
+  motion?: boolean
+  /** Слой пола: сразу над ковром, под стенами и мебелью (подсветка drop-цели). */
+  floor?: ReactNode
+  /**
+   * Содержимое комнаты (персонаж, вывеска, конверты) в painter-порядке:
+   * после задних стен и мебели, до передних растений и передней стенки.
+   */
+  children?: ReactNode
 }
 
-/** Комната в локальных координатах (угол в 0,0). Персонажей нет — это этап 3. */
-export function Room({ cfg, color, status }: RoomProps) {
+/** Комната в локальных координатах (угол в 0,0). */
+export function Room({ cfg, color, status, motion = true, floor, children }: RoomProps) {
   const S = cfg.size
   const [dA, dB] = doorSpan(S)
   return (
     <g>
       <Poly points={rect(0, 0, S, S)} fill={color} />
       <Poly points={rect(S * 0.18, S * 0.66, S * 0.8, S * 0.92)} fill={shade(color, 1.1)} strokeWidth={1.5} />
+      {floor}
 
       <Box x={0} y={0} w={T} d={S} h={H} color={WALL.face} right={shade(WALL.face, 0.92)} left={shade(WALL.face, 0.78)} top={WALL.top} />
       <Box x={T} y={0} w={S - T} d={T} h={H} color={WALL.face} left={WALL.face} right={shade(WALL.face, 0.78)} top={WALL.top} />
@@ -94,15 +108,18 @@ export function Room({ cfg, color, status }: RoomProps) {
         <Plant key={`pl${x}_${y}`} x={x} y={y} />
       ))}
 
-      <Workstation cfg={cfg} status={status} />
+      <Workstation cfg={cfg} status={status} motion={motion} />
       {cfg.boss && <Box x={248} y={164} z={28} w={22} d={16} h={6} color={FURNITURE.paper} />}
+      {children}
       {cfg.frontPlants.map(([x, y]) => (
         <Plant key={`pf${x}_${y}`} x={x} y={y} />
       ))}
 
-      <Box x={T} y={S - T} w={dA - T} d={T} h={12} color={WALL.face} top={WALL.top} />
-      <Box x={dB} y={S - T} w={S - T - dB} d={T} h={12} color={WALL.face} top={WALL.top} />
-      <Box x={S - T} y={T} w={T} d={S - T} h={12} color={WALL.face} top={WALL.top} />
+      <g data-wall="front">
+        <Box x={T} y={S - T} w={dA - T} d={T} h={12} color={WALL.face} top={WALL.top} />
+        <Box x={dB} y={S - T} w={S - T - dB} d={T} h={12} color={WALL.face} top={WALL.top} />
+        <Box x={S - T} y={T} w={T} d={S - T} h={12} color={WALL.face} top={WALL.top} />
+      </g>
     </g>
   )
 }

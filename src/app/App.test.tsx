@@ -1,19 +1,23 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { FLIGHT_MS } from '../animations'
 import { createJournalStore, createMemoryStorage, type JournalStore } from '../journal'
+import { PRIORITY_COLORS } from '../theme/colors'
 import App from './App'
 
 let store: JournalStore
 let dom: ReturnType<typeof render>
 
 beforeEach(() => {
+  vi.useFakeTimers()
   store = createJournalStore({ storage: createMemoryStorage(), now: () => '12:00:00' })
   dom = render(<App store={store} />)
 })
 
 afterEach(() => {
   cleanup()
+  vi.useRealTimers()
   Reflect.deleteProperty(document, 'elementFromPoint')
 })
 
@@ -27,12 +31,18 @@ const card = () => screen.getByRole('complementary', { name: 'Карточка �
 const task = (id: string) => store.getJournal().queue.find((t) => t.id === id)
 const worker = (id: string) => store.getJournal().workers.find((w) => w.id === id)
 
-/** Перетаскивание: jsdom не умеет elementFromPoint — подставляем цель под курсором. */
-function dragTo(source: Element, target: Element | null) {
+/** Перетаскивание без приземления: jsdom не умеет elementFromPoint — подставляем цель под курсором. */
+function release(source: Element, target: Element | null) {
   Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => target })
   fireEvent.pointerDown(source, { clientX: 10, clientY: 10, button: 0 })
   fireEvent.pointerMove(window, { clientX: 60, clientY: 40 })
   fireEvent.pointerUp(window, { clientX: 60, clientY: 40 })
+}
+const land = (ms = FLIGHT_MS) => act(() => vi.advanceTimersByTime(ms))
+/** Перетаскивание + полёт конверта до приземления. */
+function dragTo(source: Element, target: Element | null) {
+  release(source, target)
+  land()
 }
 
 describe('App: карточка', () => {
@@ -113,6 +123,74 @@ describe('App: drag-and-drop', () => {
     expect($('[data-room="w2"]').getAttribute('fill')).not.toBe('transparent')
     fireEvent.pointerUp(window, { clientX: 40, clientY: 40 })
     expect(dom.container.querySelector('[data-ghost]')).toBeNull()
+  })
+})
+
+describe('App: полёт конверта', () => {
+  it('после drop конверт летит 450 мс по дуге, операция — по приземлении', () => {
+    release($('[data-task-slot="T-13"]'), $('[data-room="w2"]'))
+    const flight = $('[data-flight="T-13"]')
+    const style = flight.getAttribute('style') ?? ''
+    expect(style).toContain(`${FLIGHT_MS}ms cubic-bezier(.4,0,.2,1)`)
+    expect(style).toContain(`${FLIGHT_MS}ms cubic-bezier(.3,-.6,.6,1)`)
+    expect(dom.container.querySelector('[data-ghost]')).toBeNull()
+    expect(task('T-13')?.assignedTo).toBeNull()
+    land(FLIGHT_MS - 1)
+    expect(task('T-13')?.assignedTo).toBeNull()
+    land(1)
+    expect(task('T-13')?.assignedTo).toBe('w2')
+    expect(dom.container.querySelector('[data-flight]')).toBeNull()
+    expect(message().textContent).toContain('T-13 → GPT-5')
+  })
+
+  it('отказ виден сразу, без полёта (сухой прогон до анимации)', () => {
+    release($('[data-task-slot="T-13"]'), $('[data-room="w3"]'))
+    expect(dom.container.querySelector('[data-flight]')).toBeNull()
+    expect(message().getAttribute('data-kind')).toBe('err')
+  })
+
+  it('motion=false — без полёта, операция сразу', () => {
+    cleanup()
+    dom = render(<App store={store} motion={false} />)
+    release($('[data-task-slot="T-13"]'), $('[data-room="w2"]'))
+    expect(dom.container.querySelector('[data-flight]')).toBeNull()
+    expect(task('T-13')?.assignedTo).toBe('w2')
+  })
+})
+
+describe('App: приоритизация', () => {
+  const slots = () => [...dom.container.querySelectorAll('[data-task-slot]')].map((el) => el.getAttribute('data-task-slot'))
+  const rgb = (hex: string) => `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`
+
+  it('лоток: priority desc, order asc; флажки цвета приоритета', () => {
+    expect(slots()).toEqual(['T-12', 'T-13', 'T-14', 'T-16', 'T-15', 'T-17'])
+    const flags = [...dom.container.querySelectorAll<HTMLElement>('[data-task-slot] > div:first-child')].map((el) => el.style.background)
+    expect(flags).toEqual([3, 2, 2, 2, 1, 1].map((p) => rgb(PRIORITY_COLORS[p as 1 | 2 | 3])))
+    expect(PRIORITY_COLORS).toEqual({ 3: '#e0402e', 2: '#f2c230', 1: '#a3a3a3' })
+    expect($('[data-envelope="T-09"] [data-priority]').getAttribute('fill')).toBe(PRIORITY_COLORS[3])
+  })
+
+  it('▲ пересортировывает лоток сразу', () => {
+    const tray = screen.getByRole('region', { name: 'Лоток Гермеса' })
+    const up = () => within($('[data-task-slot="T-17"]') as HTMLElement).getByTitle('Повысить приоритет')
+    fireEvent.click(up())
+    fireEvent.click(up())
+    expect(task('T-17')?.priority).toBe(3)
+    expect(slots()).toEqual(['T-12', 'T-17', 'T-13', 'T-14', 'T-16', 'T-15'])
+    expect(within(tray).getAllByRole('listitem')).toHaveLength(6)
+  })
+
+  it('очередь модели: сортировка и reorder перетаскиванием', () => {
+    act(() => {
+      store.run('assign', { task: 'T-12', worker: 'w1' })
+    })
+    fireEvent.click($('[data-room="w1"]'))
+    const queue = () => [...within(card()).getByRole('list', { name: 'Очередь модели' }).querySelectorAll('[data-queue-task]')].map((el) => el.getAttribute('data-queue-task'))
+    expect(queue()).toEqual(['T-12', 'T-08'])
+    dragTo($('[data-queue-task="T-08"]'), $('[data-queue-task="T-12"]'))
+    expect(queue()).toEqual(['T-08', 'T-12'])
+    expect(task('T-08')).toMatchObject({ priority: 3, assignedTo: 'w1' })
+    expect(worker('w1')?.task).toBe('T-07')
   })
 })
 

@@ -4,3 +4,5 @@ export { canIdle, idlePose, idleOffset, nextIdleDelay, IDLE_SLOT_MS, IDLE_POSES 
 export type { IdlePose, IdleWorker } from './schedule'
 export { laneStyle } from './geometry'
 export type { IdleLane, IdlePoint, LaneStyle } from './geometry'
+export { useIdleClock } from './useIdleClock'
+export { FLIGHT_EASE, FLIGHT_MS, type ScreenPoint } from './flight'

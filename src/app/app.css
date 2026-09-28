@@ -1,10 +1,8 @@
-/* Снимает ограничения шаблона Vite из src/index.css: приложение на весь экран. */
-#root {
-  width: auto;
-  max-width: none;
-  margin: 0;
-  text-align: left;
-  border-inline: 0;
-  min-height: 100vh;
+/* Приложение на весь экран; палитра светлая, без системной тёмной темы. */
+:root {
   color-scheme: light;
+}
+
+#root {
+  min-height: 100vh;
 }

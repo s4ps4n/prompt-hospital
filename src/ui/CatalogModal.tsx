@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { CATALOG, ROLES, isAssignableRole } from '../journal/catalog'
 import type { AssignableRole } from '../journal/types'
-import { OUTLINE, UI } from '../theme/colors'
+import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
 import { Avatar } from './Avatar'
 import { previewWorker } from './helpers'
 import { Modal } from './Modal'
-import { UI_EXTRA, button, field } from './styles'
+import { button, field } from './styles'
 
 export interface CatalogChoice {
   model: string

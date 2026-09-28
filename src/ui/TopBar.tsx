@@ -1,7 +1,7 @@
 import { COORDINATOR_ID } from '../journal/catalog'
 import type { Journal, WorkerStatus } from '../journal/types'
-import { OUTLINE, UI } from '../theme/colors'
-import { FONT_MONO, STATUS_META, STATUS_ORDER, UI_EXTRA, button } from './styles'
+import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
+import { FONT_MONO, STATUS_META, STATUS_ORDER, button } from './styles'
 
 interface TopBarProps {
   journal: Journal

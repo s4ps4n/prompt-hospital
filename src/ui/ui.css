@@ -7,6 +7,10 @@
 }
 .ph-nope { animation: ph-nope .4s; }
 
+/* Полёт конверта: координаты — в CSS-переменных у элемента (DragGhost). */
+@keyframes ph-fly-x { from { left: var(--fx0); } to { left: var(--fx1); } }
+@keyframes ph-fly-y { from { top: var(--fy0); } to { top: var(--fy1); } }
+
 .ph-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #241a0c !important; }
 button:disabled { opacity: .45; cursor: default !important; }
 

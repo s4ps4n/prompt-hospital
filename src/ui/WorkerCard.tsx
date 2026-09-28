@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type PointerEvent } from 'react'
 import { COORDINATOR_ID, COORDINATOR_ROLE, ROLES, findCatalogEntry, isAssignableRole } from '../journal/catalog'
 import { currentTask, trayTasks, workerQueue } from '../journal/selectors'
 import type { AssignableRole, Journal, Role, Worker } from '../journal/types'
 import { displayStatus } from '../scene'
-import { OUTLINE, UI, roleColor } from '../theme/colors'
+import { OUTLINE, UI, UI_EXTRA, roleColor } from '../theme/colors'
 import { Avatar } from './Avatar'
 import {
-  UI_EXTRA,
   bumpPriority,
   button,
   field,
@@ -19,7 +18,7 @@ import {
   STATUS_META,
   taskRow,
 } from './styles'
-import type { CheckOp, RunOp } from './types'
+import type { CheckOp, RunOp, StartDrag } from './types'
 
 /** Длительность тряски select'а роли (анимация .4s + запас). */
 const FLASH_MS = 650
@@ -33,14 +32,19 @@ interface WorkerCardProps {
   onDenied: (err: string) => void
   onClose: () => void
   onClone: (model: string, role: AssignableRole) => void
+  /** Перетаскивание задач очереди: на другую задачу очереди — reorder, на комнату — reassign. */
+  onStartDrag: StartDrag
 }
+
+/** Кнопки внутри перетаскиваемой строки не начинают drag. */
+const stop = (e: PointerEvent) => e.stopPropagation()
 
 /** Любая роль, отличная от текущей: для сухого прогона setRole и «экземпляра с другой ролью». */
 function otherRole(role: Role): AssignableRole {
   return ROLES.find((r) => r !== role) ?? ROLES[0]
 }
 
-export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, onClone }: WorkerCardProps) {
+export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, onClone, onStartDrag }: WorkerCardProps) {
   const [flash, setFlash] = useState(false)
   useEffect(() => {
     if (!flash) return
@@ -186,21 +190,28 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
           {queue.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={sectionLabel}>Очередь модели</div>
-              <ul aria-label="Очередь модели" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <ul aria-label="Очередь модели" data-drop={w.id} style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {queue.map((t) => {
                   const up = bumpPriority(t.priority, 1)
                   const down = bumpPriority(t.priority, -1)
                   return (
-                    <li key={t.id} data-queue-task={t.id} style={{ ...taskRow, padding: '6px 8px' }}>
+                    <li
+                      key={t.id}
+                      data-queue-task={t.id}
+                      data-drop={w.id}
+                      data-task-slot={t.id}
+                      onPointerDown={(e) => onStartDrag(e, t.id)}
+                      style={{ ...taskRow, padding: '6px 8px', cursor: 'grab', touchAction: 'none', userSelect: 'none' }}
+                    >
                       <div style={flag(t.priority, 20)} />
                       <div style={{ flex: 1, minWidth: 0, fontSize: 11, fontWeight: 700 }}>{t.title}</div>
-                      <button type="button" style={{ ...miniButton, height: 20 }} title="Повысить приоритет" disabled={!up} onClick={() => up && run('setPriority', { task: t.id, priority: up })}>
+                      <button type="button" style={{ ...miniButton, height: 20 }} title="Повысить приоритет" disabled={!up} onPointerDown={stop} onClick={() => up && run('setPriority', { task: t.id, priority: up })}>
                         ▲
                       </button>
-                      <button type="button" style={{ ...miniButton, height: 20 }} title="Понизить приоритет" disabled={!down} onClick={() => down && run('setPriority', { task: t.id, priority: down })}>
+                      <button type="button" style={{ ...miniButton, height: 20 }} title="Понизить приоритет" disabled={!down} onPointerDown={stop} onClick={() => down && run('setPriority', { task: t.id, priority: down })}>
                         ▼
                       </button>
-                      <button type="button" style={{ ...miniButton, height: 20, fontSize: 10 }} title="Вернуть в лоток" onClick={() => run('unassign', { task: t.id })}>
+                      <button type="button" style={{ ...miniButton, height: 20, fontSize: 10 }} title="Вернуть в лоток" onPointerDown={stop} onClick={() => run('unassign', { task: t.id })}>
                         ↩
                       </button>
                     </li>

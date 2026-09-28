@@ -1,26 +1,29 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { IdleDirector, idlePose, useIdleClock } from '../animations'
 import { Character, WorkerSign } from '../characters'
 import { COORDINATOR_ID, PRIORITY_LABEL, findCatalogEntry } from '../journal/catalog'
 import { currentTask, trayTasks, workerQueue } from '../journal/selectors'
 import type { Journal, Task, Worker } from '../journal/types'
 import {
-  BOSS_ROOM,
   DEFAULT_COLS,
-  H,
   OfficeScene,
   P,
-  WORKER_ROOM,
   counterScale,
   displayStatus,
   fitScale,
+  idleRoute,
   layoutOffice,
   pts,
   rect,
+  roomConfig,
   sceneBounds,
-  type Cell,
+  seatPoint,
+  signAnchor,
+  type RoomCell,
+  type SceneItem,
 } from '../scene'
-import { OUTLINE, UI } from '../theme/colors'
-import { UI_EXTRA, priorityColor } from './styles'
+import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
+import { priorityColor } from './styles'
 import { TRAY_DROP, type StartDrag } from './types'
 
 /** Смещение стопки конвертов от кресла (как в прототипе), по типу комнаты. */
@@ -56,28 +59,41 @@ function Envelope({ task, x, y, scale, drop, current, onPointerDown, onClick }: 
       <rect x={-15} y={-20} width={34} height={23} rx={3} fill="rgba(36,26,12,.45)" stroke="none" />
       <rect x={-17} y={-23} width={34} height={23} rx={3} fill={current ? UI_EXTRA.envelopeCurrent : UI_EXTRA.envelope} />
       <path d="M-16 -22 L0 -12 L16 -22" fill="none" strokeWidth={1.8} />
-      <rect x={12} y={-34} width={9} height={12} fill={priorityColor(task.priority)} />
+      <rect x={12} y={-34} width={9} height={12} fill={priorityColor(task.priority)} data-priority={task.priority} />
     </g>
   )
 }
 
-interface RoomOverlayProps {
+interface RoomPartsProps {
   journal: Journal
-  cell: Exclude<Cell, { kind: 'lounge' }>
+  cell: RoomCell
   worker: Worker
   over: boolean
   selected: boolean
   signScale: number
+  motion: boolean
+  now: number
   onSelect: (id: string) => void
   onStartDrag: StartDrag
 }
 
-/** Что сцена этапа 2 не рисует: персонаж, пол-мишень для drop, вывеска, конверты на столе. */
-function roomLayers({ journal, cell, worker: w, over, selected, signScale, onSelect, onStartDrag }: RoomOverlayProps) {
+interface RoomParts {
+  drop: string
+  select: () => void
+  /** Подсветка пола при наведении конверта. */
+  floor: ReactNode
+  /** Содержимое комнаты в её painter-порядке: персонаж, конверты, вывеска. */
+  content: ReactNode
+  /** Гуляющий по коридору — отдельный объект сцены со своей глубиной. */
+  walker: SceneItem | null
+}
+
+/** Всё, что сцена рисует от журнала внутри комнаты модели; координаты — локальные (угол комнаты 0,0). */
+function roomParts({ journal, cell, worker: w, over, selected, signScale, motion, now, onSelect, onStartDrag }: RoomPartsProps): RoomParts {
   const boss = cell.kind === 'boss'
-  const cfg = boss ? BOSS_ROOM : WORKER_ROOM
+  const cfg = roomConfig(cell)
   const drop = boss ? TRAY_DROP : w.id
-  const status = displayStatus(journal, w)
+  const shown = { ...w, status: displayStatus(journal, w) }
   const entry = findCatalogEntry(w.model)
   const select = () => onSelect(w.id)
   const S = cell.size
@@ -86,34 +102,50 @@ function roomLayers({ journal, cell, worker: w, over, selected, signScale, onSel
   const cur = currentTask(journal, w.id)
   const stack = boss ? tray.slice(0, STACK_CAP.boss).reverse() : [...(cur ? [cur] : []), ...workerQueue(journal, w.id)]
   const total = boss ? tray.length : stack.length
-  const shown = boss ? stack : stack.slice(0, STACK_CAP.room)
+  const pile = boss ? stack : stack.slice(0, STACK_CAP.room)
   const extra = total - STACK_CAP[cell.kind]
   const [dx, dy] = STACK[cell.kind]
-  const [ax, ay] = P(cell.ox + cfg.cx + dx, cell.oy + cfg.cy + dy, cfg.dh)
-  const [seatX, seatY] = P(cell.ox + cfg.cx, cell.oy + cfg.cy, 17)
-  const [sx, sy] = P(cell.ox + S / 2, cell.oy, H + 4)
+  const [ax, ay] = P(cfg.cx + dx, cfg.cy + dy, cfg.dh)
+  const [seatX, seatY] = seatPoint(cfg)
+  const [sx, sy] = signAnchor(cfg)
   const sw = SIGN_W[cell.kind]
+
+  // Гермес не бездельничает (canIdle), а его drop-цель — лоток, поэтому он сидит как обычный Character.
+  const route = idleRoute(cell)
+  const pose = boss ? null : idlePose(shown, now, motion)
+  const character =
+    entry &&
+    (boss ? (
+      <g data-drop={drop}>
+        <Character worker={shown} catalogEntry={entry} furniture={false} motion={motion} x={seatX} y={seatY} />
+      </g>
+    ) : (
+      <IdleDirector
+        worker={shown}
+        catalogEntry={entry}
+        furniture={false}
+        motion={motion}
+        timeMs={now}
+        lane={route.lane}
+        door={route.door}
+        x={seatX}
+        y={seatY}
+        onClick={select}
+      />
+    ))
 
   const floor = (
     <polygon
-      key={`floor-${w.id}`}
-      points={pts(rect(cell.ox, cell.oy, cell.ox + S, cell.oy + S))}
-      data-drop={drop}
+      points={pts(rect(0, 0, S, S))}
       data-room={w.id}
       fill={over ? UI.button : 'transparent'}
       fillOpacity={over ? 0.45 : 1}
-      onClick={select}
-      style={{ cursor: 'pointer', pointerEvents: 'all' }}
+      stroke="none"
     />
   )
-  const body = entry && (
-    <g key={`char-${w.id}`} data-drop={drop} onClick={select} style={{ cursor: 'pointer', pointerEvents: 'visiblePainted' }}>
-      <Character worker={{ ...w, status }} catalogEntry={entry} furniture={false} x={seatX} y={seatY} />
-    </g>
-  )
   const envelopes = (
-    <g key={`env-${w.id}`}>
-      {shown.map((t, i) => (
+    <g>
+      {pile.map((t, i) => (
         <Envelope
           key={t.id}
           task={t}
@@ -138,11 +170,9 @@ function roomLayers({ journal, cell, worker: w, over, selected, signScale, onSel
   )
   const sign = (
     <g
-      key={`sign-${w.id}`}
       transform={`translate(${sx} ${sy}) scale(${signScale}) translate(${-sw / 2} ${-SIGN_H - 6})`}
       data-drop={drop}
       data-sign={w.id}
-      onClick={select}
       style={{ cursor: 'pointer', pointerEvents: 'visiblePainted' }}
     >
       {(over || selected) && (
@@ -157,14 +187,28 @@ function roomLayers({ journal, cell, worker: w, over, selected, signScale, onSel
           strokeWidth={3}
         />
       )}
-      <WorkerSign
-        worker={{ ...w, status }}
-        taskTitle={boss ? `в лотке: ${tray.length}` : cur?.title}
-        width={sw}
-      />
+      <WorkerSign worker={shown} taskTitle={boss ? `в лотке: ${tray.length}` : cur?.title} width={sw} motion={motion} />
     </g>
   )
-  return { floor, body, envelopes, sign }
+
+  const [tx, ty] = P(cell.ox, cell.oy)
+  const walker: SceneItem | null =
+    pose === 'walk'
+      ? { key: `walk-${w.id}`, depth: route.depth, node: <g transform={`translate(${tx},${ty})`}>{character}</g> }
+      : null
+  return {
+    drop,
+    select,
+    floor,
+    content: (
+      <>
+        {!walker && character}
+        {envelopes}
+        {sign}
+      </>
+    ),
+    walker,
+  }
 }
 
 interface SceneViewProps {
@@ -173,18 +217,33 @@ interface SceneViewProps {
   /** data-drop цели под курсором при перетаскивании. */
   overDrop: string | null
   cols?: number
+  /** false — анимации сцены и idle-график отключены. */
+  motion?: boolean
+  /** Фиксированное время idle-графика (мс); по умолчанию — настенные часы. */
+  timeMs?: number
   onSelect: (id: string) => void
   onStartDrag: StartDrag
   onAddRoom: () => void
 }
 
 /**
- * Сцена этапа 2 + интерактивный слой поверх неё (SVG с тем же viewBox):
- * персонажи, мишени для drop, вывески, конверты.
+ * Сцена офиса целиком: персонажи, вывески и конверты — внутри комнат в painter-порядке,
+ * гуляющие бездельники — объектами коридора. Всё — функция от журнала и idle-часов.
  */
-export function SceneView({ journal, selectedId, overDrop, cols = DEFAULT_COLS, onSelect, onStartDrag, onAddRoom }: SceneViewProps) {
+export function SceneView({
+  journal,
+  selectedId,
+  overDrop,
+  cols = DEFAULT_COLS,
+  motion = true,
+  timeMs,
+  onSelect,
+  onStartDrag,
+  onAddRoom,
+}: SceneViewProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState({ width: 900, height: 600 })
+  const now = useIdleClock(journal.workers, motion, timeMs)
 
   useEffect(() => {
     const el = wrapRef.current
@@ -199,15 +258,19 @@ export function SceneView({ journal, selectedId, overDrop, cols = DEFAULT_COLS, 
   // Зум — этап 7; пока только «вписать».
   const k = fitScale(box, b)
   const cs = counterScale(k)
-  const width = Math.ceil(b.width * k)
-  const height = Math.ceil(b.height * k)
 
-  const layers = layout.cells.flatMap((cell) => {
-    if (cell.kind === 'lounge' || !cell.worker) return []
+  const parts = new Map<string, RoomParts>()
+  for (const cell of layout.cells) {
+    if (cell.kind === 'lounge' || !cell.worker) continue
     const w = cell.worker
     const drop = w.id === COORDINATOR_ID ? TRAY_DROP : w.id
-    return [roomLayers({ journal, cell, worker: w, over: overDrop === drop, selected: selectedId === w.id, signScale: cs, onSelect, onStartDrag })]
-  })
+    parts.set(
+      w.id,
+      roomParts({ journal, cell, worker: w, over: overDrop === drop, selected: selectedId === w.id, signScale: cs, motion, now, onSelect, onStartDrag }),
+    )
+  }
+  const partsOf = (cell: RoomCell) => (cell.worker ? parts.get(cell.worker.id) : undefined)
+  const walkers = [...parts.values()].flatMap((p) => (p.walker ? [p.walker] : []))
 
   return (
     <div
@@ -223,20 +286,21 @@ export function SceneView({ journal, selectedId, overDrop, cols = DEFAULT_COLS, 
         position: 'relative',
       }}
     >
-      <div style={{ width, height, position: 'relative', margin: '0 auto' }}>
-        <OfficeScene journal={journal} cols={cols} scale={k} onAddRoom={onAddRoom} />
-        <svg
-          viewBox={`${b.minX} ${b.minY} ${b.width} ${b.height}`}
-          width={width}
-          height={height}
-          style={{ position: 'absolute', left: 0, top: 0, pointerEvents: 'none' }}
-          data-layer="interactive"
-        >
-          {layers.map((l) => l.floor)}
-          {layers.map((l) => l.body)}
-          {layers.map((l) => l.envelopes)}
-          {layers.map((l) => l.sign)}
-        </svg>
+      <div style={{ width: Math.ceil(b.width * k), margin: '0 auto' }}>
+        <OfficeScene
+          journal={journal}
+          cols={cols}
+          scale={k}
+          motion={motion}
+          onAddRoom={onAddRoom}
+          renderFloor={(cell) => partsOf(cell)?.floor}
+          renderRoom={(cell) => partsOf(cell)?.content}
+          roomTarget={(cell) => {
+            const p = partsOf(cell)
+            return p && { drop: p.drop, onClick: p.select }
+          }}
+          extras={walkers}
+        />
       </div>
     </div>
   )

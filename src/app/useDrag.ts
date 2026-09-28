@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { ScreenPoint } from '../animations/flight'
 import type { TaskId } from '../journal/types'
 import type { StartDrag } from '../ui/types'
 import { DRAG_THRESHOLD, hitAt, type DropHit } from './dnd'
@@ -14,7 +15,7 @@ export interface DragState {
  * Перетаскивание конвертов на pointer events. Слушатели move/up висят на window,
  * пока палец/кнопка не отпущены; до порога DRAG_THRESHOLD — это клик.
  */
-export function useDrag(onDrop: (task: TaskId, hit: DropHit | null) => void) {
+export function useDrag(onDrop: (task: TaskId, hit: DropHit | null, at: ScreenPoint) => void) {
   const [drag, setDrag] = useState<DragState | null>(null)
   const stopRef = useRef<(() => void) | null>(null)
 
@@ -42,7 +43,7 @@ export function useDrag(onDrop: (task: TaskId, hit: DropHit | null) => void) {
           return
         }
         setDrag(null)
-        onDrop(task, hitAt(ev.clientX, ev.clientY))
+        onDrop(task, hitAt(ev.clientX, ev.clientY), { x: ev.clientX, y: ev.clientY })
       }
       const cancel = () => {
         stop()
