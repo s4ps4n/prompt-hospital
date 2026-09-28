@@ -19,3 +19,28 @@
 @media (prefers-reduced-motion: reduce) {
   .ph-motion, .ph-motion * { animation: none !important; }
 }
+
+@keyframes walkLane {
+  0%,100% { transform: translate(var(--x0), var(--y0)); }
+  50% { transform: translate(var(--x1), var(--y1)); }
+}
+@keyframes face { 0%,100% { transform: scaleX(1); } 50% { transform: scaleX(-1); } }
+@keyframes stepA { 50% { transform: translateY(-3px); } }
+@keyframes stepB { 0%,100% { transform: translateY(-3px); } 50% { transform: translateY(0); } }
+@keyframes sip { 0%,25%,75%,100% { transform: translate(0,0); } 40%,60% { transform: translate(10px,-23px) rotate(8deg); } }
+@keyframes steam { from { opacity: .8; transform: translateY(0); } to { opacity: 0; transform: translateY(-12px); } }
+@keyframes zfloat { from { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } to { opacity: 0; transform: translateY(-18px); } }
+@keyframes drool { 0%,100% { transform: scaleY(.5); } 50% { transform: scaleY(1); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.ph-idle-enter { animation: fadeIn .9s ease-out; }
+.ph-idle-lane { transform: translate(var(--x0), var(--y0)); animation: walkLane 11s linear infinite; }
+.ph-idle-walk { animation: face 11s steps(1, end) infinite; }
+.ph-idle-step-a { animation: stepA .45s ease-in-out infinite; }
+.ph-idle-step-b { animation: stepB .45s ease-in-out infinite; }
+.ph-idle-cup { animation: sip 4s ease-in-out infinite; }
+.ph-idle-steam { animation: steam 1.6s ease-out infinite; }
+.ph-idle-z { animation: zfloat 3s ease-out infinite; }
+.ph-idle-drool { transform-box: fill-box; transform-origin: top; animation: drool 3s ease-in-out infinite; }
+.ph-idle-sleep .ph-head { transform: translate(-22px,44px) rotate(-65deg); }
+.ph-idle-sleep .ph-eyes { transform: scaleY(.1); }
+.ph-idle-coffee .ph-arm-a { transform: translate(0,-5px); }
