@@ -17,9 +17,11 @@ export function useRemoteJournal(store: JournalStore, url: string | undefined, p
     const ctl = new AbortController()
     let timer: ReturnType<typeof setTimeout> | undefined
     const tick = async () => {
+      // Запись (POST /op), пришедшая пока шёл опрос, свежее ответа опроса.
+      const since = store.epoch()
       const remote = await fetchJournal(url, ctl.signal)
       if (ctl.signal.aborted) return
-      if (remote) store.loadRemote(remote)
+      if (remote) store.loadRemote(remote, since)
       if (pollMs > 0) timer = setTimeout(tick, pollMs)
     }
     void tick()

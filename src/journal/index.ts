@@ -12,5 +12,5 @@ export {
   saveJournal,
   type KeyValueStorage,
 } from './storage'
-export { JOURNAL_POLL_MS, fetchJournal } from './remote'
-export { LOG_LIMIT, READ_ONLY_ERR, createJournalStore, type JournalStore, type JournalStoreOptions } from './store'
+export { JOURNAL_POLL_MS, fetchJournal, opArgList, opUrlFor, postOp, type PostOpResult } from './remote'
+export { LOG_LIMIT, OFFLINE_ERR, READ_ONLY_ERR, createJournalStore, type JournalStore, type JournalStoreOptions } from './store'

@@ -1,5 +1,21 @@
 import { useCallback, useState } from 'react'
-import { JOURNAL_POLL_MS, READ_ONLY_ERR, ROLES, createJournalStore, findTask, findWorker, type JournalStore, type OpArgs, type OpName, type OpResult, type TaskId } from '../journal'
+import {
+  JOURNAL_POLL_MS,
+  OFFLINE_ERR,
+  READ_ONLY_ERR,
+  ROLES,
+  createJournalStore,
+  findTask,
+  findWorker,
+  opArgList,
+  opUrlFor,
+  postOp,
+  type JournalStore,
+  type OpArgs,
+  type OpName,
+  type OpResult,
+  type TaskId,
+} from '../journal'
 import {
   CatalogModal,
   DragGhost,
@@ -27,8 +43,10 @@ export interface AppProps {
   store?: JournalStore
   /** false — отключает все анимации: idle-график, пульсы, полёт конверта (операция применяется сразу). */
   motion?: boolean
-  /** URL журнала оркестратора (режим монитора); по умолчанию — VITE_JOURNAL_URL, пусто — локальный режим. */
+  /** URL журнала оркестратора; по умолчанию — VITE_JOURNAL_URL, пусто — локальный режим. */
   journalUrl?: string
+  /** URL записи операций (POST /op); по умолчанию — рядом с journalUrl (`…/journal` → `…/op`). */
+  opUrl?: string
   /** Период опроса journalUrl, мс; 0 — только при старте. */
   pollMs?: number
 }
@@ -42,6 +60,7 @@ export default function App({
   motion = true,
   journalUrl = import.meta.env.VITE_JOURNAL_URL,
   pollMs = JOURNAL_POLL_MS,
+  opUrl = journalUrl ? opUrlFor(journalUrl) : '',
 }: AppProps) {
   const [store] = useState(() => injected ?? createJournalStore())
   useRemoteJournal(store, journalUrl, pollMs)
@@ -52,20 +71,47 @@ export default function App({
   const [journalOpen, setJournalOpen] = useState(false)
   const { zoom, scale, onScale, zoomIn, zoomOut, zoomFit } = useZoom()
 
+  /**
+   * Журнал оркестратора: check() локально → POST /op → журнал из ответа. Возвращается сухой прогон
+   * (UI сразу закрывает форму/выделяет новую комнату), сообщение — по ответу сервера.
+   * API недоступен — офис становится монитором (read-only).
+   */
+  const post = useCallback(
+    <K extends OpName>(name: K, args: OpArgs[K]): OpResult => {
+      const dry = store.check(name, args)
+      if ('err' in dry) say(dry.err, 'err')
+      if (!('msg' in dry)) return dry
+      void postOp(opUrl, name, opArgList(name, args)).then((r) => {
+        if (r.ok) {
+          store.loadRemote(r.journal)
+          say(dry.msg, 'ok')
+        } else if ('err' in r) {
+          say(r.err, 'err')
+        } else {
+          store.setReadOnly()
+          say(OFFLINE_ERR, 'err')
+        }
+      })
+      return dry
+    },
+    [store, say, opUrl],
+  )
   const run = useCallback(
     <K extends OpName>(name: K, args: OpArgs[K]): OpResult => {
+      if (store.isRemote() && opUrl) return post(name, args)
       const r = store.run(name, args)
       if ('err' in r) say(r.err, 'err')
       else if ('msg' in r) say(r.msg, 'ok')
       return r
     },
-    [store, say],
+    [store, say, opUrl, post],
   )
   const check = useCallback(<K extends OpName>(name: K, args: OpArgs[K]): OpResult => store.check(name, args), [store])
 
   const { flights, launch } = useFlights()
 
-  // Сухой прогон до анимации: отказ — сразу, без полёта; иначе операция применяется по приземлении.
+  // Сухой прогон до анимации: отказ — сразу, без полёта; иначе операция применяется по приземлении
+  // (в режиме оркестратора — POST /op по приземлении).
   const onDrop = useCallback(
     (task: TaskId, hit: DropHit | null, at: ScreenPoint) => {
       const d = decideDrop(store.getJournal(), task, hit)
@@ -93,6 +139,10 @@ export default function App({
   const reset = () => {
     if (store.isReadOnly()) {
       say(READ_ONLY_ERR, 'err')
+      return
+    }
+    if (store.isRemote()) {
+      say('Сброс — только для локального офиса, не для журнала оркестратора', 'info')
       return
     }
     if (typeof window.confirm === 'function' && !window.confirm('Сбросить офис к стартовому составу?')) return
