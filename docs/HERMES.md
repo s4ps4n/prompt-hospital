@@ -1,82 +1,82 @@
-# Как Гермес (координатор) работает с офисом
+# How Hermes (the coordinator) works with the office
 
-Офис — это визуализация журнала. Гермес ведёт журнал, офис его показывает, диспетчер —
-реально запускает модели. Никакого отдельного «подключения» нет: координатор просто
-пишет в журнал теми же операциями, что и UI.
+The office is a visualization of the journal. Hermes maintains the journal, the office
+renders it, and the dispatcher actually runs the models. There is no separate "connection":
+the coordinator writes to the journal with the same operations the UI uses.
 
 ```
-Гермес ── journal.py ──▶ journal.json ── server.py (GET /journal) ──▶ офис
-                                              │
-                              dispatch.py ───▶ реальный запуск модели
+Hermes ── journal.py ──▶ journal.json ── server.py (GET /journal) ──▶ office
+                                        │
+                        dispatch.py ───▶ actually runs the model
 ```
 
-## Правило: журнал — единая точка истины
+## Rule: the journal is the single source of truth
 
-Что бы ни делалось (поставил задачу, передал модели, завершил) — это фиксируется в
-`journal.json` через `journal.py`. Иначе офис показывает неправду.
+Whatever happens (task created, handed to a model, finished) is recorded in `journal.json`
+via `journal.py`. Otherwise the office shows a lie.
 
-Дисциплина:
+Discipline:
 
-- **поставил задачу** → `add-task` + `assign` (сразу назначить, если есть исполнитель);
-- **модель закончила** → `complete`;
-- **модель застряла / не та роль** → `block` / `unassign` / `set-role`.
+- **task created** → `add-task` + `assign` (assign immediately if there is an executor);
+- **model finished** → `complete`;
+- **model stuck / wrong role** → `block` / `unassign` / `set-role`.
 
-## Команды (`orchestrator/journal.py`)
+## Commands (`orchestrator/journal.py`)
 
 ```bash
 cd orchestrator
 
-python3 journal.py list                              # текущее состояние журнала
-python3 journal.py log                               # последние операции
+python3 journal.py list                              # current journal state
+python3 journal.py log                               # recent operations
 
-python3 journal.py add-task "Сверстать лендинг" 3    # задача, приоритет 3=высокий, 2, 1=низкий
-python3 journal.py add-task "Ревью бэкенда" 2 review # задача под роль (kind=review)
+python3 journal.py add-task "Build the landing" 3    # task, priority 3=high, 2, 1=low
+python3 journal.py add-task "Review backend" 2 review # task for a role (kind=review)
 
-python3 journal.py assign T-1 w1                     # назначить задачу на модель (снимает с прежней)
-python3 journal.py unassign T-1                      # вернуть в лоток (assignedTo = null)
-python3 journal.py complete w1                       # закрыть текущую задачу модели
-python3 journal.py block w1                          # заблокировать/разблокировать модель
+python3 journal.py assign T-1 w1                     # assign to a model (detaches from previous)
+python3 journal.py unassign T-1                      # return to the tray (assignedTo = null)
+python3 journal.py complete w1                       # close the model's current task
+python3 journal.py block w1                          # block/unblock a model
 
-python3 journal.py set-role w2 сисадмин              # сменить роль (у свободной модели)
-python3 journal.py set-priority T-1 3                # сменить приоритет
-python3 journal.py reorder T-2 T-1                   # поставить задачу перед T-1 в очереди
+python3 journal.py set-role w2 sysadmin              # change role (of an idle model)
+python3 journal.py set-priority T-1 3                # change priority
+python3 journal.py reorder T-2 T-1                   # put task before T-1 in the queue
 
-python3 journal.py add-worker codex Codex OpenAI исполнитель  # добавить модель
-python3 journal.py remove-worker w9                  # убрать свободную модель
+python3 journal.py add-worker codex Codex OpenAI executor  # add a model
+python3 journal.py remove-worker w9                  # remove an idle model
 ```
 
-- `task` — это `T-<n>` (id из очереди), `worker` — `w<n>` (id модели).
-- `kind` задаётся ролью, которой подходит задача (`review`, `дизайн`, …); `assign`
-  откажет, если роль модели не совпадает с `kind`.
+- `task` is `T-<n>` (id from the queue), `worker` is `w<n>` (model id).
+- `kind` is set to the role the task fits (`review`, `design`, …); `assign` refuses if the
+  model's role does not match `kind`.
 
-## Полный цикл задачи (пример)
+## Full task cycle (example)
 
 ```bash
-python3 journal.py add-task "Поправить README" 3        # 1. задача в лотке Гермеса
-python3 journal.py assign T-1 w1                        # 2. отдал Claude Code
-# офис показывает: w1 в статусе «в работе», конверт ушёл из лотка
-# dispatch.py запускает Claude Code, тот делает README
-python3 journal.py complete w1                          # 3. закрыл — задача в истории, w1 свободен
+python3 journal.py add-task "Fix README" 3            # 1. task in Hermes's tray
+python3 journal.py assign T-1 w1                       # 2. handed to Claude Code
+# office shows: w1 "in progress", envelope left the tray
+# dispatch.py runs Claude Code, which does the README
+python3 journal.py complete w1                         # 3. closed — task in history, w1 idle
 ```
 
-## Как офис это видит
+## How the office sees it
 
-- Офис читает `GET /journal` по таймеру (polling) — изменения в журнале появляются
-  в следующем цикле опроса.
-- **Лоток Гермеса** = задачи с `assignedTo = null`.
-- **Модель в работе** = `worker.status ∈ {run, blocked}` + `worker.task`.
-- **Бездельники** (спят / кофе / гуляют) = `wait`/`done` без текущей задачи.
+- The office reads `GET /journal` on a timer (polling) — journal changes appear on the next
+  poll cycle.
+- **Hermes's tray** = tasks with `assignedTo = null`.
+- **Model in progress** = `worker.status ∈ {run, blocked}` + `worker.task`.
+- **Idlers** (sleep / coffee / walk) = `wait`/`done` without a current task.
 
-## Что где запускается
+## What runs where
 
-| Процесс | Команда | Зачем |
+| Process | Command | Purpose |
 |---|---|---|
-| журнал | `journal.py` (CLI) | вести задачи/модели вручную |
-| API | `python3 server.py 8090` | отдать журнал офису |
-| диспетчер | `python3 dispatch.py --loop 30` | реально запускать модели |
+| journal | `journal.py` (CLI) | maintain tasks/models by hand |
+| API | `python3 server.py 8090` | serve the journal to the office |
+| dispatcher | `python3 dispatch.py --loop 30` | actually run models |
 
-## См. также
+## See also
 
-- `README.md` — архитектура и операции.
-- `orchestrator/README.md` — бэкенд, инварианты журнала.
-- `INSTALL.md` — как развернуть (3 уровня).
+- `README.md` — architecture and operations.
+- `orchestrator/README.md` — backend, journal invariants.
+- `INSTALL.md` — how to deploy (3 levels).
