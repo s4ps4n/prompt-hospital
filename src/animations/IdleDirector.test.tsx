@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest'
 import { CATALOG } from '../journal/catalog'
 import type { Worker } from '../journal/types'
 import { IdleDirector } from './IdleDirector'
-import { laneStyle } from './geometry'
-import { idleOffset, idlePose, IDLE_SLOT_MS, nextIdleDelay } from './schedule'
+import { laneStyle, walkStyle } from './geometry'
+import { idHash, idleOffset, idlePose, IDLE_POSES, IDLE_SLOT_MS, nextIdleDelay } from './schedule'
 
 const worker: Worker = { id: 'w1', model: 'deepseek', name: 'DeepSeek', provider: 'DeepSeek', role: 'исполнитель', color: '#000000', status: 'wait', task: null, doneCount: 0, history: [] }
 const lane = { from: { x: -80, y: 70 }, to: { x: 90, y: 110 } }
@@ -26,11 +26,32 @@ describe('idle schedule', () => {
     expect(idlePose({ ...worker, status: 'done' }, start)).toBe('walk')
   })
   it('has stable id offsets and schedules the next exact boundary', () => {
-    expect(idleOffset('w1')).toBe(3738)
-    expect(idleOffset('w2')).toBe(3739)
+    // FNV-1a: эталонные значения 32-битного хэша.
+    expect(idHash('')).toBe(0x811c9dc5)
+    expect(idHash('a')).toBe(0xe40c292c)
+    expect(idleOffset('w1')).toBe(idHash('w1') % (IDLE_SLOT_MS * 3))
     expect(nextIdleDelay(worker.id, start)).toBe(45_000)
     expect(nextIdleDelay(worker.id, start + 44_999)).toBe(1)
     expect(idlePose(worker, -idleOffset(worker.id) - 1)).toBe('sleep')
+  })
+  it('spreads offsets of neighbouring ids across the cycle (not ~0 apart)', () => {
+    const cycle = IDLE_SLOT_MS * 3
+    const ids = Array.from({ length: 12 }, (_, i) => `w${i + 1}`)
+    for (let i = 1; i < ids.length; i++) {
+      const d = Math.abs(idleOffset(ids[i]) - idleOffset(ids[i - 1]))
+      expect(Math.min(d, cycle - d), `${ids[i - 1]}→${ids[i]}`).toBeGreaterThan(1_000)
+    }
+    // Сдвиги w1…w12 попадают во все три трети цикла, а не в одну.
+    expect(new Set(ids.map(id => Math.floor(idleOffset(id) / IDLE_SLOT_MS))).size).toBe(3)
+  })
+  it('idle workers do different things at the same moment', () => {
+    const team = Array.from({ length: 6 }, (_, i) => ({ ...worker, id: `w${i + 1}` }))
+    for (let t = 0; t < IDLE_SLOT_MS * 3; t += 5_000) {
+      expect(new Set(team.map(w => idlePose(w, t))).size, `t=${t}`).toBeGreaterThanOrEqual(2)
+    }
+    const counts = Object.fromEntries(IDLE_POSES.map(p => [p, 0]))
+    for (const w of team) counts[idlePose(w, 0)!]++
+    expect(Math.max(...Object.values(counts))).toBeLessThan(team.length)
   })
   it('excludes Hermes, active and blocked workers, and motion opt-out', () => {
     for (const status of ['run', 'blocked'] as const) expect(idlePose({ ...worker, status }, start)).toBeNull()
@@ -44,7 +65,11 @@ describe('idle schedule', () => {
 describe('IdleDirector SVG contract', () => {
   it('exports all four lane variables and a moving click/drop target', () => {
     expect(laneStyle(lane)).toEqual({ '--x0': '-80px', '--y0': '70px', '--x1': '90px', '--y1': '110px' })
+    const delay = walkStyle('w1', lane)['--walk-delay']
+    expect(delay).toMatch(/^-\d+\.\ds$/)
+    expect(walkStyle('w2', lane)['--walk-delay']).not.toBe(delay)
     const markup = render(start)
+    expect(markup).toContain(`--walk-delay:${delay}`)
     for (const value of ['--x0:-80px', '--y0:70px', '--x1:90px', '--y1:110px', 'data-drop="w1"', 'role="button"', 'tabindex="0"', 'ph-idle-step-a', 'ph-idle-step-b']) expect(markup).toContain(value)
     expect(markup).toContain('data-idle-chair="empty"')
     expect(markup.match(/class="ph-head"/g)).toHaveLength(1)
@@ -87,6 +112,12 @@ describe('IdleDirector SVG contract', () => {
     expect(walk).toContain('M12,-18 Q17,-8 15,1')
     expect(walk.match(/ph-idle-step-a/g)).toHaveLength(2)
     expect(walk.match(/ph-idle-step-b/g)).toHaveLength(2)
+    // Ноги в противофазе: левая (x=-8) — stepA, правая (x=1) — stepB.
+    expect(walk).toContain('class="ph-idle-step-a" data-leg="true"><rect x="-8"')
+    expect(walk).toContain('class="ph-idle-step-b" data-leg="true"><rect x="1"')
+    // Руки накрест ногам: левая рука с правой ногой, правая — с левой.
+    expect(walk).toContain('class="ph-idle-step-b" data-arm="true"><path d="M-13,-18')
+    expect(walk).toContain('class="ph-idle-step-a" data-arm="true"><path d="M12,-18')
     expect(walk).toContain('ph-idle-bob')
     expect(walk).not.toContain('data-cup-arm')
     const coffee = render(start + 45_000)
@@ -96,6 +127,20 @@ describe('IdleDirector SVG contract', () => {
     expect(coffee).toContain('M-6,-20 q-2,-3 0,-6 q2,-3 0,-6')
     expect(coffee).not.toContain('ph-idle-step')
     expect(coffee).not.toContain('ph-idle-bob')
+  })
+  it('walk steps are in anti-phase and actually step (no sliding)', () => {
+    const css = readFileSync(new URL('../theme/animations.css', import.meta.url), 'utf8')
+    const frames = (name: string) => css.split('\n').find(line => line.startsWith(`@keyframes ${name} `))!
+    // stepA вверху там, где stepB внизу, — ноги не подпрыгивают вместе.
+    expect(frames('stepA')).toContain('0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); }')
+    expect(frames('stepB')).toContain('0%,100% { transform: translateY(-3px); } 50% { transform: translateY(0); }')
+    // Переступание: ступни ходят вперёд-назад навстречу друг другу, а не только топают на месте.
+    expect(frames('strideA')).toContain('0%,100% { translate: -2px 0; } 50% { translate: 2px 0; }')
+    expect(frames('strideB')).toContain('0%,100% { translate: 2px 0; } 50% { translate: -2px 0; }')
+    expect(css).toContain('.ph-idle-step-a { animation: stepA .45s ease-in-out infinite, strideA .45s ease-in-out -.3375s infinite; }')
+    expect(css).toContain('.ph-idle-step-b { animation: stepB .45s ease-in-out infinite, strideB .45s ease-in-out -.3375s infinite; }')
+    // Корпус поднимается на каждом шаге (дважды за цикл), а не раз за пару шагов.
+    expect(frames('bob')).toContain('0%,50%,100% { transform: translateY(-1.5px); } 25%,75% { transform: translateY(0); }')
   })
   it('keeps sleep geometry in markup, not in invented CSS head transforms', () => {
     const css = readFileSync(new URL('../theme/animations.css', import.meta.url), 'utf8')
@@ -119,6 +164,10 @@ describe('IdleDirector SVG contract', () => {
     const css = readFileSync(new URL('../theme/animations.css', import.meta.url), 'utf8')
     for (const animation of ['walkLane 11s', 'face 11s', 'stepA .45s', 'stepB .45s', 'bob .45s', 'sip 4s', 'steam 1.6s', 'fadeIn .9s']) expect(css).toContain(animation)
     for (const variable of ['--x0', '--y0', '--x1', '--y1']) expect(css).toContain(`var(${variable})`)
+    // Плавный ход с замедлением у концов коридора (как у дизайнера); разворот — в фазе с ходом.
+    expect(css).toContain('walkLane 11s ease-in-out var(--walk-delay, 0s)')
+    expect(css).toContain('face 11s linear var(--walk-delay, 0s)')
+    expect(css).toContain('@keyframes face { 0%,49.9% { transform: scaleX(1); } 50%,100% { transform: scaleX(-1); } }')
     expect(css).toContain('.ph-still, .ph-still * { animation: none !important; }')
     expect(css).toContain('@media (prefers-reduced-motion: reduce)')
   })

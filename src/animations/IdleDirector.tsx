@@ -6,7 +6,7 @@ import { FURNITURE, OUTLINE } from '../theme/colors'
 import { canIdle, idlePose, nextIdleDelay } from './schedule'
 import '../theme/animations.css'
 
-import { laneStyle, type IdleLane, type IdlePoint } from './geometry'
+import { walkStyle, type IdleLane, type IdlePoint } from './geometry'
 
 type Interaction = Pick<SVGProps<SVGGElement>, 'onClick' | 'onPointerDown' | 'onPointerUp' | 'onDragOver' | 'onDrop' | 'onKeyDown'>
 export interface IdleDirectorProps extends Omit<CharacterProps, 'layer'>, Interaction {
@@ -47,7 +47,7 @@ export function IdleDirector({ worker, catalogEntry, lane, door, timeMs, motion 
       </g>}
     </>}
     <g key={pose ?? 'seated'} className={pose ? 'ph-idle-enter' : undefined}>
-      <g className={pose === 'walk' ? 'ph-idle-lane' : undefined} style={pose === 'walk' ? laneStyle(lane) : undefined}
+      <g className={pose === 'walk' ? 'ph-idle-lane' : undefined} style={pose === 'walk' ? walkStyle(worker.id, lane) : undefined}
         transform={pose === 'coffee' ? `translate(${door.x} ${door.y})` : undefined}>
         <g data-drop={worker.id} data-worker={worker.id} {...events}
           role={events.onClick ? 'button' : undefined} tabIndex={events.onClick ? 0 : undefined}

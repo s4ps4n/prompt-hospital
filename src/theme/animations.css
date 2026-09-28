@@ -24,21 +24,30 @@
   0%,100% { transform: translate(var(--x0), var(--y0)); }
   50% { transform: translate(var(--x1), var(--y1)); }
 }
-@keyframes face { 0%,100% { transform: scaleX(1); } 50% { transform: scaleX(-1); } }
+/* Разворот — как у дизайнера: мгновенный на 50%, в одной фазе с walkLane (общий --walk-delay). */
+@keyframes face { 0%,49.9% { transform: scaleX(1); } 50%,100% { transform: scaleX(-1); } }
 /* stepA/stepB/bob/sip/steam — keyframes из docs/handoff (стоящая поза standing()). */
 @keyframes stepA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @keyframes stepB { 0%,100% { transform: translateY(-3px); } 50% { transform: translateY(0); } }
-@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
+/* Корпус выше всего, когда любая нога поднята (0% — B, 50% — A): два подъёма за цикл, без «хромоты». */
+@keyframes bob { 0%,50%,100% { transform: translateY(-1.5px); } 25%,75% { transform: translateY(0); } }
+/* Переступание: поднятая нога идёт вперёд, опорная — назад (свойство translate, складывается с transform
+   stepA/stepB). Задержка -.3375s = ¾ цикла: ступня сзади на 25% stepA, впереди на 75%. Вперёд — +x
+   (при обратном ходе face отражает фигуру). */
+@keyframes strideA { 0%,100% { translate: -2px 0; } 50% { translate: 2px 0; } }
+@keyframes strideB { 0%,100% { translate: 2px 0; } 50% { translate: -2px 0; } }
 @keyframes sip { 0%,70%,100% { transform: translate(0,0); } 80%,90% { transform: translate(1px,-8px); } }
 @keyframes steam { 0% { transform: translateY(0); opacity: 0; } 30% { opacity: .9; } 100% { transform: translateY(-10px); opacity: 0; } }
 @keyframes zfloat { from { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } to { opacity: 0; transform: translateY(-18px); } }
 @keyframes drool { 0%,100% { transform: scaleY(.5); } 50% { transform: scaleY(1); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .ph-idle-enter { animation: fadeIn .9s ease-out; }
-.ph-idle-lane { transform: translate(var(--x0), var(--y0)); animation: walkLane 11s linear infinite; }
-.ph-idle-walk { animation: face 11s steps(1, end) infinite; }
-.ph-idle-step-a { animation: stepA .45s ease-in-out infinite; }
-.ph-idle-step-b { animation: stepB .45s ease-in-out infinite; }
+/* Как в референсе: ease-in-out — замедление к концу коридора и разворот на месте, а не рывок на полном ходу. */
+.ph-idle-lane { transform: translate(var(--x0), var(--y0)); animation: walkLane 11s ease-in-out var(--walk-delay, 0s) infinite; }
+.ph-idle-walk { animation: face 11s linear var(--walk-delay, 0s) infinite; }
+.ph-idle-step-a, .ph-idle-step-b, .ph-idle-bob { transform-box: fill-box; transform-origin: 50% 100%; }
+.ph-idle-step-a { animation: stepA .45s ease-in-out infinite, strideA .45s ease-in-out -.3375s infinite; }
+.ph-idle-step-b { animation: stepB .45s ease-in-out infinite, strideB .45s ease-in-out -.3375s infinite; }
 .ph-idle-bob { animation: bob .45s ease-in-out infinite; }
 .ph-idle-cup { animation: sip 4s ease-in-out infinite; }
 .ph-idle-steam { animation: steam 1.6s ease-out infinite; }

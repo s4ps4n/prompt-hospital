@@ -1,5 +1,6 @@
 import type { CatalogEntry, Worker } from '../journal/types'
 import { FURNITURE, OUTLINE } from '../theme/colors'
+import { idHash } from '../animations/schedule'
 import { Character } from './Character'
 
 /** Стоящая поза idle — перенос standing() из docs/handoff/Office Orchestrator.dc.html.
@@ -36,7 +37,7 @@ export interface StandingProps {
 
 export function Standing({ worker, catalogEntry: entry, mode }: StandingProps) {
   const walk = mode === 'walk'
-  const seed = Array.from(worker.id).reduce((sum, ch) => (sum * 31 + ch.charCodeAt(0)) % 4000, 0) / 1000
+  const seed = idHash(worker.id) % 4000 / 1000
   return <g data-stand={mode} stroke={OUTLINE} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round">
     <ellipse cx={0} cy={0} rx={13} ry={4.5} fill={SHADOW} stroke="none" />
     <Leg x={-8} className={walk ? 'ph-idle-step-a' : undefined} />
@@ -45,9 +46,11 @@ export function Standing({ worker, catalogEntry: entry, mode }: StandingProps) {
       <g className={walk ? 'ph-idle-bob' : undefined}>
         {/* Туловище и голова без анимации головы (в референсе pose 'stand' — headStyle undefined). */}
         <Character worker={worker} catalogEntry={entry} furniture={false} motion={false} layer="body" />
-        <Arm d={ARM_L} hx={-16} hy={1} color={entry.color} skin={entry.skin} className={walk ? 'ph-idle-step-a' : undefined} />
+        {/* Руки в противофазе своим ногам (левая с правой ногой, как при ходьбе); у дизайнера — в фазе,
+            отчего походка выходила «иноходью». */}
+        <Arm d={ARM_L} hx={-16} hy={1} color={entry.color} skin={entry.skin} className={walk ? 'ph-idle-step-b' : undefined} />
         {walk
-          ? <Arm d={ARM_R} hx={15} hy={1} color={entry.color} skin={entry.skin} className="ph-idle-step-b" />
+          ? <Arm d={ARM_R} hx={15} hy={1} color={entry.color} skin={entry.skin} className="ph-idle-step-a" />
           : <g className="ph-idle-cup" data-cup-arm style={{ animationDelay: `-${seed.toFixed(2)}s` }}>
             <path d={CUP_ARM} fill="none" strokeWidth={10} />
             <path d={CUP_ARM} fill="none" stroke={entry.color} strokeWidth={6} />

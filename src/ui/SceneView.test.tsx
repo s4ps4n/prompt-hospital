@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { IDLE_SLOT_MS, idleOffset } from '../animations'
+import { IDLE_SLOT_MS, idleOffset, idlePose } from '../animations'
 import { initialJournal } from '../journal/initial'
 import type { Journal } from '../journal/types'
 import { SceneView } from './SceneView'
@@ -11,10 +11,15 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-/** Начало слота «гуляет» у w2; соседние id сдвинуты на 1 мс, поэтому +10 мс — все в одной позе. */
+/** Начало слота «гуляет» у w2 (+10 мс); у остальных свой сдвиг — позы по расписанию, не синхронно. */
 const WALK = IDLE_SLOT_MS * 3 - idleOffset('w2') + 10
 const COFFEE = WALK + IDLE_SLOT_MS
 const SLEEP = WALK + 2 * IDLE_SLOT_MS
+const IDS = ['w0', 'w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7']
+/** Кто по расписанию в коридоре (гуляет или пьёт кофе) в момент t. */
+const outside = (journal: Journal, t: number) => journal.workers
+  .filter(w => ['walk', 'coffee'].includes(idlePose(w, t) ?? ''))
+  .map(w => w.id)
 
 const noop = () => {}
 function scene(timeMs?: number, motion = true, journal: Journal = initialJournal()) {
@@ -33,13 +38,31 @@ const pose = (root: ParentNode, id: string) => root.querySelector(`[data-idle-po
 
 describe('SceneView: персонажи в painter-порядке', () => {
   it('одна SVG-сцена: персонаж внутри своей комнаты, после стола и до передней стенки', () => {
-    const { container, one, room } = scene(SLEEP)
-    expect(container.querySelectorAll('svg[viewBox]')).toHaveLength(1)
-    for (const id of ['w0', 'w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7']) {
-      const r = room(id)
-      const body = one(`[data-worker-id="${id}"]`, r)
-      expect(follows(one('[data-screen]', r), body)).toBe(true)
-      expect(follows(body, one('[data-wall="front"]', r))).toBe(true)
+    // motion=false — все сидят; SLEEP — w2 спит, прочие по своему расписанию (гуляющие — в коридоре).
+    for (const [t, motion] of [[SLEEP, false], [SLEEP, true]] as const) {
+      cleanup()
+      const { container, one, room } = scene(t, motion)
+      expect(container.querySelectorAll('svg[viewBox]')).toHaveLength(1)
+      const away = motion ? outside(initialJournal(), t) : []
+      expect(away).not.toContain('w2')
+      for (const id of IDS.filter(id => !away.includes(id))) {
+        const r = room(id)
+        const body = one(`[data-worker-id="${id}"]`, r)
+        expect(follows(one('[data-screen]', r), body)).toBe(true)
+        expect(follows(body, one('[data-wall="front"]', r))).toBe(true)
+      }
+    }
+  })
+
+  it('бездельники в один момент делают разное (сдвиг по id)', () => {
+    const journal = initialJournal()
+    const idle = journal.workers.filter(w => idlePose(w, 0) !== null)
+    expect(idle.length).toBeGreaterThanOrEqual(3)
+    for (let t = WALK; t < WALK + IDLE_SLOT_MS * 3; t += IDLE_SLOT_MS / 3) {
+      const { container } = scene(t)
+      const poses = new Set(idle.map(w => pose(container, w.id)))
+      expect(poses.size, `t=${t}`).toBeGreaterThanOrEqual(2)
+      cleanup()
     }
   })
 
@@ -60,9 +83,11 @@ describe('SceneView: персонажи в painter-порядке', () => {
     expect(follows(walker, room('w4'))).toBe(true)
     // На гуляющего можно бросать задачи.
     expect(one('[data-drop="w2"]', walker)).toBeTruthy()
-    // Гуляют только бездельники (wait/done), не Гермес и не занятые.
+    // В коридоре — только бездельники (wait/done) в позе walk/coffee, не Гермес и не занятые.
     const walkers = [...container.querySelectorAll('[data-extra]')].map((el) => el.getAttribute('data-extra'))
-    expect(walkers.sort()).toEqual(['walk-w2', 'walk-w3', 'walk-w5', 'walk-w6', 'walk-w7'])
+    const away = outside(initialJournal(), WALK)
+    for (const busy of ['w0', 'w1', 'w4']) expect(away).not.toContain(busy)
+    expect(walkers.sort()).toEqual(away.map(id => `walk-${id}`).sort())
   })
 })
 
