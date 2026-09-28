@@ -155,7 +155,7 @@ elif 'my-model' in model:
 
 ## Деплой (как это развёрнуто в проде)
 
-Фронт и API — docker-контейнеры в одной сети, за Traefik (как `doc.studiocms.ru`).
+Фронт и API — docker-контейнеры в одной сети, за Traefik.
 
 ```bash
 # 1. Статика в nginx, Basic Auth, прокси на API
@@ -219,4 +219,3 @@ npm run lint        # oxlint
 npm run build       # tsc + vite build
 ```
 
-Ревью кода — через бесплатные модели OpenRouter (`orchestrator/review-backend.py`).

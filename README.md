@@ -152,7 +152,7 @@ Then write `run_my_model` — the call to your executor (CLI/API). The dispatche
 
 ## Deploy (as it runs in prod)
 
-Frontend and API are docker containers on one network, behind Traefik (like `doc.studiocms.ru`).
+Frontend and API are docker containers on one network, behind Traefik.
 
 ```bash
 # 1. Static files in nginx, Basic Auth, proxy to the API
@@ -216,4 +216,3 @@ npm run lint        # oxlint
 npm run build       # tsc + vite build
 ```
 
-Code review — via free OpenRouter models (`orchestrator/review-backend.py`).
