@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""API оркестратора (уровень B): отдаёт journal.json и принимает операции.
+"""Orchestrator API (level B): serves journal.json and accepts operations.
 
-GET  /journal  → состояние журнала (workers, queue, log, seq)
+GET  /journal  → journal state (workers, queue, log, seq)
 GET  /health   → {"ok": true}
-POST /op       → {"name": "...", "args": [...]} — применяет операцию через journal.py
+POST /op       → {"name": "...", "args": [...]} — applies an operation via journal.py
 
-CORS разрешён (для разработки; в проде офис ходит same-origin через nginx-прокси).
-Запуск: python3 server.py [порт]  (по умолчанию 8090)
+CORS is enabled (for development; in prod the office goes same-origin through an nginx proxy).
+Run: python3 server.py [port]  (default 8090)
 """
 import json
 import subprocess

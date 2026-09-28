@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Журнал оркестратора — CLI. Источник истины по задачам и моделям.
+"""Orchestrator journal — CLI. Source of truth for tasks and models.
 
-Схема совместима с Prompt Hospital (src/journal/types.ts):
-  worker: id, model, name, provider, role, status(run|done|blocked|wait), task, doneCount, history
-  task:   id, title, priority(3|2|1), order, assignedTo, kind
+Schema is compatible with Prompt Hospital (src/journal/types.ts):
+  worker:  id, model, name, provider, role, status(run|done|blocked|wait), task, doneCount, history
+  task:    id, title, priority(3|2|1), order, assignedTo, kind
   journal: workers, queue, log, seq
 
-Операции (как OPS в Prompt Hospital):
-  add-task <title> [priority=2] [kind=роль]
+Operations (same as OPS in Prompt Hospital):
+  add-task <title> [priority=2] [kind=role]
   assign <task> <worker>
   unassign <task>
   complete <worker>
   block <worker>
   add-worker <model> <name> <provider> <role>
-  list            — состояние
-  log             — последние операции
+  list            — state
+  log             — recent operations
 """
 import json, sys, time, fcntl
 from pathlib import Path
@@ -80,7 +80,7 @@ def assign(j, task_id, worker_id):
         return unassign(j, task_id)
     if t.get('kind') and t['kind'] != w['role']:
         return f'отказ: задача для роли «{t["kind"]}», а у {w["name"]} — «{w["role"]}»'
-    # Снять задачу с прежней модели, если она была назначена на другую (reassign).
+    # Detach the task from its previous model, if it was assigned to another (reassign).
     prev_id = t.get('assignedTo')
     if prev_id and prev_id != worker_id:
         prev = find_worker(j, prev_id)
