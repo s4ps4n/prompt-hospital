@@ -70,7 +70,7 @@ python3 dispatch.py --loop 30
 
 ## Уровень 2. Прод: docker + nginx + домен + HTTPS
 
-То, как это развёрнуто у нас на `https://prompthospital.site`. Требует docker и настроенный Traefik (как для любого домена).
+То, как это развёрнуто у нас на `https://example.com`. Требует docker и настроенный Traefik (как для любого домена).
 
 ### 1. API в docker-сети
 
@@ -106,7 +106,7 @@ docker run -d --name prompt-hospital --network deploy_default \
   -v /root/prompt-hospital/.htpasswd:/etc/nginx/.htpasswd:ro \
   --restart unless-stopped \
   --label traefik.enable=true \
-  --label "traefik.http.routers.prompthospital.rule=Host(\`prompthospital.site\`)" \
+  --label "traefik.http.routers.prompthospital.rule=Host(\`example.com\`)" \
   --label traefik.http.routers.prompthospital.entrypoints=websecure \
   --label traefik.http.routers.prompthospital.tls.certresolver=le \
   --label traefik.http.services.prompthospital.loadbalancer.server.port=80 \
@@ -115,7 +115,7 @@ docker run -d --name prompt-hospital --network deploy_default \
 
 ### 3. DNS
 
-У регистратора домена: `A-запись prompthospital.site → IP сервера`. Сертификат Traefik выпустит сам (Let's Encrypt).
+У регистратора домена: `A-запись example.com → IP сервера`. Сертификат Traefik выпустит сам (Let's Encrypt).
 
 ---
 

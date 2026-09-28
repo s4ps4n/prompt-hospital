@@ -45,7 +45,7 @@ orchestrator/             # бэкенд пульта (в этом же репо
 
 ```
                      ┌────────────────────────────────────────────┐
-                     │  Офис (React, prompthospital.site)         │
+                     │  Офис (React, example.com)         │
                      │  drag-and-drop, карточка, каталог, лоток   │
                      └───────────────┬────────────────────────────┘
                           GET /journal│          POST /op (операции)
@@ -113,7 +113,7 @@ python3 dispatch.py --once       # разовый проход диспетче�
 4. **Запусти диспетчер**:
 
 ```bash
-ORCHESTRATOR_API=https://prompthospital.site \
+ORCHESTRATOR_API=https://example.com \
 ORCHESTRATOR_AUTH='user:pass' \
 python3 dispatch.py --loop 30
 ```
@@ -184,14 +184,14 @@ docker run -d --name prompt-hospital --network deploy_default \
   -v /root/prompt-hospital/.htpasswd:/etc/nginx/.htpasswd:ro \
   --restart unless-stopped \
   --label traefik.enable=true \
-  --label "traefik.http.routers.prompthospital.rule=Host(\`prompthospital.site\`)" \
+  --label "traefik.http.routers.prompthospital.rule=Host(\`example.com\`)" \
   --label traefik.http.routers.prompthospital.entrypoints=websecure \
   --label traefik.http.routers.prompthospital.tls.certresolver=le \
   --label traefik.http.services.prompthospital.loadbalancer.server.port=80 \
   nginx:alpine
 ```
 
-DNS: `A-запись prompthospital.site → <IP сервера>`. Сертификат выпустит Traefik (Let's Encrypt).
+DNS: `A-запись example.com → <IP сервера>`. Сертификат выпустит Traefik (Let's Encrypt).
 
 ## Уровни интеграции (что уже готово)
 

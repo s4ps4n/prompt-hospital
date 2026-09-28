@@ -70,7 +70,7 @@ The dispatcher polls the journal every 30 seconds: if a model with `model: "code
 
 ## Level 2. Prod: docker + nginx + domain + HTTPS
 
-How it runs at `https://prompthospital.site`. Requires docker and a configured Traefik (as for any domain).
+How it runs at `https://example.com`. Requires docker and a configured Traefik (as for any domain).
 
 ### 1. API in the docker network
 
@@ -106,7 +106,7 @@ docker run -d --name prompt-hospital --network deploy_default \
   -v /root/prompt-hospital/.htpasswd:/etc/nginx/.htpasswd:ro \
   --restart unless-stopped \
   --label traefik.enable=true \
-  --label "traefik.http.routers.prompthospital.rule=Host(\`prompthospital.site\`)" \
+  --label "traefik.http.routers.prompthospital.rule=Host(\`example.com\`)" \
   --label traefik.http.routers.prompthospital.entrypoints=websecure \
   --label traefik.http.routers.prompthospital.tls.certresolver=le \
   --label traefik.http.services.prompthospital.loadbalancer.server.port=80 \
@@ -115,7 +115,7 @@ docker run -d --name prompt-hospital --network deploy_default \
 
 ### 3. DNS
 
-At your registrar: `A record prompthospital.site → server IP`. Traefik issues the certificate itself (Let's Encrypt).
+At your registrar: `A record example.com → server IP`. Traefik issues the certificate itself (Let's Encrypt).
 
 ---
 

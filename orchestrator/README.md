@@ -21,7 +21,7 @@ python3 journal.py complete w1           # закрыть
 
 python3 server.py 8090           # API (в проде — docker-контейнер orchestrator-api)
 
-ORCHESTRATOR_API=https://prompthospital.site \
+ORCHESTRATOR_API=https://example.com \
 ORCHESTRATOR_AUTH='user:pass' \
 python3 dispatch.py --loop 30    # диспетчер в цикле (каждые 30 с)
 ```

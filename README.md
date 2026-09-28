@@ -45,7 +45,7 @@ orchestrator/             # control-panel backend (in this same repository)
 
 ```
                      ┌────────────────────────────────────────────┐
-                     │  Office (React, prompthospital.site)       │
+                     │  Office (React, example.com)       │
                      │  drag-and-drop, card, catalog, tray        │
                      └───────────────┬────────────────────────────┘
                           GET /journal│          POST /op (operations)
@@ -110,7 +110,7 @@ python3 dispatch.py --once       # one dispatcher pass
 4. **Run the dispatcher**:
 
 ```bash
-ORCHESTRATOR_API=https://prompthospital.site \
+ORCHESTRATOR_API=https://example.com \
 ORCHESTRATOR_AUTH='user:pass' \
 python3 orchestrator/dispatch.py --loop 30
 ```
@@ -181,14 +181,14 @@ docker run -d --name prompt-hospital --network deploy_default \
   -v /root/prompt-hospital/.htpasswd:/etc/nginx/.htpasswd:ro \
   --restart unless-stopped \
   --label traefik.enable=true \
-  --label "traefik.http.routers.prompthospital.rule=Host(\`prompthospital.site\`)" \
+  --label "traefik.http.routers.prompthospital.rule=Host(\`example.com\`)" \
   --label traefik.http.routers.prompthospital.entrypoints=websecure \
   --label traefik.http.routers.prompthospital.tls.certresolver=le \
   --label traefik.http.services.prompthospital.loadbalancer.server.port=80 \
   nginx:alpine
 ```
 
-DNS: an `A record prompthospital.site → <server IP>`. Traefik issues the certificate itself (Let's Encrypt).
+DNS: an `A record example.com → <server IP>`. Traefik issues the certificate itself (Let's Encrypt).
 
 ## Integration levels (all done)
 
