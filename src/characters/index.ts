@@ -1,4 +1,5 @@
 export { Character, type CharacterProps } from './Character'
+export { Standing, type StandingProps, type StandMode } from './Standing'
 export { WorkerSign, type WorkerSignProps } from './WorkerSign'
 export { Workstation } from './Workstation'
 export { StatusLamp, StatusScreen, type StatusProps } from './Status'

@@ -66,6 +66,37 @@ describe('IdleDirector SVG contract', () => {
     expect(sleep.match(/transform="translate\(2 26\) rotate\(-28\)"/g)).toHaveLength(2)
     expect(render(start)).not.toContain('rotate(')
   })
+  it('walk and coffee are the standing pose from standing(): legs, torso, static head, arms', () => {
+    const torso = 'M-16,3 C-17,-10 -14,-21 -8,-25 L8,-25 C14,-21 17,-10 16,3 Z'
+    for (const [offset, mode] of [[0, 'walk'], [45_000, 'coffee']] as const) {
+      const markup = render(start + offset)
+      expect(markup).toContain(`data-stand="${mode}"`)
+      expect(markup.match(/data-leg/g)).toHaveLength(2)
+      for (const x of [-8, 1]) expect(markup).toContain(`<rect x="${x}" y="-17" width="7" height="15"`)
+      expect(markup).toContain('<ellipse cx="0" cy="0" rx="13" ry="4.5"')
+      expect(markup).toContain('transform="translate(0 -15)"')
+      expect(markup).toContain(torso)
+      expect(markup.match(/class="ph-head"/g)).toHaveLength(1)
+      expect(markup).not.toContain('data-idle-pose="seated"')
+      // Голова статична: персонаж внутри — ph-still, без nod/sway.
+      expect(markup).toContain('class="ph-still"')
+      expect(markup).not.toContain('Q-22,-8 -29,3')
+    }
+    const walk = render(start)
+    expect(walk).toContain('M-13,-18 Q-18,-8 -16,1')
+    expect(walk).toContain('M12,-18 Q17,-8 15,1')
+    expect(walk.match(/ph-idle-step-a/g)).toHaveLength(2)
+    expect(walk.match(/ph-idle-step-b/g)).toHaveLength(2)
+    expect(walk).toContain('ph-idle-bob')
+    expect(walk).not.toContain('data-cup-arm')
+    const coffee = render(start + 45_000)
+    expect(coffee).toContain('data-cup-arm')
+    expect(coffee).toContain('M12,-18 Q11,-5 -1,-8')
+    expect(coffee).toContain('<rect x="-9" y="-17" width="10" height="11" rx="1.5"')
+    expect(coffee).toContain('M-6,-20 q-2,-3 0,-6 q2,-3 0,-6')
+    expect(coffee).not.toContain('ph-idle-step')
+    expect(coffee).not.toContain('ph-idle-bob')
+  })
   it('keeps sleep geometry in markup, not in invented CSS head transforms', () => {
     const css = readFileSync(new URL('../theme/animations.css', import.meta.url), 'utf8')
     expect(css).not.toMatch(/\.ph-idle-sleep \.ph-(head|eyes)/)
@@ -86,7 +117,7 @@ describe('IdleDirector SVG contract', () => {
   })
   it('uses required CSS timings and honors reduced motion', () => {
     const css = readFileSync(new URL('../theme/animations.css', import.meta.url), 'utf8')
-    for (const animation of ['walkLane 11s', 'face 11s', 'stepA .45s', 'stepB .45s', 'sip 4s', 'steam 1.6s', 'fadeIn .9s']) expect(css).toContain(animation)
+    for (const animation of ['walkLane 11s', 'face 11s', 'stepA .45s', 'stepB .45s', 'bob .45s', 'sip 4s', 'steam 1.6s', 'fadeIn .9s']) expect(css).toContain(animation)
     for (const variable of ['--x0', '--y0', '--x1', '--y1']) expect(css).toContain(`var(${variable})`)
     expect(css).toContain('.ph-still, .ph-still * { animation: none !important; }')
     expect(css).toContain('@media (prefers-reduced-motion: reduce)')
