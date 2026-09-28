@@ -33,7 +33,7 @@ const pose = (root: ParentNode, id: string) => root.querySelector(`[data-idle-po
 
 describe('SceneView: персонажи в painter-порядке', () => {
   it('одна SVG-сцена: персонаж внутри своей комнаты, после стола и до передней стенки', () => {
-    const { container, one, room } = scene(COFFEE)
+    const { container, one, room } = scene(SLEEP)
     expect(container.querySelectorAll('svg[viewBox]')).toHaveLength(1)
     for (const id of ['w0', 'w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7']) {
       const r = room(id)
@@ -72,7 +72,9 @@ describe('SceneView: idle-анимации по графику', () => {
     cleanup()
     const coffee = scene(COFFEE)
     expect(pose(coffee.container, 'w2')).toBe('coffee')
-    expect(pose(coffee.room('w2'), 'w2')).toBe('coffee')
+    // Кофе пьют в коридоре у двери — объект коридора, как и гуляющий (walkers у дизайнера).
+    expect(coffee.room('w2').querySelector('[data-worker-id="w2"]')).toBeNull()
+    expect(pose(coffee.one('[data-extra="walk-w2"]'), 'w2')).toBe('coffee')
     cleanup()
     expect(pose(scene(SLEEP).container, 'w2')).toBe('sleep')
   })

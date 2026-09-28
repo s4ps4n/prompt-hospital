@@ -66,9 +66,11 @@ function Envelope({ task, x, y, scale, drop, current, onPointerDown, onClick }: 
   )
 }
 
-/** Гуляет ли модель по коридору (тогда её персонаж — отдельный объект сцены). */
+/** Вышла ли модель в коридор — гуляет или пьёт кофе у двери (тогда её персонаж — отдельный объект сцены). */
 function walking(w: Worker, now: number, motion: boolean): boolean {
-  return w.id !== COORDINATOR_ID && idlePose(w, now, motion) === 'walk'
+  if (w.id === COORDINATOR_ID) return false
+  const pose = idlePose(w, now, motion)
+  return pose === 'walk' || pose === 'coffee'
 }
 
 /** Начало текущего idle-слота модели: поза внутри слота не меняется, мемо комнаты не сбивается. 0 — не бездельничает. */
@@ -81,7 +83,7 @@ interface RoomContentProps {
   journal: Journal
   cell: RoomCell
   worker: Worker
-  /** 'room' — персонаж (если не гуляет), конверты и вывеска; 'walker' — только гуляющий персонаж. */
+  /** 'room' — персонаж (если не гуляет), конверты и вывеска; 'walker' — только персонаж в коридоре. */
   part: 'room' | 'walker'
   over: boolean
   selected: boolean

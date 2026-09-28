@@ -41,6 +41,4 @@
 .ph-idle-steam { animation: steam 1.6s ease-out infinite; }
 .ph-idle-z { animation: zfloat 3s ease-out infinite; }
 .ph-idle-drool { transform-box: fill-box; transform-origin: top; animation: drool 3s ease-in-out infinite; }
-.ph-idle-sleep .ph-head { transform: translate(-22px,44px) rotate(-65deg); }
-.ph-idle-sleep .ph-eyes { transform: scaleY(.1); }
 .ph-idle-coffee .ph-arm-a { transform: translate(0,-5px); }

@@ -1,5 +1,5 @@
 import { useEffect, useState, type SVGProps } from 'react'
-import { Character, type CharacterProps } from '../characters/Character'
+import { Character, SLEEP_HEAD, type CharacterProps } from '../characters/Character'
 import { Workstation } from '../characters/Workstation'
 import { FURNITURE, OUTLINE } from '../theme/colors'
 import { canIdle, idlePose, nextIdleDelay } from './schedule'
@@ -33,7 +33,7 @@ export function IdleDirector({ worker, catalogEntry, lane, door, timeMs, motion 
     return () => clearTimeout(timer)
   }, [enabled, worker.id, timeMs])
   const pose = idlePose(worker, timeMs ?? clock, motion)
-  const sprite = <Character worker={worker} catalogEntry={catalogEntry} furniture={false} motion={false} />
+  const sprite = <Character worker={worker} catalogEntry={catalogEntry} furniture={false} motion={false} sleep={pose === 'sleep'} />
   return <g transform={`translate(${x} ${y})`} className={motion ? 'ph-idle ph-motion' : 'ph-idle ph-still'}
     data-idle-pose={pose ?? 'seated'} data-worker-id={worker.id}>
     {!pose ? <Character worker={worker} catalogEntry={catalogEntry} motion={motion} furniture={furniture} /> : <>
@@ -67,7 +67,10 @@ export function IdleDirector({ worker, catalogEntry, lane, door, timeMs, motion 
             </g>}
             {pose === 'sleep' && <g fill={OUTLINE}>
               {[0, 1, 2].map(i => <text key={i} className="ph-idle-z" x={2 + i * 8} y={-23 - i * 8} style={{ animationDelay: `${i * .6}s` }} fontSize={12}>z</text>)}
-              <path className="ph-idle-drool" d="M-13,7 Q-9,16 -13,21" fill="none" stroke={FURNITURE.water} strokeWidth={3} />
+              {/* Слюна — из уголка рта, в системе координат лежащей головы (как в character() дизайнера). */}
+              <g transform={SLEEP_HEAD}>
+                <path className="ph-idle-drool" d="M-3,-31 Q-4,-25 -2,-22 Q0,-25 -1,-31 Z" fill={FURNITURE.water} stroke={OUTLINE} strokeWidth={1} />
+              </g>
             </g>}
           </g>}
         </g>

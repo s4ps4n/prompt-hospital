@@ -10,11 +10,13 @@ export type RoomCell = Exclude<Cell, { kind: 'lounge' }>
 export const SEAT_Z = 17
 /** Высота «пояса» идущего персонажа: ноги спрайта заканчиваются на 15 ниже нуля. */
 const WALK_Z = 15
-/** Дорожка прогулки: в коридоре перед комнатой, в пределах поля M у нижнего ряда. */
-const LANE_Y = 30
-const LANE_X: readonly [number, number] = [20, 140]
-/** Кофе — у двери, внутри комнаты, перед передней стенкой. */
-const DOOR_Y = 132
+/**
+ * Дорожка бездельника — в коридоре перед передней стенкой комнаты, как у дизайнера
+ * (`ly = oy + L + 34`). Отступ меньше поля M, поэтому и у нижнего ряда не упирается в ограду.
+ */
+export const LANE_Y = 34
+/** Отступ дорожки от боковых стен: гуляющий остаётся перед своей комнатой (у дизайнера p0 = ox + 10). */
+export const LANE_X_PAD = 10
 
 export function roomConfig(cell: RoomCell): RoomConfig {
   return cell.kind === 'boss' ? BOSS_ROOM : WORKER_ROOM
@@ -47,15 +49,21 @@ function rel(from: Pt, x: number, y: number, z: number): IdlePoint {
   return { x: px - from[0], y: py - from[1] }
 }
 
+/** Середина дверного проёма в передней стене — по той же геометрии, что рисует Room. */
+export function doorX(size: number): number {
+  const [dA, dB] = doorSpan(size)
+  return (dA + dB) / 2
+}
+
 /** Где бездельник гуляет и пьёт кофе — в координатах сцены, заданных раскладкой. */
 export function idleRoute(cell: RoomCell): IdleRoute {
   const cfg = roomConfig(cell)
   const seat = seatPoint(cfg)
   const S = cfg.size
-  const [dA, dB] = doorSpan(S)
+  const y = S + LANE_Y
   return {
-    lane: { from: rel(seat, LANE_X[0], S + LANE_Y, WALK_Z), to: rel(seat, LANE_X[1], S + LANE_Y, WALK_Z) },
-    door: rel(seat, (dA + dB) / 2, DOOR_Y, WALK_Z),
+    lane: { from: rel(seat, LANE_X_PAD, y, WALK_Z), to: rel(seat, S - LANE_X_PAD, y, WALK_Z) },
+    door: rel(seat, doorX(S), y, WALK_Z),
     depth: cell.depth + LANE_Y,
   }
 }

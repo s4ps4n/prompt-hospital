@@ -59,6 +59,16 @@ describe('IdleDirector SVG contract', () => {
     expect(sleep).toContain('ph-idle-drool')
     expect(sleep.match(/>z<\/text>/g)).toHaveLength(3)
     expect(sleep.match(/class="ph-head"/g)).toHaveLength(1)
+    // Как в character() дизайнера: глаза-дуги, открытый рот, голова на столе translate(2,26) rotate(-28).
+    expect(sleep).toContain('ph-eyes-closed')
+    expect(sleep).not.toContain('class="ph-eyes"')
+    expect(sleep).toContain('M-4.5,-33 A2.5,2 0 1 0 0.5,-33')
+    expect(sleep.match(/transform="translate\(2 26\) rotate\(-28\)"/g)).toHaveLength(2)
+    expect(render(start)).not.toContain('rotate(')
+  })
+  it('keeps sleep geometry in markup, not in invented CSS head transforms', () => {
+    const css = readFileSync(new URL('../theme/animations.css', import.meta.url), 'utf8')
+    expect(css).not.toMatch(/\.ph-idle-sleep \.ph-(head|eyes)/)
   })
   it('motion=false restores the static seated character for every slot', () => {
     for (const offset of [0, 45_000, 90_000]) {
