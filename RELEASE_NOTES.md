@@ -1,25 +1,27 @@
-# v1.0.0 — first release
+# v1.0.0 — первый релиз
 
-Prompt Hospital — a Theme Hospital–style office visualization of an AI team. A working orchestrator control panel: see who's doing what, drag tasks onto models, and the models actually run.
+**RU.** Prompt Hospital — визуализация ИИ-команды в стиле Theme Hospital. Рабочий пульт оркестратора: смотришь, кто чем занят, перетаскиваешь задачи на модели — и модели реально запускаются.
 
-## What's inside
+**EN.** Prompt Hospital — a Theme Hospital–style office visualization of an AI team. A working orchestrator control panel: see who's doing what, drag tasks onto models, and the models actually run.
 
-- **Isometric office** — rooms, chibi characters, statuses, idle animations (walk / coffee / sleep).
-- **Journal** — single source of truth (`journal.json`), models + tasks + history.
-- **API + dispatcher** — `server.py` serves the journal, `dispatch.py` actually runs models.
-- **Integration levels A→D** — journal → monitor → write → execute.
-- **Interaction** — drag-and-drop tasks, model card, catalog, Hermes tray, priorities.
-- **i18n** — RU/EN, `translations.csv` as the human-editable source + generator.
-- **Docs** — README (EN/RU), INSTALL (EN/RU), ROADMAP.
+## Что внутри · What's inside
 
-## Stack
+- **Изометрический офис / Isometric office** — комнаты, чиби-персонажи, статусы, idle-анимации (гуляет / кофе / сон).
+- **Журнал / Journal** — единый источник истины (`journal.json`): модели, задачи, история.
+- **API + диспетчер / API + dispatcher** — `server.py` отдаёт журнал, `dispatch.py` реально запускает модели.
+- **Уровни интеграции A→D / Integration levels A→D** — журнал → монитор → запись → исполнение.
+- **Интерактив / Interaction** — drag-and-drop задач, карточка модели, каталог, лоток Гермеса, приоритеты.
+- **i18n** — RU/EN, `translations.csv` как редактируемый людьми источник + генератор.
+- **Доки / Docs** — README (EN/RU), INSTALL (EN/RU), ROADMAP.
 
-Vite · React · TypeScript · SVG · Python (journal / API / dispatcher) · Docker · Traefik
+## Стек · Stack
 
-## Try it
+Vite · React · TypeScript · SVG · Python (журнал / API / диспетчер) · Docker · Traefik
+
+## Попробовать · Try it
 
 https://prompthospital.site
 
-## Deploy
+## Развёртывание · Deploy
 
-See `INSTALL.md` — three levels: from `npm run dev` to docker + Traefik + HTTPS.
+См. `INSTALL.md` — три уровня: от `npm run dev` до docker + Traefik + HTTPS.
