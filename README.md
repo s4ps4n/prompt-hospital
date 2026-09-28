@@ -16,6 +16,7 @@
 - **Все мутации — через `OPS[name](journal, args)`** (чистые функции, возвращают `{msg}` | `{err}` | `{noop}`). Обёртка `run()` клонирует журнал, применяет операцию, пишет в `log`, сохраняет. `check()` — «сухой прогон» для валидации до анимации.
 - **Отрисовка — чистая функция от журнала** (`renderVals`). Сортировка очередей производная: `cmpT = priority desc, order asc`.
 - Операции: `assign, reassign, unassign, setRole, setPriority, reorder, complete, block, addWorker, removeWorker, addTask`. Для боевого API оркестратора — заменить `OPS` на вызовы API с той же сигнатурой.
+- **Монитор (этап B)**: `VITE_JOURNAL_URL=http://127.0.0.1:8090/journal npm run dev` (или проп `<App journalUrl=… pollMs=…/>`). Офис грузит `GET /journal` при старте и опрашивает каждые 5 с; журнал только для чтения — drag-and-drop/операции/сброс отвечают «Монитор: журнал оркестратора только для чтения». `/journal` недоступен — тихо остаётся локальный журнал (localStorage → `initial.ts`), интерактивный.
 
 ## Данные
 - `worker`: `{id, model, name, provider, role, color, status: run|done|blocked|wait, task: taskId|null, doneCount, history[]}`. `w0` — Гермес (координатор, кабинет 2×2, не удаляется, роль закреплена).

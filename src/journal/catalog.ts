@@ -34,6 +34,22 @@ export function findCatalogEntry(model: string): CatalogEntry | undefined {
   return CATALOG.find((c) => c.model === model)
 }
 
+/**
+ * Внешность для модели, которой может не быть в каталоге (реальный журнал оркестратора:
+ * `claude-code`, `codex`, `nemotron-120b`…): точное совпадение → префикс (`qwen-27b` → qwen) →
+ * провайдер (`OpenAI` → GPT-5) → стабильный выбор по имени модели. Всегда возвращает запись.
+ */
+export function resolveCatalogEntry(model: string, provider = ''): CatalogEntry {
+  const found =
+    findCatalogEntry(model) ??
+    CATALOG.find((c) => model.startsWith(`${c.model}-`)) ??
+    CATALOG.find((c) => provider.includes(c.provider))
+  if (found) return found
+  let h = 0
+  for (const ch of model) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  return CATALOG[h % CATALOG.length]
+}
+
 export function isAssignableRole(role: string): role is AssignableRole {
   return (ROLES as readonly string[]).includes(role)
 }

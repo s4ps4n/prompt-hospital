@@ -1,10 +1,33 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import type { Journal, JournalStore } from '../journal'
+import { fetchJournal, type Journal, type JournalStore } from '../journal'
 import type { Message, MessageKind } from '../ui/MessageBar'
 
 /** Текущий журнал из стора; перерисовка — по subscribe. */
 export function useJournal(store: JournalStore): Journal {
   return useSyncExternalStore(store.subscribe, store.getJournal, store.getJournal)
+}
+
+/**
+ * Режим монитора: грузит журнал оркестратора с `url` при старте и затем каждые `pollMs`
+ * (0 — только при старте). Пока /journal не ответил — тихо остаётся локальный журнал.
+ */
+export function useRemoteJournal(store: JournalStore, url: string | undefined, pollMs: number): void {
+  useEffect(() => {
+    if (!url) return
+    const ctl = new AbortController()
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const tick = async () => {
+      const remote = await fetchJournal(url, ctl.signal)
+      if (ctl.signal.aborted) return
+      if (remote) store.loadRemote(remote)
+      if (pollMs > 0) timer = setTimeout(tick, pollMs)
+    }
+    void tick()
+    return () => {
+      ctl.abort()
+      clearTimeout(timer)
+    }
+  }, [store, url, pollMs])
 }
 
 export const MESSAGE_MS = 6000

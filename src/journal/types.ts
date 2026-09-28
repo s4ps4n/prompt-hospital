@@ -10,6 +10,7 @@ export type Role =
   | 'дизайнер'
   | 'UX/UI'
   | 'приёмщик'
+  | 'рецензент'
 
 /** Роли, доступные для назначения (координатор закреплён за Гермесом). */
 export type AssignableRole = Exclude<Role, 'координатор'>
@@ -37,7 +38,8 @@ export interface Worker {
   name: string
   provider: string
   role: Role
-  color: string
+  /** Журнал оркестратора (/journal) цвет не присылает — внешность берётся из каталога. */
+  color?: string
   status: WorkerStatus
   task: TaskId | null
   doneCount: number

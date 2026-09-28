@@ -18,6 +18,7 @@ export const ROLE_COLORS: Record<Role, string> = {
   дизайнер: '#f0c07a',
   'UX/UI': '#e6a2d2',
   приёмщик: '#c9b98e',
+  рецензент: '#9fc7c2',
 }
 export const ROLE_FALLBACK = '#cccccc'
 

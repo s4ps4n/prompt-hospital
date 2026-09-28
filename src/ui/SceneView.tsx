@@ -1,7 +1,7 @@
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { IDLE_SLOT_MS, IdleDirector, canIdle, idlePose, nextIdleDelay, useIdleClock } from '../animations'
 import { Character, WorkerSign } from '../characters'
-import { COORDINATOR_ID, PRIORITY_LABEL, findCatalogEntry } from '../journal/catalog'
+import { COORDINATOR_ID, PRIORITY_LABEL, resolveCatalogEntry } from '../journal/catalog'
 import { currentTask, trayTasks, workerQueue } from '../journal/selectors'
 import type { Journal, Task, Worker } from '../journal/types'
 import {
@@ -104,7 +104,7 @@ const RoomContent = memo(function RoomContent({ journal, cell, worker: w, part, 
   const cfg = roomConfig(cell)
   const drop = boss ? TRAY_DROP : w.id
   const shown = { ...w, status: displayStatus(journal, w) }
-  const entry = findCatalogEntry(w.model)
+  const entry = resolveCatalogEntry(w.model, w.provider)
   const select = () => onSelect(w.id)
 
   const tray = trayTasks(journal)

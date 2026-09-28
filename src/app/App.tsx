@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { ROLES, createJournalStore, findTask, findWorker, type JournalStore, type OpArgs, type OpName, type OpResult, type TaskId } from '../journal'
+import { JOURNAL_POLL_MS, READ_ONLY_ERR, ROLES, createJournalStore, findTask, findWorker, type JournalStore, type OpArgs, type OpName, type OpResult, type TaskId } from '../journal'
 import {
   CatalogModal,
   DragGhost,
@@ -18,7 +18,7 @@ import { UI_EXTRA } from '../theme/colors'
 import { decideDrop, flightTarget, type DropHit } from './dnd'
 import { useDrag } from './useDrag'
 import { useFlights } from './useFlights'
-import { useJournal, useMessage } from './useJournal'
+import { useJournal, useMessage, useRemoteJournal } from './useJournal'
 import { useZoom } from './useZoom'
 import './app.css'
 
@@ -27,14 +27,24 @@ export interface AppProps {
   store?: JournalStore
   /** false — отключает все анимации: idle-график, пульсы, полёт конверта (операция применяется сразу). */
   motion?: boolean
+  /** URL журнала оркестратора (режим монитора); по умолчанию — VITE_JOURNAL_URL, пусто — локальный режим. */
+  journalUrl?: string
+  /** Период опроса journalUrl, мс; 0 — только при старте. */
+  pollMs?: number
 }
 
 /**
  * Приложение целиком. Всё, что относится к офису, читается из журнала;
  * локально — только состояние интерфейса (выделение, модалки, drag, сообщение, зум).
  */
-export default function App({ store: injected, motion = true }: AppProps) {
+export default function App({
+  store: injected,
+  motion = true,
+  journalUrl = import.meta.env.VITE_JOURNAL_URL,
+  pollMs = JOURNAL_POLL_MS,
+}: AppProps) {
   const [store] = useState(() => injected ?? createJournalStore())
+  useRemoteJournal(store, journalUrl, pollMs)
   const journal = useJournal(store)
   const [message, say] = useMessage()
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -81,6 +91,10 @@ export default function App({ store: injected, motion = true }: AppProps) {
   // Стабильные колбэки: SceneView мемоизирована и не пересобирается на drag/сообщениях/модалках.
   const openCatalog = useCallback(() => setCatalog({ model: 'claude', role: ROLES[0] }), [])
   const reset = () => {
+    if (store.isReadOnly()) {
+      say(READ_ONLY_ERR, 'err')
+      return
+    }
     if (typeof window.confirm === 'function' && !window.confirm('Сбросить офис к стартовому составу?')) return
     store.reset()
     setSelectedId(null)

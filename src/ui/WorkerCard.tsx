@@ -1,5 +1,5 @@
 import { useEffect, useState, type PointerEvent } from 'react'
-import { COORDINATOR_ID, COORDINATOR_ROLE, ROLES, findCatalogEntry, isAssignableRole } from '../journal/catalog'
+import { COORDINATOR_ID, COORDINATOR_ROLE, ROLES, isAssignableRole, resolveCatalogEntry } from '../journal/catalog'
 import { currentTask, trayTasks, workerQueue } from '../journal/selectors'
 import type { AssignableRole, Journal, Role, Worker } from '../journal/types'
 import { displayStatus } from '../scene'
@@ -56,7 +56,7 @@ export function WorkerCard({ journal, worker: w, run, check, onDenied, onClose, 
   const status = displayStatus(journal, w)
   const cur = currentTask(journal, w.id)
   const queue = workerQueue(journal, w.id)
-  const entry = findCatalogEntry(w.model)
+  const entry = resolveCatalogEntry(w.model, w.provider)
   const locked = isCoord || !!w.task
 
   // Причину отказа берём у журнала (сухой прогон), а не дублируем текст в UI.

@@ -39,7 +39,7 @@ export function defaultStorage(): KeyValueStorage {
   return createMemoryStorage()
 }
 
-function isJournalShape(value: unknown): value is Journal {
+export function isJournalShape(value: unknown): value is Journal {
   if (typeof value !== 'object' || value === null) return false
   const v = value as Record<string, unknown>
   return (
