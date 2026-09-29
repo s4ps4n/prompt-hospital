@@ -227,3 +227,7 @@ npm run build       # tsc + vite build
 
 Вдохновлено *Theme Hospital* (Bullfrog, 1997); ресурсы, названия и код оригинала не используются.
 [MIT](LICENSE) © s4ps4n.
+
+---
+
+Сделано в Улан-Удэ — [@s4ps4n](https://github.com/s4ps4n), студия [АЙТИТЕК](https://it-uu.ru): сайты, интернет-магазины, ИИ-инструменты. Наш же — [Каркас CMS](https://karkas-cms.ru), в реестре российского ПО.

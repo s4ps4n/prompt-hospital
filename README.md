@@ -225,3 +225,7 @@ Details in [ROADMAP.md](ROADMAP.md).
 
 Inspired by *Theme Hospital* (Bullfrog, 1997); no assets, names or code from the original are used.
 [MIT](LICENSE) © s4ps4n.
+
+---
+
+Made in Ulan-Ude by [@s4ps4n](https://github.com/s4ps4n) at [ITTEK](https://it-uu.ru) — we build web products, online stores and AI tooling.
