@@ -49,6 +49,20 @@ def op(name, args):
     return api('/op', 'POST', {'name': name, 'args': args})
 
 
+def run_claude(task_id, title):
+    print(f'  ▶ Claude Code берёт {task_id}: {title}')
+    r = subprocess.run(
+        ['claude', '-p', title, '--permission-mode', 'acceptEdits'],
+        cwd=WORKDIR, capture_output=True, text=True, timeout=1800,
+    )
+    if r.returncode == 0:
+        out = (r.stdout or '').strip()
+        print('  ✓ Claude Code завершил:', out.splitlines()[-1] if out else '(пусто)')
+        return True
+    print('  ✗ Claude Code вернул ошибку:', r.stderr.strip()[:200] or r.stdout.strip()[:200])
+    return False
+
+
 def run_codex(task_id, title):
     print(f'  ▶ Codex берёт {task_id}: {title}')
     r = subprocess.run(
@@ -109,17 +123,25 @@ def tick():
         if task.get('assignedTo') != w['id']:
             continue
         model = (w.get('model') or '').lower()
-        if 'codex' in model:
+        name = (w.get('name') or '').lower()
+        ok = False
+        if 'claude' in model or 'claude' in name:
+            print(f"[{time.strftime('%H:%M:%S')}] задача {task['id']} → Claude Code")
+            ok = run_claude(task['id'], task['title'])
+        elif 'codex' in model or 'codex' in name:
             print(f"[{time.strftime('%H:%M:%S')}] задача {task['id']} → Codex")
             ok = run_codex(task['id'], task['title'])
-            # Повторная проверка: за время выполнения задача могла быть переназначена.
-            j2 = api('/journal')
-            if j2:
-                t2 = next((t for t in j2.get('queue', []) if t['id'] == task['id']), None)
-                if t2 and t2.get('assignedTo') == w['id']:
-                    print('  →', op('complete' if ok else 'block', [w['id']]))
-                else:
-                    print('  → задача переназначена, результат не записываем')
+        else:
+            continue
+
+        # Повторная проверка: за время выполнения задача могла быть переназначена.
+        j2 = api('/journal')
+        if j2:
+            t2 = next((t for t in j2.get('queue', []) if t['id'] == task['id']), None)
+            if t2 and t2.get('assignedTo') == w['id']:
+                print('  →', op('complete' if ok else 'block', [w['id']]))
+            else:
+                print('  → задача переназначена, результат не записываем')
 
 
 _running = True
