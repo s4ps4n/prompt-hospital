@@ -1,26 +1,27 @@
-# SVG-компоненты этапа 3
+# SVG components (Stage 3)
 
-`Character` принимает `worker` и `catalogEntry`, возвращает `<g>` для размещения
-в SVG. Локальный ноль — сиденье; голова (0, −44), r=17. По умолчанию включены
-кресло, стол, клавиатура и ЭЛТ; габариты примерно (−65, −94)…(36, 40).
-`x`, `y` перемещают группу, `motion={false}` отключает все её анимации.
-Также учитывается `prefers-reduced-motion`.
+The `Character` component accepts `worker` and `catalogEntry`, and returns a `<g>` for rendering in SVG. The local zero is the seat; the head is at (0, −44), r=17.
+Default elements included: chair, desk, keyboard, and CRT monitor; dimensions are approximately (−65, −94)…(36, 40).
 
-Для сцены с готовой мебелью используйте `furniture={false}`. При необходимости
-порядок отрисовки: `Character layer="body"`, мебель сцены,
-`Character layer="arms"` (обоим слоям передать `furniture={false}`).
-Голова, как в `character()` дизайнера: сидя — в `body` (под столом и руками),
-в позе сна (`sleep`) — в `arms`, после рук (лежит на столе поверх них).
-Руки заканчиваются в (−29, 3), (−17, 7); клавиатуру нужно совместить с ними.
-`StatusScreen` — отдельный экран для существующего ЭЛТ; его локальный контур
-(0,0), (22,5), (22,24), (0,19). Родитель может трансформировать эту группу.
+- `x`, `y` move the group; `motion={false}` disables all animations.
+- The component respects `prefers-reduced-motion`.
 
-`WorkerSign` рисует вывеску 230×66 (ширина настраивается, минимум 180), принимает
-`taskTitle` из журнала через родителя. Без заголовка показывает ID задачи либо
-«Нет текущей задачи». Длинные строки сокращены; полный текст остаётся в `<title>`.
-`StatusLamp` доступен отдельно. Все компоненты экспортируются из `index.ts`.
+For scenes with existing furniture, use `furniture={false}`. Rendering order:
+1. `Character layer="body"`
+2. Scene furniture
+3. `Character layer="arms"` (pass `furniture={false}` to both layers)
 
-CSS анимаций импортируется компонентами из `src/theme/animations.css`.
-Палитра, контур и ширина контура общие с этапом 2: `src/theme/colors.ts`.
-Сцена и журнал не изменяются. Расписание прогулок, кофе и сна относится к
-поведению сцены; этот модуль реализует сидящий спрайт из задания этапа 3.
+Head placement (matching the designer's `character()`):
+- Sitting: in `body` (under the desk and hands).
+- Sleeping (`sleep` pose): in `arms`, after the hands (resting on the desk, on top of them).
+- Hands end at (−29, 3), (−17, 7); the keyboard must be aligned with them.
+
+`StatusScreen` is a separate component for the CRT; its local contour is (0,0), (22,5), (22,24), (0,19). The parent can transform this group.
+
+`WorkerSign` draws a 230×66 sign (width configurable, min 180), accepts `taskTitle` from the journal via parent. Without a title, it shows the task ID or "No task". Long strings are truncated; the full text remains in the `<title>` attribute.
+`StatusLamp` is available separately. All components are exported from `index.ts`.
+
+Animation CSS is imported by components from `src/theme/animations.css`.
+Palette, contour, and stroke width are shared with Stage 2: `src/theme/colors.ts`.
+
+The scene and journal remain unchanged. Walking/coffee/sleep schedules are scene-level behaviors; this module implements the sitting sprite defined in Stage 3 requirements.
