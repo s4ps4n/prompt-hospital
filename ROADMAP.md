@@ -1,17 +1,16 @@
-# Дорожная карта
+# Roadmap
 
-Состояние на текущий момент, по факту кода.
+> English · [Русский](ROADMAP.ru.md)
 
-## Сделано
+Current state based on actual codebase.
 
-- **Офис и кабинеты** — изометрическая сцена, модели в комнатах, лоток Гермеса, журнал, idle-бездельники (спят / пьют кофе / гуляют).
-- **Свой оркестратор** — журнал (`journal.json`) + HTTP API (`server.py`) + диспетчер (`dispatch.py`), который реально запускает модели. Уровни A→D: журнал → монитор → запись → исполнение.
+## Done
+- **Office and cubicles** — isometric scene, models in rooms, Hermes tray, journal, idle-idlers (sleeping / drinking coffee / walking).
+- **Custom orchestrator** — journal (`journal.json`) + HTTP API (`server.py`) + dispatcher (`dispatch.py`), which actually runs the models. Levels A→D: journal → monitor → write → execution.
 
-## В планах
+## Planned
+- **Statistics** — who worked how much, by model (completed tasks, time in progress).
+- **Overseer** — a hand that slaps idlers so they run to Hermes for a task (a joke from discussions).
 
-- **Статистика** — кто сколько работал, по моделям (закрытых задач, времени в работе).
-- **Надзиратель** — рука, которая шлёпает бездельников, чтобы те бежали к Гермесу за задачей (шутка из обсуждений).
-
-## Не в плане
-
-- **WebSocket** — офис и диспетчер обновляются опросом (`polling`), для текущего масштаба этого достаточно; real-time push не требуется.
+## Out of Scope
+- **WebSocket** — the office and dispatcher update via polling; this is sufficient for the current scale; real-time push is not required.
