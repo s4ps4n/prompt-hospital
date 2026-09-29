@@ -86,17 +86,33 @@ def auto_assign():
         return
     workers = j.get('workers', [])
     for task in unassigned:
-        # Ищем свободную модель (исключая Гермеса w0)
+        # Ищем модель с точным совпадением роли
         target = None
         for w in workers:
             if w['id'] == 'w0':
                 continue
             if w.get('status') in ('wait', 'done') and not w.get('task'):
-                if task.get('kind'):
-                    if w.get('role') == task['kind']:
+                if task.get('kind') and w.get('role') == task['kind']:
+                    target = w
+                    break
+
+        # Если точного совпадения нет — эскалация фулстаку (Claude Code / Codex)
+        if not target and task.get('kind'):
+            for w in workers:
+                if w['id'] == 'w0':
+                    continue
+                if w.get('status') in ('wait', 'done') and not w.get('task'):
+                    if 'фулстак' in str(w.get('role', '')):
                         target = w
+                        print(f"[{time.strftime('%H:%M:%S')}] Эскалация: задача {task['id']} ({task.get('kind')}) → универсалу {target['name']}")
                         break
-                else:
+
+        # Если роль вообще не указана — отдаём первому свободному
+        if not target and not task.get('kind'):
+            for w in workers:
+                if w['id'] == 'w0':
+                    continue
+                if w.get('status') in ('wait', 'done') and not w.get('task'):
                     target = w
                     break
         if target:
