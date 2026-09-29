@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Dispatcher (level D): task in the journal → actually run a model → complete/block.
+"""Диспетчер (уровень D): задача в журнале → реальный запуск модели → complete/block.
 
-Reads the journal via the API, finds tasks assigned to models with an available executor,
-runs the executor, and writes complete/block back to the journal by result.
+Читает журнал через API, находит задачи, назначенные на модели с доступным executor'ом,
+запускает executor, по результату пишет complete/block обратно в журнал.
 
-Configuration is via environment variables (see below), no secrets in code.
+Конфигурация — через переменные окружения (см. ниже), без секретов в коде.
 
-Executors (locally, in sandboxes):
-  codex       → codex exec -s workspace-write <task>
+Executor'ы (локально, в песочницах):
+  codex       → codex exec -s workspace-write <задача>
 
-Run: python3 dispatch.py [--once | --loop <sec>]
+Запуск: python3 dispatch.py [--once | --loop <сек>]
 """
 import base64
 import json
@@ -22,7 +22,7 @@ import urllib.error
 import urllib.request
 
 API = os.getenv('ORCHESTRATOR_API', 'http://localhost:8090')
-AUTH = os.getenv('ORCHESTRATOR_AUTH', '')  # user:pass or token:<token>
+AUTH = os.getenv('ORCHESTRATOR_AUTH', '')  # user:pass или token:<токен>
 WORKDIR = os.getenv('ORCHESTRATOR_WORKDIR', '/home/hermes/prompt-hospital')
 
 
@@ -63,8 +63,40 @@ def run_codex(task_id, title):
     return False
 
 
-def tick():
+def auto_assign():
     j = api('/journal')
+    if not j:
+        return
+    unassigned = [t for t in j.get('queue', []) if not t.get('assignedTo')]
+    if not unassigned:
+        return
+    workers = j.get('workers', [])
+    for task in unassigned:
+        # Ищем свободную модель (исключая Гермеса w0)
+        target = None
+        for w in workers:
+            if w['id'] == 'w0':
+                continue
+            if w.get('status') in ('wait', 'done') and not w.get('task'):
+                if task.get('kind'):
+                    if w.get('role') == task['kind']:
+                        target = w
+                        break
+                else:
+                    target = w
+                    break
+        if target:
+            print(f"[{time.strftime('%H:%M:%S')}] Координатор (авто): задача {task['id']} → {target['name']} ({target['id']})")
+            op('assign', [task['id'], target['id']])
+            # Обновляем локальное состояние воркера, чтобы не назначить на него вторую задачу в том же тике
+            target['task'] = task['id']
+            target['status'] = 'run'
+
+
+def tick():
+    auto_assign()
+    j = api('/journal')
+
     if not j:
         return
     for w in j.get('workers', []):
@@ -73,14 +105,14 @@ def tick():
         task = next((t for t in j.get('queue', []) if t['id'] == w['task']), None)
         if not task:
             continue
-        # Is the task still assigned to this model?
+        # Задача всё ещё назначена на эту модель?
         if task.get('assignedTo') != w['id']:
             continue
         model = (w.get('model') or '').lower()
         if 'codex' in model:
             print(f"[{time.strftime('%H:%M:%S')}] задача {task['id']} → Codex")
             ok = run_codex(task['id'], task['title'])
-            # Re-check: the task may have been reassigned while it was running.
+            # Повторная проверка: за время выполнения задача могла быть переназначена.
             j2 = api('/journal')
             if j2:
                 t2 = next((t for t in j2.get('queue', []) if t['id'] == task['id']), None)
