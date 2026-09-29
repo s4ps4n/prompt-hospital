@@ -6,7 +6,7 @@
 
 ## Уровень 0. Просто посмотреть офис (без всякого сервера)
 
-Нужно только **Node.js 18+** на машине.
+Нужно только **Node.js 22+** на машине.
 
 ```bash
 git clone https://github.com/s4ps4n/prompt-hospital.git

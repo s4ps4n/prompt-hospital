@@ -1,17 +1,31 @@
+<div align="center">
+
 # Prompt Hospital
 
-> [English](README.md) · Русский
+**У ваших ИИ-моделей наконец есть офис.**
 
-![Node 18+](https://img.shields.io/badge/Node-18+-339933?logo=nodedotjs&logoColor=white)
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![Traefik](https://img.shields.io/badge/Traefik-3-24A1C1?logo=traefikproxy&logoColor=white)
-![Vitest](https://img.shields.io/badge/tests-Vitest-6E9F18?logo=vitest&logoColor=white)
+Изометрический пульт ИИ-команды в духе Theme Hospital: у каждой модели свой кабинет, задачи
+приходят конвертами, а перетащил конверт на модель — она реально запускается.
 
-Мультяшный офис-визуализация ИИ-команды в стиле Theme Hospital. Единый пульт оркестратора: смотришь, кто чем занят, перетаскиваешь задачи на модели, добавляешь модели — а под капотом это пишется в реальный журнал и реально запускает модели.
+[**▸ Демо**](https://prompthospital.site/demo) ·
+[**Быстрый старт**](#установка) ·
+[**Добавить модель**](#добавить-свою-модель) ·
+[Дорожная карта](ROADMAP.md) ·
+[English](README.md)
+
+</div>
+
+https://github.com/user-attachments/assets/0c18869a-997c-45b7-9600-4d6642f35a36
+
+<div align="center">
+
+![Node 22+](https://img.shields.io/badge/Node-22+-339933?logo=nodedotjs&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![MIT](https://img.shields.io/badge/license-MIT-green)
+
+</div>
 
 ## Что это
 
@@ -38,7 +52,6 @@ orchestrator/             # бэкенд пульта (в этом же репо
   journal.py              #   CLI операций (те же, что OPS фронтенда)
   server.py               #   HTTP API: GET /journal, POST /op
   dispatch.py             #   диспетчер: задача → реальный запуск модели
-  review-backend.py       #   ревью/рефакторинг бэкенда бесплатной моделью
 ```
 
 ## Архитектура
@@ -139,9 +152,21 @@ python3 dispatch.py --loop 30
 
 **Правило ведения:** запустил модель на задачу → сразу `addTask` + `assign` в журнал; завершил → `complete`. Иначе офис показывает неправду.
 
-## Как добавить свою модель-исполнителя
+## Добавить свою модель
 
-В `dispatch.py` в функции `tick()` добавь ветку под свою модель:
+У модели две стороны: как она выглядит в офисе и что реально запускается, когда ей дают задачу.
+
+**1. Внешность** — запись в `CATALOG` в [`src/journal/catalog.ts`](src/journal/catalog.ts):
+
+```ts
+{ model: 'phi', name: 'Phi', provider: 'Microsoft', hair: '#6fb7e8', color: '#3f87b8', skin: '#f2c9a0', style: 'bob', acc: 'glasses' },
+```
+
+`style`: `cap | bob | quiff | bun | spiky`; `acc` (необязательно): `wings | glasses | headset`.
+Модель не из каталога всё равно получает стабильную внешность — по префиксу (`qwen-27b` → Qwen),
+по провайдеру или по хэшу имени; этот шаг — про собственное лицо, а не про то, чтобы заработало.
+
+**2. Запуск** — в [`orchestrator/dispatch.py`](orchestrator/dispatch.py), внутри `tick()`, ветка:
 
 ```python
 model = (w.get('model') or '').lower()
@@ -151,47 +176,14 @@ elif 'my-model' in model:
     ok = run_my_model(task['title'])
 ```
 
-И напиши `run_my_model` — вызов твоего executor'а (CLI/API). Диспетчер сам запишет `complete`/`block` по результату.
+Дальше — функция `run_my_model` с вызовом вашего исполнителя (CLI/API). `complete`/`block`
+диспетчер проставит сам.
 
-## Деплой (как это развёрнуто в проде)
+PR «Add model: <Имя>» со скриншотом кабинета — самый простой первый вклад.
 
-Фронт и API — docker-контейнеры в одной сети, за Traefik.
+## Деплой
 
-```bash
-# 1. Статика в nginx, Basic Auth, прокси на API
-cat > nginx.conf <<'EOF'
-server {
-  listen 80;
-  root /usr/share/nginx/html;
-  index index.html;
-  auth_basic "Prompt Hospital";
-  auth_basic_user_file /etc/nginx/.htpasswd;
-  location /journal { proxy_pass http://orchestrator-api:8090; }
-  location /op      { proxy_pass http://orchestrator-api:8090; }
-  location /        { try_files $uri /index.html; }
-}
-EOF
-
-# 2. API в docker-сети
-docker run -d --name orchestrator-api --network deploy_default \
-  -v ./orchestrator:/app -w /app --restart unless-stopped \
-  python:3.11-alpine python server.py 8090
-
-# 3. Фронт с Traefik-лейблами (HTTPS через certResolver le)
-docker run -d --name prompt-hospital --network deploy_default \
-  -v ./site:/usr/share/nginx/html:ro \
-  -v ./nginx.conf:/etc/nginx/conf.d/default.conf:ro \
-  -v ./.htpasswd:/etc/nginx/.htpasswd:ro \
-  --restart unless-stopped \
-  --label traefik.enable=true \
-  --label "traefik.http.routers.prompthospital.rule=Host(\`example.com\`)" \
-  --label traefik.http.routers.prompthospital.entrypoints=websecure \
-  --label traefik.http.routers.prompthospital.tls.certresolver=le \
-  --label traefik.http.services.prompthospital.loadbalancer.server.port=80 \
-  nginx:alpine
-```
-
-DNS: `A-запись example.com → <IP сервера>`. Сертификат выпустит Traefik (Let's Encrypt).
+Docker + nginx (Basic Auth) + Traefik с HTTPS — пошагово в [INSTALL.ru.md, уровень 2](INSTALL.ru.md).
 
 ## Уровни интеграции (что уже готово)
 
@@ -202,11 +194,14 @@ DNS: `A-запись example.com → <IP сервера>`. Сертификат 
 
 Все четыре готовы. По умолчанию офис работает на уровне C (пишет в журнал); D включается запуском `dispatch.py`.
 
-## Команда
+## Эталонная сборка
+
+Как это запущено у автора; любой оркестратор, который умеет HTTP, подключается так же.
+
 
 | Модель | Роль | Как подключена |
 |---|---|---|
-| Гермес | координатор | DeepSeek (этот ассистент) |
+| Гермес | координатор | DeepSeek через Hermes Agent |
 | Claude Code | исполнитель | локально, `claude -p` |
 | Codex | исполнитель | локально, `codex exec -s workspace-write` |
 | Nemotron / Qwen / Laguna | рецензент | OpenRouter `:free` |
@@ -219,3 +214,16 @@ npm run lint        # oxlint
 npm run build       # tsc + vite build
 ```
 
+## Дорожная карта
+
+- ✅ Офис и кабинеты — модели, лоток, журнал, бездельники
+- ✅ Свой оркестратор — журнал, API, диспетчер, который реально запускает модели
+- 🔜 Статистика — кто сколько работал, по моделям
+- 🔜 Надзиратель — рука, которая шлёпает бездельников, чтобы бежали к Гермесу за задачей
+
+Подробнее — [ROADMAP.md](ROADMAP.md).
+
+## Благодарности и лицензия
+
+Вдохновлено *Theme Hospital* (Bullfrog, 1997); ресурсы, названия и код оригинала не используются.
+[MIT](LICENSE) © s4ps4n.

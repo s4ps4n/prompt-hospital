@@ -1,25 +1,32 @@
+<div align="center">
+
 # Prompt Hospital
 
-> English · [Русский](README.ru.md)
+**Your AI models finally have an office.**
+
+An isometric, Theme Hospital–style control panel for an AI team: each model gets a room,
+tasks arrive as envelopes, and when you drag one onto a model — the model actually runs.
+
+[**▸ Live demo**](https://prompthospital.site/demo) ·
+[**Quick start**](#installation) ·
+[**Add your model**](#add-your-model) ·
+[Roadmap](ROADMAP.md) ·
+[Русский](README.ru.md)
+
+</div>
 
 https://github.com/user-attachments/assets/0c18869a-997c-45b7-9600-4d6642f35a36
 
+<div align="center">
 
+![Node 22+](https://img.shields.io/badge/Node-22+-339933?logo=nodedotjs&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![MIT](https://img.shields.io/badge/license-MIT-green)
 
+</div>
 
-
-
-
-![Node 18+](https://img.shields.io/badge/Node-18+-339933?logo=nodedotjs&logoColor=white)
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
-![Traefik](https://img.shields.io/badge/Traefik-3-24A1C1?logo=traefikproxy&logoColor=white)
-![Vitest](https://img.shields.io/badge/tests-Vitest-6E9F18?logo=vitest&logoColor=white)
-
-A cartoon office visualization of an AI team, in the spirit of Theme Hospital. A single orchestrator control panel: see who is doing what, drag tasks onto models, add models — and under the hood it writes to a real journal and actually runs the models.
 
 ## What it is
 
@@ -46,7 +53,6 @@ orchestrator/             # control-panel backend (in this same repository)
   journal.py              #   operation CLI (same ops as the frontend OPS)
   server.py               #   HTTP API: GET /journal, POST /op
   dispatch.py             #   dispatcher: task → actually run the model
-  review-backend.py       #   backend review/refactor via a free model
 ```
 
 ## Architecture
@@ -144,9 +150,21 @@ Roles: `coordinator, executor, architect, fullstack, sysadmin, designer, UX/UI, 
 
 **Bookkeeping rule:** whenever you start a model on a task, immediately `addTask` + `assign` in the journal; when done, `complete`. Otherwise the office shows a lie.
 
-## Adding your own executor model
+## Add your model
 
-In `dispatch.py`, inside `tick()`, add a branch for your model:
+A model has two sides: how it looks in the office and what actually runs when it gets a task.
+
+**1. Appearance** — add an entry to `CATALOG` in [`src/journal/catalog.ts`](src/journal/catalog.ts):
+
+```ts
+{ model: 'phi', name: 'Phi', provider: 'Microsoft', hair: '#6fb7e8', color: '#3f87b8', skin: '#f2c9a0', style: 'bob', acc: 'glasses' },
+```
+
+`style`: `cap | bob | quiff | bun | spiky`; `acc` (optional): `wings | glasses | headset`.
+Models not in the catalog still get a stable look — by prefix (`qwen-27b` → Qwen), by provider,
+or by a hash of the name — so this step is about a face of its own, not about working at all.
+
+**2. Execution** — in [`orchestrator/dispatch.py`](orchestrator/dispatch.py), inside `tick()`, add a branch:
 
 ```python
 model = (w.get('model') or '').lower()
@@ -156,47 +174,14 @@ elif 'my-model' in model:
     ok = run_my_model(task['title'])
 ```
 
-Then write `run_my_model` — the call to your executor (CLI/API). The dispatcher records `complete`/`block` by itself.
+Then write `run_my_model` — the call to your executor (CLI/API). The dispatcher records
+`complete`/`block` by itself.
 
-## Deploy (as it runs in prod)
+A PR titled `Add model: <Name>` with a screenshot of the room is the easiest first contribution.
 
-Frontend and API are docker containers on one network, behind Traefik.
+## Deploy
 
-```bash
-# 1. Static files in nginx, Basic Auth, proxy to the API
-cat > nginx.conf <<'EOF'
-server {
-  listen 80;
-  root /usr/share/nginx/html;
-  index index.html;
-  auth_basic "Prompt Hospital";
-  auth_basic_user_file /etc/nginx/.htpasswd;
-  location /journal { proxy_pass http://orchestrator-api:8090; }
-  location /op      { proxy_pass http://orchestrator-api:8090; }
-  location /        { try_files $uri /index.html; }
-}
-EOF
-
-# 2. API in the docker network
-docker run -d --name orchestrator-api --network deploy_default \
-  -v ./orchestrator:/app -w /app --restart unless-stopped \
-  python:3.11-alpine python server.py 8090
-
-# 3. Frontend with Traefik labels (HTTPS via certResolver le)
-docker run -d --name prompt-hospital --network deploy_default \
-  -v ./site:/usr/share/nginx/html:ro \
-  -v ./nginx.conf:/etc/nginx/conf.d/default.conf:ro \
-  -v ./.htpasswd:/etc/nginx/.htpasswd:ro \
-  --restart unless-stopped \
-  --label traefik.enable=true \
-  --label "traefik.http.routers.prompthospital.rule=Host(\`example.com\`)" \
-  --label traefik.http.routers.prompthospital.entrypoints=websecure \
-  --label traefik.http.routers.prompthospital.tls.certresolver=le \
-  --label traefik.http.services.prompthospital.loadbalancer.server.port=80 \
-  nginx:alpine
-```
-
-DNS: an `A record example.com → <server IP>`. Traefik issues the certificate itself (Let's Encrypt).
+Docker + nginx (Basic Auth) + Traefik with HTTPS — step by step in [INSTALL.md, Level 2](INSTALL.md#level-2-prod-docker--nginx--domain--https).
 
 ## Integration levels (all done)
 
@@ -207,11 +192,14 @@ DNS: an `A record example.com → <server IP>`. Traefik issues the certificate i
 
 By default the office runs at level C (writes to the journal); D is enabled by running `dispatch.py`.
 
-## Team
+## Reference setup
+
+How the author runs it; any orchestrator that speaks HTTP works the same way.
+
 
 | Model | Role | How it is wired |
 |---|---|---|
-| Hermes | coordinator | DeepSeek (this assistant) |
+| Hermes | coordinator | DeepSeek via Hermes Agent |
 | Claude Code | executor | locally, `claude -p` |
 | Codex | executor | locally, `codex exec -s workspace-write` |
 | Nemotron / Qwen / Laguna | reviewer | OpenRouter `:free` |
@@ -224,3 +212,16 @@ npm run lint        # oxlint
 npm run build       # tsc + vite build
 ```
 
+## Roadmap
+
+- ✅ Office and rooms — models, tray, journal, idle animations
+- ✅ Own orchestrator — journal, API, dispatcher that actually runs models
+- 🔜 Stats — who worked how much, per model
+- 🔜 The Warden — a hand that slaps idle models back to Hermes for a task
+
+Details in [ROADMAP.md](ROADMAP.md).
+
+## Credits and license
+
+Inspired by *Theme Hospital* (Bullfrog, 1997); no assets, names or code from the original are used.
+[MIT](LICENSE) © s4ps4n.

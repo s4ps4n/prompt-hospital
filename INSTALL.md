@@ -6,7 +6,7 @@ Three levels, from simplest to full. Start with the first — the office works i
 
 ## Level 0. Just see the office (no server at all)
 
-You only need **Node.js 18+**.
+You only need **Node.js 22+**.
 
 ```bash
 git clone https://github.com/s4ps4n/prompt-hospital.git
