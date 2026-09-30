@@ -1,0 +1,11 @@
+{
+  "name": "tochka-b24",
+  "private": true,
+  "type": "module",
+  "description": "Точка → Битрикс24: счёт → «Оплачен» (T-71). Рантайм без зависимостей, Node ≥ 22.18.",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "start": "node --env-file=.env src/server.ts",
+    "test": "npx --yes vitest@5.0.2 run"
+  }
+}
