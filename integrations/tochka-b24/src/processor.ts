@@ -91,7 +91,13 @@ export function makeProcessor({ store, journal, log, autoClose }: ProcessorDeps)
       .join('\n')
     const text = `⚠ Требует проверки: поступил платёж, счёт НЕ закрыт автоматически.\nСлучай: ${label}.\nПричина: ${why}.\n\nПлатёж:\n${describe(p)}\n\nСчета-кандидаты:\n${list}`
     for (const c of candidates) await store.flagForReview(c, text)
-    await notify(p, `Платёж ${rub(p.amountKop)} требует проверки (${label}): кандидатов — ${candidates.length}, подробности в таймлайне счетов.\n${candidates.map((c) => `• ${store.link(c)}`).join('\n')}`)
+    // Пометки уже стоят: сбой задачи не должен вести к повторной обработке (и дублям пометок).
+    try {
+      await store.addTask(`Платёж требует проверки (Точка): ${label}`, `${text}\n\n${candidates.map((c) => `• ${store.link(c)}`).join('\n')}`)
+    } catch (e) {
+      log('payment.task_failed', { ref: journal.ref(p.key), error: errCode(e) })
+    }
+    await notify(p,`Платёж ${rub(p.amountKop)} требует проверки (${label}): кандидатов — ${candidates.length}, подробности в таймлайне счетов.\n${candidates.map((c) => `• ${store.link(c)}`).join('\n')}`)
     return { status: 'review', invoiceIds: candidates.map((c) => c.id) }
   }
 
@@ -117,7 +123,7 @@ export function makeProcessor({ store, journal, log, autoClose }: ProcessorDeps)
       return { status: 'closed', invoiceId: m.invoice.id }
     }
     if (m.level === 2) return review(p, m.reason, m.candidates, m.mentioned, m.combo)
-    await store.reportUnresolved('Неразобранный платёж (Точка)', `Платёж не сопоставлен со счётом: ${UNRESOLVED[m.reason]}.\n\n${describe(p)}`)
+    await store.addTask('Неразобранный платёж (Точка)', `Платёж не сопоставлен со счётом: ${UNRESOLVED[m.reason]}.\n\n${describe(p)}`)
     await notify(p, 'Неразобранный платёж из Точки — поставлена задача на ручной разбор.')
     return { status: 'unresolved' }
   }

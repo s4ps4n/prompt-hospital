@@ -1,6 +1,11 @@
 // Битрикс24: счета (смарт-процесс), реквизиты, таймлайн, задачи, уведомления.
 // Доступ — локальное приложение портала (OAuth, права crm/task/im), НЕ входящий вебхук с правами на всю CRM.
 // Платёжные данные уходят только на портал владельца — в его же CRM.
+//
+// Тип счетов — смарт-процесс (crm.item, entityTypeId 31), а не старые crm.invoice: с 2022 г. новые счета Б24
+// создаются только смарт-процессом, crm.invoice.* — устаревший API без стадий-воронок (STATUS_ID вида DT31_<cat>:…,
+// на которых построен поиск, у него нет). Фактический тип на портале — `node src/stages.ts` (crm.type.list);
+// свой смарт-процесс — свой entityTypeId в B24_ENTITY_TYPE_ID, код тот же.
 
 import type { Invoice } from './matcher.ts'
 import { normalizeInn, toKopecks } from './money.ts'
@@ -136,8 +141,8 @@ export interface InvoiceStore {
   markPaid(inv: Invoice, paidDate: string): Promise<void>
   comment(inv: Invoice, text: string): Promise<void>
   flagForReview(inv: Invoice, comment: string): Promise<void>
-  /** Задача ответственному за счета, срок — сегодня. */
-  reportUnresolved(title: string, description: string): Promise<void>
+  /** Задача ответственному за счета (уровни 2–3), срок — сегодня. */
+  addTask(title: string, description: string): Promise<void>
   /** Сообщение ответственному в чат Б24 (не наружу). */
   notify(text: string): Promise<void>
   /** Ссылка (BB-код Б24) на сделку счёта; сделки нет — на сам счёт. */
@@ -352,7 +357,7 @@ export class B24InvoiceStore implements InvoiceStore {
     await this.comment(inv, comment)
   }
 
-  async reportUnresolved(title: string, description: string): Promise<void> {
+  async addTask(title: string, description: string): Promise<void> {
     await this.rest.call('tasks.task.add', {
       fields: { TITLE: title, DESCRIPTION: description, RESPONSIBLE_ID: this.cfg.responsibleId, DEADLINE: endOfDay(this.now()) },
     })
