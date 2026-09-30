@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>МИР ДЗЮДО — UI-кит и макеты секций</title>
+<style>
+/* ── Настройки темы (в Каркасе — поля themeSchema в админке; см. JUDO-UIKIT.md §2).
+      Единственное место с цветовыми литералами. ───────────────────────────── */
+:root{
+  --c-bg:#F5F2EB; --c-bg-elev:#FFFFFF; --c-bg-warm:#EBE4D6;
+  --c-text:#15140F; --c-ink-soft:#3B372F; --c-muted:#686258;
+  --c-line:#DCD4C5; --c-line-strong:#857B6B;
+  --c-accent:#A3161C; --c-on-accent:#FFFFFF;
+  --radius:2px; --radius-lg:6px; --space:8px;
+  --shadow-card:0 1px 2px rgb(21 20 15 / .06), 0 8px 24px -12px rgb(21 20 15 / .18);
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-head:"Inter Tight","Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --head-weight:700; --head-ls:-0.02em;
+  /* выводится движком */
+  --c-accent-deep:color-mix(in oklab,var(--c-accent),var(--c-text) 25%);
+  --c-price:var(--c-accent);
+  --header-h:68px;
+  /* не тема, а данные: цвет варианта товара «синее» (в носителе — из атрибута варианта) */
+  --variant-blue:color-mix(in oklab,var(--c-text) 55%,oklch(45% .12 260));
+}
+
+/* ── Стили носителя: только токены ───────────────────────────── */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font:400 16px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--c-accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--font-head);font-weight:var(--head-weight);letter-spacing:var(--head-ls);margin:0}
+h1{font-size:clamp(40px,6.4vw,72px);line-height:1}
+h2{font-size:clamp(28px,3.6vw,44px);line-height:1.1}
+h3{font-size:clamp(20px,1.8vw,24px);line-height:1.25}
+p{margin:0;max-width:68ch}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+@media(min-width:768px){.wrap{padding:0 32px}}
+.overline{font:600 12px/1.2 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--c-muted)}
+.lead{font-size:clamp(17px,1.4vw,19px);color:var(--c-ink-soft)}
+.small{font-size:14px;line-height:1.5;color:var(--c-muted)}
+.price{font-variant-numeric:tabular-nums;color:var(--c-price);font-weight:600}
+
+.sec{padding:64px 0}
+@media(min-width:1024px){.sec{padding:96px 0}}
+.sec--warm{background:var(--c-bg-warm)}
+.sec--dark{background:var(--c-text);color:var(--c-bg)}
+.sec--dark .overline,.sec--dark .small{color:color-mix(in oklab,var(--c-bg) 62%,var(--c-text))}
+.sec--dark .lead{color:color-mix(in oklab,var(--c-bg) 82%,var(--c-text))}
+.sec-head{display:grid;gap:12px;margin-bottom:40px}
+.sec-head--row{grid-template-columns:1fr;align-items:end}
+@media(min-width:768px){.sec-head--row{grid-template-columns:1fr auto}}
+
+/* Подписи макета (не часть сайта) */
+.note{font:500 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--c-muted);border:1px dashed var(--c-line-strong);border-radius:var(--radius);padding:6px 10px;display:inline-block}
+.sec--dark .note{color:color-mix(in oklab,var(--c-bg) 62%,var(--c-text));border-color:color-mix(in oklab,var(--c-bg) 35%,var(--c-text))}
+.doc-bar{background:var(--c-bg-elev);border-bottom:1px solid var(--c-line);padding:12px 0;font-size:14px}
+.doc-bar .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center}
+.doc-bar nav{display:flex;flex-wrap:wrap;gap:4px 16px}
+.doc-bar a{color:var(--c-ink-soft);text-decoration:none}
+.doc-bar a:hover{color:var(--c-accent)}
+.doc-title{font:600 13px/1 var(--font);letter-spacing:.1em;text-transform:uppercase}
+
+/* Фото-плейсхолдер: «ткань» из токенов */
+.ph{position:relative;border-radius:var(--radius-lg);overflow:hidden;background:
+  repeating-linear-gradient(45deg,color-mix(in oklab,var(--c-line) 55%,transparent) 0 1px,transparent 1px 7px),
+  repeating-linear-gradient(-45deg,color-mix(in oklab,var(--c-line) 55%,transparent) 0 1px,transparent 1px 7px),
+  var(--c-bg-warm)}
+.ph--dark{background:
+  repeating-linear-gradient(45deg,color-mix(in oklab,var(--c-bg) 9%,transparent) 0 1px,transparent 1px 7px),
+  repeating-linear-gradient(-45deg,color-mix(in oklab,var(--c-bg) 9%,transparent) 0 1px,transparent 1px 7px),
+  color-mix(in oklab,var(--c-text) 88%,var(--c-bg))}
+.ph--blue{background:
+  repeating-linear-gradient(45deg,color-mix(in oklab,var(--c-bg) 12%,transparent) 0 1px,transparent 1px 7px),
+  repeating-linear-gradient(-45deg,color-mix(in oklab,var(--c-bg) 12%,transparent) 0 1px,transparent 1px 7px),
+  var(--variant-blue)}
+.ph>span{position:absolute;left:12px;bottom:10px;font:500 11px/1.3 ui-monospace,Menlo,monospace;color:var(--c-muted);background:color-mix(in oklab,var(--c-bg-elev) 85%,transparent);padding:3px 6px;border-radius:var(--radius)}
+.r45{aspect-ratio:4/5}.r34{aspect-ratio:3/4}.r11{aspect-ratio:1}.r43{aspect-ratio:4/3}
+
+/* ── Кнопки ── */
+.btn{--h:48px;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--h);padding:0 24px;border-radius:var(--radius);border:1px solid transparent;font:600 15px/1 var(--font);letter-spacing:.01em;text-decoration:none;cursor:pointer;transition:background .18s ease-out,color .18s ease-out,border-color .18s ease-out,transform .18s ease-out}
+.btn:active{transform:translateY(1px)}
+.btn--primary{background:var(--c-accent);color:var(--c-on-accent)}
+.btn--primary:hover{background:var(--c-accent-deep)}
+.btn--secondary{background:transparent;color:var(--c-text);border-color:var(--c-line-strong)}
+.btn--secondary:hover{border-color:var(--c-text)}
+.btn--ghost{background:transparent;color:var(--c-text);padding:0 4px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--c-line-strong)}
+.btn--ghost:hover{text-decoration-color:var(--c-accent)}
+.btn--on-dark{background:var(--c-bg);color:var(--c-text)}
+.btn--on-dark:hover{background:var(--c-bg-warm)}
+.btn--outline-dark{background:transparent;color:var(--c-bg);border-color:color-mix(in oklab,var(--c-bg) 45%,var(--c-text))}
+.btn--outline-dark:hover{border-color:var(--c-bg)}
+.btn[disabled],.btn[aria-disabled=true]{background:var(--c-line);color:var(--c-muted);border-color:transparent;cursor:not-allowed;transform:none}
+.btn--sm{--h:40px;padding:0 16px;font-size:14px}
+.btn--block{width:100%}
+.btn[data-loading]{color:transparent;position:relative}
+.btn[data-loading]::after{content:"";position:absolute;width:18px;height:18px;border:2px solid var(--c-on-accent);border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(1turn)}}
+
+/* ── Сегменты роста ── */
+.seg{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:6px;border:0;padding:0;margin:0}
+.seg legend,.field-legend{font:600 13px/1.3 var(--font);margin-bottom:10px;display:flex;justify-content:space-between;width:100%;gap:12px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;margin:0}
+.seg span{display:grid;place-items:center;min-height:48px;border:1px solid var(--c-line-strong);border-radius:var(--radius);background:var(--c-bg-elev);font:500 15px/1 var(--font);font-variant-numeric:tabular-nums;cursor:pointer;transition:border-color .15s ease-out,background .15s ease-out}
+.seg label:hover span{border-color:var(--c-text)}
+.seg input:checked+span{background:var(--c-text);color:var(--c-bg);border-color:var(--c-text)}
+.seg input:focus-visible+span{outline:2px solid var(--c-accent);outline-offset:2px}
+.seg .na span{color:var(--c-muted);background:repeating-linear-gradient(135deg,transparent 0 6px,color-mix(in oklab,var(--c-line) 70%,transparent) 6px 7px),var(--c-bg);border-style:dashed;text-decoration:line-through;cursor:not-allowed}
+
+/* ── Свотчи ── */
+.swatches{display:flex;gap:16px;border:0;padding:0;margin:0;flex-wrap:wrap}
+.sw{display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;min-height:44px}
+.sw input{position:absolute;opacity:0}
+.sw i{width:40px;height:40px;border-radius:50%;border:1px solid var(--c-line-strong);box-shadow:0 0 0 3px var(--c-bg),0 0 0 4px transparent;transition:box-shadow .15s ease-out}
+.sw--white i{background:var(--c-bg-elev)}
+.sw--blue i{background:var(--variant-blue)}
+.sw input:checked+i{box-shadow:0 0 0 3px var(--c-bg),0 0 0 5px var(--c-accent)}
+.sw input:focus-visible+i{outline:2px solid var(--c-accent);outline-offset:6px}
+
+/* ── Бейджи ── */
+.badge{display:inline-flex;align-items:center;gap:8px;font:500 13px/1 var(--font);color:var(--c-ink-soft)}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c-accent)}
+.badge--na{color:var(--c-muted)}
+.badge--na::before{background:transparent;border:1.5px solid var(--c-muted)}
+.tag{display:inline-block;font:600 11px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;padding:6px 8px;border:1px solid var(--c-text);border-radius:var(--radius);background:var(--c-bg-elev)}
+.tag--new{border-color:var(--c-accent);color:var(--c-accent)}
+
+/* ── Поля ── */
+.field{display:grid;gap:6px}
+.field label{font:600 13px/1.3 var(--font)}
+.field input,.field textarea,.field select{min-height:48px;padding:12px 14px;border:1px solid var(--c-line-strong);border-radius:var(--radius);background:var(--c-bg-elev);color:var(--c-text);font:400 16px/1.4 var(--font)}
+.field textarea{min-height:96px;resize:vertical}
+.field input::placeholder,.field textarea::placeholder{color:var(--c-muted)}
+.field input:focus,.field textarea:focus{outline:2px solid var(--c-accent);outline-offset:0;border-color:var(--c-accent)}
+.field--error input{border-color:var(--c-accent);box-shadow:inset 3px 0 0 var(--c-accent)}
+.field .err{font-size:13px;color:var(--c-accent)}
+.field input:disabled{background:var(--c-bg);color:var(--c-muted)}
+.check{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--c-ink-soft);min-height:44px}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--c-accent);flex:none}
+
+/* ── Способ связи ── */
+.contact-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border:0;padding:0;margin:0}
+.contact-pick label{position:relative}
+.contact-pick input{position:absolute;opacity:0}
+.contact-pick span{display:grid;place-items:center;gap:4px;min-height:56px;padding:8px;border:1px solid var(--c-line-strong);border-radius:var(--radius);background:var(--c-bg-elev);font:500 14px/1.2 var(--font);cursor:pointer;text-align:center}
+.contact-pick input:checked+span{border-color:var(--c-accent);box-shadow:inset 0 0 0 1px var(--c-accent);color:var(--c-accent)}
+.contact-pick input:focus-visible+span{outline:2px solid var(--c-accent);outline-offset:2px}
+
+/* ── Инфо-плашка ── */
+.info{background:var(--c-bg-warm);border-left:3px solid var(--c-accent);padding:14px 16px;border-radius:0 var(--radius) var(--radius) 0;font-size:14px;line-height:1.55;color:var(--c-ink-soft)}
+.info b{color:var(--c-text)}
+
+/* ── Карточка товара ── */
+.pcard{display:grid;gap:14px;text-decoration:none;position:relative}
+.pcard .ph{transition:box-shadow .2s ease-out}
+.pcard:hover .ph{box-shadow:var(--shadow-card)}
+.pcard .tags{position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:1}
+.pcard h3{font-size:17px;line-height:1.3;letter-spacing:-.01em}
+.pcard-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.grid-4{display:grid;gap:32px 16px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:1024px){.grid-4{grid-template-columns:repeat(4,1fr);gap:40px 24px}}
+
+/* ── Toast ── */
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);opacity:0;pointer-events:none;display:flex;gap:16px;align-items:center;background:var(--c-text);color:var(--c-bg);padding:12px 12px 12px 18px;border-radius:var(--radius-lg);box-shadow:var(--shadow-card);transition:opacity .25s ease-out,transform .25s ease-out;z-index:50;width:max-content;max-width:calc(100vw - 32px)}
+.toast.is-on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast::before{content:"✓";display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--c-accent);color:var(--c-on-accent);font-size:13px;flex:none}
+.toast--static{position:static;transform:none;opacity:1;pointer-events:auto}
+@media(max-width:767px){.toast{bottom:88px}}
+
+/* ── Кит: раскладка ── */
+.kit{display:grid;gap:48px}
+.kit-row{display:grid;gap:16px}
+.kit-row>h3{font-size:15px;letter-spacing:0;font-family:var(--font);font-weight:600;padding-bottom:10px;border-bottom:1px solid var(--c-line)}
+.flex{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.swatch-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.tok{border:1px solid var(--c-line);border-radius:var(--radius-lg);overflow:hidden;background:var(--c-bg-elev);font-size:12px}
+.tok div{height:72px;border-bottom:1px solid var(--c-line)}
+.tok p{padding:8px 10px;line-height:1.35}
+.tok b{display:block;font-size:13px}
+.type-scale{display:grid;gap:18px}
+.type-scale>div{display:grid;grid-template-columns:1fr;gap:4px;padding-bottom:18px;border-bottom:1px solid var(--c-line)}
+@media(min-width:768px){.type-scale>div{grid-template-columns:160px 1fr;align-items:baseline}}
+.two{display:grid;gap:24px}
+@media(min-width:768px){.two{grid-template-columns:1fr 1fr}}
+
+/* ── Промо-полоса и шапка ── */
+.promo{background:var(--c-text);color:color-mix(in oklab,var(--c-bg) 85%,var(--c-text));font-size:13px;overflow:hidden;white-space:nowrap}
+.promo .wrap{display:flex;gap:32px;justify-content:center;padding-top:9px;padding-bottom:9px}
+.promo span+span::before{content:"·";margin-right:32px;color:var(--c-accent)}
+@media(max-width:767px){.promo .wrap{justify-content:flex-start}.promo span:nth-child(n+2){display:none}}
+.hdr{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--c-bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--c-line)}
+.hdr .wrap{display:flex;align-items:center;gap:32px;min-height:var(--header-h)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font:800 17px/1 var(--font-head);letter-spacing:.06em;text-transform:uppercase}
+.logo i{width:30px;height:30px;border-radius:50%;background:var(--c-accent);box-shadow:inset 0 0 0 6px var(--c-bg),inset 0 0 0 7px var(--c-text)}
+.nav{display:none;gap:24px;font-size:15px}
+.nav a{text-decoration:none;color:var(--c-ink-soft);padding:12px 0}
+.nav a:hover{color:var(--c-text)}
+.hdr-end{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tel{display:none;font-weight:600;text-decoration:none;font-variant-numeric:tabular-nums}
+.icon-btn{position:relative;display:grid;place-items:center;width:44px;height:44px;border-radius:var(--radius);border:0;background:transparent;color:var(--c-text);cursor:pointer;text-decoration:none}
+.icon-btn:hover{background:var(--c-bg-warm)}
+.icon-btn svg{width:22px;height:22px}
+.count{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--c-accent);color:var(--c-on-accent);font:600 11px/18px var(--font);text-align:center}
+@media(min-width:1100px){.nav{display:flex}.tel{display:block}.burger{display:none}}
+
+/* ── 1 Hero ── */
+.hero{padding:40px 0 56px}
+.hero-grid{display:grid;gap:32px}
+.hero-text{display:grid;gap:24px;align-content:center}
+.hero h1 em{font-style:normal;color:color-mix(in oklab,var(--c-bg) 60%,var(--c-text))}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;padding-top:24px;border-top:1px solid color-mix(in oklab,var(--c-bg) 20%,var(--c-text))}
+.facts b{display:block;font:700 clamp(22px,2.4vw,32px)/1.1 var(--font-head);letter-spacing:var(--head-ls);color:var(--c-bg)}
+@media(max-width:767px){.hero-cta .btn{flex:1 1 100%}.hero-grid .ph{order:-1}}
+@media(min-width:1024px){.hero{padding:72px 0 96px}.hero-grid{grid-template-columns:7fr 5fr;gap:64px}}
+
+/* ── 2 Конфигуратор ── */
+.cfg{display:grid;gap:32px}
+@media(min-width:1024px){.cfg{grid-template-columns:1fr 1fr;gap:64px;align-items:start}.cfg .ph{position:sticky;top:calc(var(--header-h) + 24px)}}
+.cfg-panel{display:grid;gap:28px;background:var(--c-bg-elev);border:1px solid var(--c-line);border-radius:var(--radius-lg);padding:24px}
+@media(min-width:768px){.cfg-panel{padding:32px}}
+.models{display:grid;gap:6px;border:0;padding:0;margin:0}
+.models label{position:relative}
+.models input{position:absolute;opacity:0}
+.models span{display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:56px;padding:10px 16px;border:1px solid var(--c-line-strong);border-radius:var(--radius);cursor:pointer}
+.models span small{color:var(--c-muted);font-size:13px;display:block}
+.models input:checked+span{border-color:var(--c-text);box-shadow:inset 0 0 0 1px var(--c-text)}
+.models input:focus-visible+span{outline:2px solid var(--c-accent);outline-offset:2px}
+.cfg-total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:20px;border-top:1px solid var(--c-line)}
+.cfg-total .price{font:700 28px/1 var(--font-head)}
+
+/* ── 3 Категории ── */
+.cats{display:grid;gap:16px;grid-auto-flow:column;grid-auto-columns:82%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+.cats>a{scroll-snap-align:start}
+@media(min-width:768px){.cats{grid-auto-flow:row;grid-template-columns:repeat(3,1fr);overflow:visible}}
+.cat{position:relative;display:block;text-decoration:none;border-radius:var(--radius-lg);overflow:hidden}
+.cat .ph{border-radius:0;transition:transform .4s ease-out}
+.cat:hover .ph{transform:scale(1.03)}
+.cat-cap{position:absolute;inset:auto 0 0;padding:20px;display:flex;justify-content:space-between;align-items:end;gap:12px;color:var(--c-bg);background:linear-gradient(to top,color-mix(in oklab,var(--c-text) 85%,transparent),transparent)}
+.cat-cap h3{font-size:clamp(24px,2.4vw,32px)}
+.cat-cap small{font-size:14px;color:color-mix(in oklab,var(--c-bg) 80%,var(--c-text))}
+
+/* ── 4 Детали ── */
+.mosaic{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.mosaic figure{margin:0;display:grid;gap:10px}
+.mosaic figcaption{font-size:14px;line-height:1.45;color:color-mix(in oklab,var(--c-bg) 72%,var(--c-text))}
+.mosaic figcaption b{display:block;color:var(--c-bg);font-weight:600}
+.mosaic .big{grid-column:1/-1}
+@media(min-width:1024px){.mosaic{grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:24px}.mosaic .big{grid-column:1;grid-row:1/3}.mosaic .big .ph{aspect-ratio:auto;height:100%;min-height:520px}}
+
+/* ── 6 Шаги ── */
+.steps{display:grid;gap:0;counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{display:grid;grid-template-columns:48px 1fr;gap:4px 16px;padding:20px 0;border-top:1px solid var(--c-line)}
+.steps li::before{counter-increment:s;content:"0" counter(s);grid-row:1/3;font:700 15px/1.6 var(--font-head);color:var(--c-accent)}
+.steps h3{font-size:19px}
+.steps p{font-size:15px;color:var(--c-ink-soft)}
+@media(min-width:1024px){.steps{grid-template-columns:repeat(4,1fr);gap:32px}.steps li{grid-template-columns:1fr;border-top:2px solid var(--c-text);padding-top:24px}.steps li::before{grid-row:auto;margin-bottom:12px}}
+
+/* ── 7 Партнёр ── */
+.partner{display:grid;gap:32px;align-items:center}
+@media(min-width:1024px){.partner{grid-template-columns:5fr 7fr;gap:64px}}
+.partner blockquote{margin:0;font:600 clamp(22px,2.4vw,30px)/1.3 var(--font-head);letter-spacing:-.01em}
+.partner blockquote::before{content:"«";color:var(--c-accent)}
+.partner blockquote::after{content:"»";color:var(--c-accent)}
+.partner-logo{display:flex;align-items:center;gap:14px}
+.partner-logo i{width:56px;height:56px;border-radius:50%;border:1px solid var(--c-line-strong);display:grid;place-items:center;font:800 13px/1 var(--font-head);font-style:normal;letter-spacing:.04em;background:var(--c-bg-elev)}
+.partner cite{font-style:normal;font-size:14px;color:var(--c-muted)}
+
+/* ── 8 Про размер ── */
+.size-note{display:grid;gap:16px;align-items:center;background:var(--c-bg-elev);border:1px solid var(--c-line);border-left:3px solid var(--c-accent);border-radius:var(--radius-lg);padding:24px}
+@media(min-width:768px){.size-note{grid-template-columns:auto 1fr auto;gap:28px;padding:28px 32px}}
+.size-note .big-num{font:700 48px/1 var(--font-head);letter-spacing:var(--head-ls);color:var(--c-accent)}
+
+/* ── 9 FAQ ── */
+.faq-grid{display:grid;gap:32px}
+@media(min-width:1024px){.faq-grid{grid-template-columns:4fr 8fr;gap:64px}}
+.faq details{border-top:1px solid var(--c-line)}
+.faq details:last-child{border-bottom:1px solid var(--c-line)}
+.faq summary{list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:64px;padding:12px 0;font:600 17px/1.35 var(--font);cursor:pointer}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font:300 26px/1 var(--font);color:var(--c-accent);transition:transform .2s ease-out;flex:none}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details p{padding:0 0 20px;color:var(--c-ink-soft)}
+
+/* ── 10 Контакт-CTA ── */
+.cta-box{display:grid;gap:28px;text-align:left}
+@media(min-width:1024px){.cta-box{grid-template-columns:1fr auto;align-items:end}}
+.cta-btns{display:grid;gap:10px}
+@media(min-width:768px){.cta-btns{grid-template-columns:repeat(3,auto)}}
+
+/* ── Подвал ── */
+.ftr{background:var(--c-text);color:color-mix(in oklab,var(--c-bg) 78%,var(--c-text));padding:56px 0 32px;font-size:14px;border-top:1px solid color-mix(in oklab,var(--c-bg) 12%,var(--c-text))}
+.ftr-grid{display:grid;gap:32px}
+@media(min-width:768px){.ftr-grid{grid-template-columns:1.4fr 1fr 1fr 1.2fr}}
+.ftr h4{margin:0 0 14px;font:600 12px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--c-bg)}
+.ftr ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ftr a{text-decoration:none;display:inline-block;padding:6px 0}
+.ftr a:hover{color:var(--c-bg)}
+.ftr .logo{color:var(--c-bg)}
+.ftr .logo i{box-shadow:inset 0 0 0 6px var(--c-text),inset 0 0 0 7px var(--c-bg)}
+.ftr-bottom{margin-top:48px;padding-top:20px;border-top:1px solid color-mix(in oklab,var(--c-bg) 15%,var(--c-text));display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;color:color-mix(in oklab,var(--c-bg) 60%,var(--c-text))}
+
+/* ── Мой заказ ── */
+.order{display:grid;gap:32px;align-items:start}
+@media(min-width:1024px){.order{grid-template-columns:7fr 5fr;gap:48px}.order-side{position:sticky;top:calc(var(--header-h) + 24px)}}
+.line-item{display:grid;grid-template-columns:72px 1fr auto;gap:8px 16px;padding:20px 0;border-top:1px solid var(--c-line);align-items:start}
+.line-item:last-child{border-bottom:1px solid var(--c-line)}
+.line-item .ph{width:72px}
+.line-item h3{font-size:16px;letter-spacing:0;font-family:var(--font);font-weight:600}
+.qty{display:inline-flex;border:1px solid var(--c-line-strong);border-radius:var(--radius);margin-top:8px}
+.qty button{width:44px;height:44px;border:0;background:transparent;font-size:18px;cursor:pointer;color:var(--c-text)}
+.qty output{width:32px;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.link-rm{background:none;border:0;padding:12px 0;font:inherit;font-size:13px;color:var(--c-muted);text-decoration:underline;cursor:pointer}
+.order-side{display:grid;gap:20px;background:var(--c-bg-elev);border:1px solid var(--c-line);border-radius:var(--radius-lg);padding:24px}
+.total{display:flex;justify-content:space-between;align-items:baseline}
+.total .price{font:700 26px/1 var(--font-head)}
+.form-grid{display:grid;gap:16px}
+
+/* ── Мобильный кадр и sticky-бар ── */
+.phones{display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(300px,375px));justify-content:center}
+.phone{border:1px solid var(--c-line-strong);border-radius:28px;overflow:hidden;background:var(--c-bg);display:grid;grid-template-rows:auto 1fr auto;height:640px;box-shadow:var(--shadow-card)}
+.phone-body{overflow:hidden;padding:20px;display:grid;gap:18px;align-content:start}
+.sticky-bar{display:flex;gap:12px;align-items:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--c-bg-elev);border-top:1px solid var(--c-line);min-height:64px}
+.sticky-bar .btn{flex:1}
+.phone .hdr{position:static}
+.phone .hdr .wrap{padding:0 12px;min-height:56px;gap:8px}
+.phone .nav,.phone .tel{display:none}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="doc-bar">
+  <div class="wrap">
+    <span class="doc-title">МИР ДЗЮДО · UI-кит v1</span>
+    <nav aria-label="Разделы макета">
+      <a href="#kit">Кит</a><a href="#home">Главная</a><a href="#order">Мой заказ</a><a href="#mobile">Mobile</a>
+    </nav>
+    <span class="small">Спецификация: docs/review/JUDO-UIKIT.md · шрифты в макете — системный fallback</span>
+  </div>
+</div>
+
+<!-- ═════════════════ UI-КИТ ═════════════════ -->
+<section class="sec" id="kit" aria-labelledby="kit-h">
+  <div class="wrap kit">
+    <div class="sec-head">
+      <span class="overline">UI-кит</span>
+      <h2 id="kit-h">Токены и компоненты</h2>
+      <p class="lead">Десять цветов темы, два радиуса, два шрифта. Всё остальное выводится из них.</p>
+    </div>
+
+    <div class="kit-row">
+      <h3>Цвет — поля themeSchema</h3>
+      <div class="swatch-grid">
+        <div class="tok"><div style="background:var(--c-bg)"></div><p><b>colorBg</b>#F5F2EB · хлопок</p></div>
+        <div class="tok"><div style="background:var(--c-bg-elev)"></div><p><b>colorBgElev</b>#FFFFFF</p></div>
+        <div class="tok"><div style="background:var(--c-bg-warm)"></div><p><b>colorBgWarm</b>#EBE4D6</p></div>
+        <div class="tok"><div style="background:var(--c-text)"></div><p><b>colorText</b>#15140F · тушь</p></div>
+        <div class="tok"><div style="background:var(--c-ink-soft)"></div><p><b>colorInkSoft</b>#3B372F</p></div>
+        <div class="tok"><div style="background:var(--c-muted)"></div><p><b>colorMuted</b>#686258 · 5.4:1</p></div>
+        <div class="tok"><div style="background:var(--c-line)"></div><p><b>colorLine</b>#DCD4C5</p></div>
+        <div class="tok"><div style="background:var(--c-line-strong)"></div><p><b>colorLineStrong</b>#857B6B · 3.7:1</p></div>
+        <div class="tok"><div style="background:var(--c-accent)"></div><p><b>colorAccent</b>#A3161C · 7.0:1</p></div>
+        <div class="tok"><div style="background:var(--c-accent-deep)"></div><p><b>--c-accent-deep</b>выводит движок</p></div>
+      </div>
+    </div>
+
+    <div class="kit-row">
+      <h3>Типографика</h3>
+      <div class="type-scale">
+        <div><span class="small">display · 72/72</span><span style="font:var(--head-weight) clamp(40px,6.4vw,72px)/1 var(--font-head);letter-spacing:var(--head-ls)">Готов к схватке</span></div>
+        <div><span class="small">h2 · 44/48</span><h2 style="font-size:clamp(28px,3.6vw,44px)">Детали решают</h2></div>
+        <div><span class="small">h3 · 24/30</span><h3>Кимоно тренировочное, 550 г/м²</h3></div>
+        <div><span class="small">body · 17/27</span><p>Плотное плетение «рисовое зерно» держит захват и не рвётся на рукаве. Садится примерно на 5% после первой стирки при 30°.</p></div>
+        <div><span class="small">small · 14/21</span><p class="small">Цена ориентировочная, итог подтверждает менеджер.</p></div>
+        <div><span class="small">overline · 12</span><span class="overline">02 — Конфигуратор</span></div>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="kit-row">
+        <h3>Кнопки</h3>
+        <div class="flex">
+          <button class="btn btn--primary">Отправить заявку</button>
+          <button class="btn btn--secondary">В заказ</button>
+          <button class="btn btn--ghost">Таблица размеров</button>
+        </div>
+        <div class="flex">
+          <button class="btn btn--primary btn--sm">Малая · desktop</button>
+          <button class="btn btn--primary" disabled>Выберите рост</button>
+          <button class="btn btn--primary" data-loading aria-label="Отправляем…">Отправить заявку</button>
+        </div>
+        <div class="flex" style="background:var(--c-text);padding:16px;border-radius:var(--radius-lg)">
+          <button class="btn btn--on-dark">Каталог</button>
+          <button class="btn btn--outline-dark">Подобрать кимоно</button>
+        </div>
+      </div>
+
+      <div class="kit-row">
+        <h3>Статусы и метки</h3>
+        <div class="flex">
+          <span class="badge">Доступно к заказу</span>
+          <span class="badge badge--na">Нет размера 190</span>
+        </div>
+        <div class="flex"><span class="tag">Хит</span><span class="tag tag--new">Новинка</span></div>
+        <div class="info"><b>Оплата после подтверждения.</b> Менеджер свяжется, уточнит наличие и размер. <a href="#">Как заказать</a></div>
+        <div class="toast toast--static" role="status">Добавлено в заказ <a class="btn btn--on-dark btn--sm" href="#order">Перейти к заказу</a></div>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="kit-row">
+        <h3>Выбор варианта</h3>
+        <fieldset class="seg" role="radiogroup">
+          <legend>Рост, см <a class="small" href="#">Как подобрать</a></legend>
+          <label><input type="radio" name="k1"><span>120</span></label>
+          <label><input type="radio" name="k1"><span>130</span></label>
+          <label><input type="radio" name="k1"><span>140</span></label>
+          <label><input type="radio" name="k1" checked><span>150</span></label>
+          <label><input type="radio" name="k1"><span>160</span></label>
+          <label><input type="radio" name="k1"><span>170</span></label>
+          <label><input type="radio" name="k1"><span>180</span></label>
+          <label class="na" title="Нет размера — можно заказать с ожиданием"><input type="radio" name="k1" aria-disabled="true"><span>190</span></label>
+          <label><input type="radio" name="k1"><span>200</span></label>
+        </fieldset>
+        <fieldset class="swatches">
+          <legend class="field-legend">Цвет</legend>
+          <label class="sw sw--white"><input type="radio" name="c1" checked><i></i>Белое</label>
+          <label class="sw sw--blue"><input type="radio" name="c1"><i></i>Синее</label>
+        </fieldset>
+      </div>
+
+      <div class="kit-row">
+        <h3>Поля формы</h3>
+        <div class="field"><label for="f1">Имя</label><input id="f1" placeholder="Как к вам обращаться"></div>
+        <div class="field field--error"><label for="f2">Телефон</label><input id="f2" value="+7 914 12" aria-invalid="true" aria-describedby="f2e"><span class="err" id="f2e">Проверьте номер — не хватает цифр</span></div>
+        <fieldset class="contact-pick">
+          <legend class="field-legend">Как с вами связаться</legend>
+          <label><input type="radio" name="cm1" checked><span>Телефон</span></label>
+          <label><input type="radio" name="cm1"><span>WhatsApp</span></label>
+          <label><input type="radio" name="cm1"><span>Telegram</span></label>
+        </fieldset>
+      </div>
+    </div>
+
+    <div class="kit-row">
+      <h3>Карточка товара</h3>
+      <div class="grid-4">
+        <a class="pcard" href="#">
+          <div class="tags"><span class="tag">Хит</span></div>
+          <div class="ph r45"><span>фото 4:5</span></div>
+          <h3>Кимоно тренировочное «Сэнсэй»</h3>
+          <div class="pcard-meta"><span class="price">от 4 900 ₽</span><span class="badge">Доступно к заказу</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ ГЛАВНАЯ ═════════════════ -->
+<div id="home">
+  <div class="promo" role="note">
+    <div class="wrap"><span>Оплата после подтверждения менеджером</span><span>Доставка по России</span><span>Официальный партнёр клуба ИППОН</span></div>
+  </div>
+
+  <header class="hdr">
+    <div class="wrap">
+      <a class="logo" href="#home"><i aria-hidden="true"></i>Мир дзюдо</a>
+      <nav class="nav" aria-label="Главное меню">
+        <a href="#">Кимоно</a><a href="#">Пояса</a><a href="#">Аксессуары</a><a href="#">Размеры</a><a href="#">Как заказать</a><a href="#">Контакты</a>
+      </nav>
+      <div class="hdr-end">
+        <a class="tel" href="tel:+70000000000" title="bizPhone из NAP">+7 (3012) 00-00-00</a>
+        <a class="icon-btn" href="#order" aria-label="Мой заказ, 2 позиции">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 7h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9L5 7Z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/></svg>
+          <span class="count">2</span>
+        </a>
+        <button class="icon-btn burger" aria-label="Меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1 Hero -->
+  <section class="sec--dark hero" aria-labelledby="h1">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <span class="overline">Улан-Удэ · партнёр клуба ИППОН</span>
+          <h1 id="h1">Экипировка для&nbsp;дзюдо <em>под заказ</em></h1>
+          <p class="lead">Кимоно, пояса и аксессуары для тренировок и соревнований. Поможем с размером — оплата только после подтверждения.</p>
+          <div class="hero-cta">
+            <a class="btn btn--primary" href="#cfg">Подобрать кимоно</a>
+            <a class="btn btn--outline-dark" href="#cats">Каталог</a>
+          </div>
+        </div>
+        <div class="ph ph--dark r45"><span>фото: кимоно в полный рост, контровой свет</span></div>
+      </div>
+      <div class="facts">
+        <div><b>120–200</b><span class="small">ростовки</span></div>
+        <div><b>~5%</b><span class="small">усадка учтена</span></div>
+        <div><b>1 день</b><span class="small">ответ менеджера</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 Конфигуратор -->
+  <section class="sec" id="cfg" aria-labelledby="cfg-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="overline">01 — Конфигуратор</span>
+        <h2 id="cfg-h">Подберите кимоно за&nbsp;минуту</h2>
+      </div>
+      <div class="cfg">
+        <div class="ph r45" id="cfg-photo"><span>фото модели · меняется по цвету</span></div>
+        <form class="cfg-panel" onsubmit="return false">
+          <fieldset class="models">
+            <legend class="field-legend">Модель</legend>
+            <label><input type="radio" name="m" checked data-price="4900"><span><span>Тренировочное «Сэнсэй»<small>550 г/м² · для зала</small></span><span class="price">от 4 900 ₽</span></span></label>
+            <label><input type="radio" name="m" data-price="8400"><span><span>Соревновательное «Иппон»<small>750 г/м² · плотный воротник</small></span><span class="price">от 8 400 ₽</span></span></label>
+          </fieldset>
+          <fieldset class="seg">
+            <legend>Рост, см <a class="small" href="#">Таблица размеров</a></legend>
+            <label><input type="radio" name="h"><span>120</span></label>
+            <label><input type="radio" name="h"><span>130</span></label>
+            <label><input type="radio" name="h"><span>140</span></label>
+            <label><input type="radio" name="h" checked><span>150</span></label>
+            <label><input type="radio" name="h"><span>160</span></label>
+            <label><input type="radio" name="h"><span>170</span></label>
+            <label><input type="radio" name="h"><span>180</span></label>
+            <label class="na"><input type="radio" name="h" aria-disabled="true"><span>190</span></label>
+            <label><input type="radio" name="h"><span>200</span></label>
+          </fieldset>
+          <fieldset class="swatches">
+            <legend class="field-legend">Цвет</legend>
+            <label class="sw sw--white"><input type="radio" name="c" value="white" checked><i></i>Белое</label>
+            <label class="sw sw--blue"><input type="radio" name="c" value="blue"><i></i>Синее</label>
+          </fieldset>
+          <div class="info">Кимоно садится на <b>~5%</b> после первой стирки — мы учитываем это при подборе.</div>
+          <div class="cfg-total">
+            <span class="badge">Доступно к заказу</span>
+            <span class="price" id="cfg-price">4 900 ₽</span>
+          </div>
+          <button class="btn btn--primary btn--block" type="button" data-add>Добавить в заказ</button>
+          <span class="note">данные: варианты и цены товаров каталога, не отдельная сущность</span>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 Категории -->
+  <section class="sec" id="cats" style="padding-top:0" aria-labelledby="cats-h">
+    <div class="wrap">
+      <div class="sec-head sec-head--row">
+        <div style="display:grid;gap:12px"><span class="overline">02 — Каталог</span><h2 id="cats-h">Всё для татами</h2></div>
+        <a class="btn btn--ghost" href="#">Весь каталог →</a>
+      </div>
+      <div class="cats">
+        <a class="cat" href="#"><div class="ph r34"><span>кимоно</span></div><div class="cat-cap"><h3>Кимоно</h3><small>12 моделей →</small></div></a>
+        <a class="cat" href="#"><div class="ph ph--dark r34"><span>пояса</span></div><div class="cat-cap"><h3>Пояса</h3><small>9 цветов →</small></div></a>
+        <a class="cat" href="#"><div class="ph r34"><span>аксессуары</span></div><div class="cat-cap"><h3>Аксессуары</h3><small>18 позиций →</small></div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Детали решают -->
+  <section class="sec sec--dark" aria-labelledby="det-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="overline">03 — Качество</span>
+        <h2 id="det-h">Детали решают</h2>
+        <p class="lead">Мы показываем изделие так, как его проверяет тренер: вблизи.</p>
+      </div>
+      <div class="mosaic">
+        <figure class="big"><div class="ph ph--dark r43"><span>макро: воротник, 8 строчек</span></div><figcaption><b>Воротник с 8 строчками</b>Жёсткий, не заламывается — сопернику труднее взять захват.</figcaption></figure>
+        <figure><div class="ph ph--dark r11"><span>макро: плетение</span></div><figcaption><b>Плетение «рисовое зерно»</b>750 г/м² в соревновательной модели.</figcaption></figure>
+        <figure><div class="ph ph--dark r11"><span>макро: шов подмышкой</span></div><figcaption><b>Двойной шов</b>В зонах захвата и под мышкой.</figcaption></figure>
+        <figure><div class="ph ph--dark r11"><span>макро: колено брюк</span></div><figcaption><b>Усиленные колени</b>Второй слой ткани на брюках.</figcaption></figure>
+        <figure><div class="ph ph--dark r11"><span>макро: пояс</span></div><figcaption><b>Пояс с 10 строчками</b>Держит узел весь раунд.</figcaption></figure>
+      </div>
+      <p style="margin-top:24px"><span class="note">контент-тип «Деталь»: фото + заголовок + подпись — владелец добавляет сам</span></p>
+    </div>
+  </section>
+
+  <!-- 5 Хиты -->
+  <section class="sec sec--warm" aria-labelledby="hits-h">
+    <div class="wrap">
+      <div class="sec-head sec-head--row">
+        <div style="display:grid;gap:12px"><span class="overline">04 — Выбор зала</span><h2 id="hits-h">Берут чаще всего</h2></div>
+        <a class="btn btn--ghost" href="#">Весь каталог →</a>
+      </div>
+      <div class="grid-4">
+        <a class="pcard" href="#"><div class="tags"><span class="tag">Хит</span></div><div class="ph r45"><span>кимоно белое</span></div><h3>Кимоно тренировочное «Сэнсэй»</h3><div class="pcard-meta"><span class="price">от 4 900 ₽</span><span class="badge">Доступно к заказу</span></div></a>
+        <a class="pcard" href="#"><div class="tags"><span class="tag tag--new">Новинка</span></div><div class="ph ph--blue r45"><span>кимоно синее</span></div><h3>Кимоно соревновательное «Иппон»</h3><div class="pcard-meta"><span class="price">от 8 400 ₽</span><span class="badge">Доступно к заказу</span></div></a>
+        <a class="pcard" href="#"><div class="ph ph--dark r45"><span>пояс</span></div><h3>Пояс цветной, хлопок</h3><div class="pcard-meta"><span class="price">от 690 ₽</span><span class="badge">Доступно к заказу</span></div></a>
+        <a class="pcard" href="#"><div class="ph r45"><span>сумка</span></div><h3>Сумка для формы</h3><div class="pcard-meta"><span class="price">2 300 ₽</span><span class="badge badge--na">Под заказ, 2 недели</span></div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 Как заказать -->
+  <section class="sec" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sec-head"><span class="overline">05 — Как заказать</span><h2 id="how-h">Четыре шага без&nbsp;предоплаты</h2></div>
+      <ol class="steps">
+        <li><h3>Заявка</h3><p>Соберите заказ на сайте или напишите в мессенджер.</p></li>
+        <li><h3>Звонок менеджера</h3><p>Уточним рост, вес и наличие. Подскажем размер.</p></li>
+        <li><h3>Подтверждение и оплата</h3><p>Платите только за подтверждённый заказ.</p></li>
+        <li><h3>Доставка или самовывоз</h3><p>По Улан-Удэ — самовывоз, по России — транспортной компанией.</p></li>
+      </ol>
+      <p style="margin-top:24px"><span class="note">шорткод [steps] · общий блок</span></p>
+    </div>
+  </section>
+
+  <!-- 7 Партнёр ИППОН -->
+  <section class="sec sec--warm" aria-labelledby="ip-h">
+    <div class="wrap partner">
+      <div class="ph r43"><span>фото: зал клуба ИППОН, тренировка</span></div>
+      <div style="display:grid;gap:24px">
+        <span class="overline">06 — Партнёр</span>
+        <h2 id="ip-h" class="partner-logo"><i>IPPON</i>Клуб дзюдо «ИППОН», Улан-Удэ</h2>
+        <blockquote>Экипировку для учеников подбираем вместе — по росту, по возрасту, по правилам соревнований.</blockquote>
+        <cite>Главный тренер клуба · имя и фото по согласованию</cite>
+        <div class="flex"><a class="btn btn--secondary" href="#">О партнёрстве</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 Про размер -->
+  <section class="sec" aria-label="Про размер" style="padding-bottom:0">
+    <div class="wrap">
+      <div class="size-note">
+        <span class="big-num">~5%</span>
+        <p><b>Кимоно из хлопка садится после первой стирки.</b> Если ребёнок между размерами — берите больший. Не уверены — пришлите рост и вес, подберём.</p>
+        <a class="btn btn--secondary" href="#">Таблица размеров</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 FAQ -->
+  <section class="sec" aria-labelledby="faq-h">
+    <div class="wrap faq-grid">
+      <div style="display:grid;gap:16px;align-content:start">
+        <span class="overline">07 — Вопросы</span>
+        <h2 id="faq-h">Частые вопросы</h2>
+        <p class="small">Не нашли ответ? <a href="#">Напишите нам</a> — ответим в течение дня.</p>
+      </div>
+      <div class="faq">
+        <details open><summary>Когда нужно платить?</summary><p>Только после звонка менеджера и подтверждения заказа. Заявка на сайте ни к чему не обязывает.</p></details>
+        <details><summary>Сколько ждать заказ?</summary><p>Если модель есть у поставщика — 5–10 дней. Сроки для конкретного размера менеджер назовёт при звонке.</p></details>
+        <details><summary>Как выбрать размер ребёнку?</summary><p>Ориентируйтесь на рост и учитывайте усадку ~5%. В комментарии к заявке укажите рост и вес — подберём сами.</p></details>
+        <details><summary>Доставляете ли вы в другие города?</summary><p>Да, по России — транспортными компаниями. Стоимость рассчитаем при подтверждении.</p></details>
+        <details><summary>Можно ли обменять кимоно?</summary><p>Да, если изделие не стирали и сохранены бирки. Условия — на странице «Как заказать».</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 Контакт-CTA -->
+  <section class="sec sec--dark" aria-labelledby="cta-h">
+    <div class="wrap cta-box">
+      <div style="display:grid;gap:16px">
+        <span class="overline">08 — Связь</span>
+        <h2 id="cta-h">Поможем подобрать размер</h2>
+        <p class="lead">Пришлите рост и вес — ответим, какой размер брать и когда будет в наличии.</p>
+      </div>
+      <div class="cta-btns">
+        <a class="btn btn--primary" href="#">Позвонить</a>
+        <a class="btn btn--outline-dark" href="#">WhatsApp</a>
+        <a class="btn btn--outline-dark" href="#">Telegram</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="ftr">
+    <div class="wrap">
+      <div class="ftr-grid">
+        <div style="display:grid;gap:16px;align-content:start">
+          <a class="logo" href="#home"><i aria-hidden="true"></i>Мир дзюдо</a>
+          <p>Экипировка для дзюдо под заказ. Официальный партнёр клуба «ИППОН», Улан-Удэ.</p>
+        </div>
+        <div><h4>Каталог</h4><ul><li><a href="#">Кимоно</a></li><li><a href="#">Пояса</a></li><li><a href="#">Аксессуары</a></li></ul></div>
+        <div><h4>Покупателям</h4><ul><li><a href="#">Размеры</a></li><li><a href="#">Как заказать</a></li><li><a href="#">О магазине</a></li><li><a href="#">Политика ПДн</a></li></ul></div>
+        <div><h4>Контакты</h4><ul><li><a href="#">+7 (3012) 00-00-00</a></li><li><a href="#">WhatsApp · Telegram</a></li><li>Улан-Удэ, адрес из NAP</li><li>Пн–Сб 10:00–19:00</li></ul></div>
+      </div>
+      <div class="ftr-bottom"><span>© 2026 Мир дзюдо · реквизиты из настроек сайта</span><span>Сайт работает на Каркас CMS</span></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ═════════════════ МОЙ ЗАКАЗ ═════════════════ -->
+<section class="sec sec--warm" id="order" aria-labelledby="order-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="overline">Страница /order/</span>
+      <h2 id="order-h">Мой заказ</h2>
+      <p class="lead">Это предварительная заявка. Менеджер свяжется с вами для уточнения наличия, подбора размера и согласования доставки. Оплата — после подтверждения заказа.</p>
+    </div>
+    <div class="order">
+      <div>
+        <div class="line-item">
+          <div class="ph r11"><span></span></div>
+          <div><h3>Кимоно тренировочное «Сэнсэй»</h3><p class="small">рост 150 · белое</p>
+            <div class="qty"><button aria-label="Меньше">−</button><output>1</output><button aria-label="Больше">+</button></div></div>
+          <div style="text-align:right"><span class="price">4 900 ₽</span><br><button class="link-rm">Удалить</button></div>
+        </div>
+        <div class="line-item">
+          <div class="ph ph--dark r11"><span></span></div>
+          <div><h3>Пояс цветной, хлопок</h3><p class="small">жёлтый · 260 см</p>
+            <div class="qty"><button aria-label="Меньше">−</button><output>1</output><button aria-label="Больше">+</button></div></div>
+          <div style="text-align:right"><span class="price">690 ₽</span><br><button class="link-rm">Удалить</button></div>
+        </div>
+      </div>
+      <form class="order-side" onsubmit="return false">
+        <div class="total"><span>Итого <span class="small">ориентировочно</span></span><span class="price">5 590 ₽</span></div>
+        <div class="info"><b>Оплата после подтверждения.</b> Итоговую сумму и сроки назовёт менеджер.</div>
+        <div class="form-grid">
+          <div class="field"><label for="o1">Имя</label><input id="o1" autocomplete="name" placeholder="Как к вам обращаться"></div>
+          <div class="field"><label for="o2">Телефон</label><input id="o2" type="tel" autocomplete="tel" placeholder="+7"></div>
+          <fieldset class="contact-pick">
+            <legend class="field-legend">Как с вами связаться</legend>
+            <label><input type="radio" name="cm2" checked><span>Телефон</span></label>
+            <label><input type="radio" name="cm2"><span>WhatsApp</span></label>
+            <label><input type="radio" name="cm2"><span>Telegram</span></label>
+          </fieldset>
+          <fieldset class="contact-pick" style="grid-template-columns:1fr 1fr">
+            <legend class="field-legend">Получение</legend>
+            <label><input type="radio" name="dl" checked><span>Самовывоз, Улан-Удэ</span></label>
+            <label><input type="radio" name="dl"><span>Доставка по России</span></label>
+          </fieldset>
+          <div class="field"><label for="o3">Комментарий</label><textarea id="o3" placeholder="Рост и вес ребёнка, пожелания"></textarea></div>
+          <label class="check"><input type="checkbox" checked>Согласен на обработку персональных данных по&nbsp;<a href="#">политике</a></label>
+          <button class="btn btn--primary btn--block">Отправить заявку</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════ MOBILE ═════════════════ -->
+<section class="sec" id="mobile" aria-labelledby="mob-h">
+  <div class="wrap">
+    <div class="sec-head"><span class="overline">375 px</span><h2 id="mob-h">Mobile: карточка и заказ</h2><p class="lead">Главное действие всегда в sticky-баре, высота 64 + safe-area.</p></div>
+    <div class="phones">
+      <div class="phone">
+        <header class="hdr"><div class="wrap"><a class="logo" href="#"><i aria-hidden="true"></i>Мир дзюдо</a><div class="hdr-end"><a class="icon-btn" href="#" aria-label="Мой заказ, 2 позиции"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 7h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9L5 7Z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/></svg><span class="count">2</span></a><button class="icon-btn" aria-label="Меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg></button></div></div></header>
+        <div class="phone-body">
+          <span class="small">Главная / Кимоно</span>
+          <div class="ph r43"><span>галерея · свайп</span></div>
+          <h3>Кимоно тренировочное «Сэнсэй»</h3>
+          <span class="badge">Доступно к заказу</span>
+          <fieldset class="seg"><legend>Рост, см</legend>
+            <label><input type="radio" name="mh"><span>140</span></label><label><input type="radio" name="mh" checked><span>150</span></label><label><input type="radio" name="mh"><span>160</span></label><label><input type="radio" name="mh"><span>170</span></label><label class="na"><input type="radio" name="mh" aria-disabled="true"><span>190</span></label>
+          </fieldset>
+        </div>
+        <div class="sticky-bar"><span class="price">4 900 ₽</span><button class="btn btn--primary" data-add>Добавить в заказ</button></div>
+      </div>
+      <div class="phone">
+        <header class="hdr"><div class="wrap"><a class="logo" href="#"><i aria-hidden="true"></i>Мир дзюдо</a><div class="hdr-end"><button class="icon-btn" aria-label="Меню"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg></button></div></div></header>
+        <div class="phone-body">
+          <h3>Мой заказ · 2</h3>
+          <div class="info">Это предварительная заявка. Оплата — после подтверждения менеджером.</div>
+          <div class="field"><label for="m1">Телефон</label><input id="m1" type="tel" placeholder="+7"></div>
+          <fieldset class="contact-pick"><legend class="field-legend">Как связаться</legend>
+            <label><input type="radio" name="cm3"><span>Телефон</span></label><label><input type="radio" name="cm3" checked><span>WhatsApp</span></label><label><input type="radio" name="cm3"><span>Telegram</span></label>
+          </fieldset>
+        </div>
+        <div class="sticky-bar"><button class="btn btn--primary">Отправить заявку</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Добавлено в заказ <a class="btn btn--on-dark btn--sm" href="#order">Перейти к заказу</a></div>
+
+<script>
+/* Островок демо: цена конфигуратора, фото по цвету, toast. В носителе — тот же vanilla JS. */
+(function(){
+  var fmt=function(n){return n.toLocaleString('ru-RU').replace(/ /g,' ')+' ₽'};
+  var price=document.getElementById('cfg-price'),photo=document.getElementById('cfg-photo');
+  document.querySelectorAll('input[name=m]').forEach(function(r){r.addEventListener('change',function(){price.textContent=fmt(+r.dataset.price)})});
+  document.querySelectorAll('input[name=c]').forEach(function(r){r.addEventListener('change',function(){photo.classList.toggle('ph--blue',r.value==='blue')})});
+  document.querySelectorAll('.na input').forEach(function(i){i.addEventListener('click',function(e){e.preventDefault()})});
+  var t=document.getElementById('toast'),tm;
+  document.querySelectorAll('[data-add]').forEach(function(b){b.addEventListener('click',function(){t.classList.add('is-on');clearTimeout(tm);tm=setTimeout(function(){t.classList.remove('is-on')},4000)})});
+})();
+</script>
+</body>
+</html>
