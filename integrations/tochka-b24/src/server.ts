@@ -21,7 +21,7 @@ import {
   SignatureError,
   tochkaApi,
   tochkaOAuthTokens,
-  verifyJwt,
+  verifyWebhook,
   type JwtCheck,
   type KeySource,
   type OwnAccount,
@@ -59,7 +59,8 @@ export function createApp(d: AppDeps): Server {
 
     try {
       const body = await readBody(req, MAX_BODY)
-      const claims = verifyJwt(body, await d.keys.keys(), d.jwt)
+      const claims = verifyWebhook(body, await d.keys.keys(), d.jwt)
+      if (!claims) throw new SignatureError('jwt_invalid')
       rejectedInRow = 0
       const parsed = parseIncomingPayment(claims, d.accounts)
       if (parsed.kind === 'ignored') {

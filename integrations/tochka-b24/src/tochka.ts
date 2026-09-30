@@ -120,6 +120,18 @@ export function verifyJwt(token: string, keys: KeyObject[], check: JwtCheck = {}
   return payload
 }
 
+/**
+ * Тело вебхука Точки (строка JWT, text/plain) → payload, если подпись RS256 одним из сохранённых ключей
+ * и exp/iss/aud в порядке; иначе null. Исключения наружу не выходят: невалидному не доверяем, но и не падаем.
+ */
+export function verifyWebhook(rawBody: string, keys: KeyObject[], check: JwtCheck = {}): Record<string, unknown> | null {
+  try {
+    return typeof rawBody === 'string' ? verifyJwt(rawBody, keys, check) : null
+  } catch {
+    return null
+  }
+}
+
 // ─── Разбор платежей (объекты живут в памяти до конца обработки, нигде не сохраняются) ──
 
 type Side = { inn?: unknown; name?: unknown; account?: unknown; bankCode?: unknown; amount?: unknown; currency?: unknown }

@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { tochkaProfiles } from '../src/config.ts'
-import { fileKeys, keyFingerprint, parseKeys, SignatureError, verifyJwt } from '../src/tochka.ts'
+import { fileKeys, keyFingerprint, parseKeys, SignatureError, verifyJwt, verifyWebhook } from '../src/tochka.ts'
 
 const OOO_ACC = '40702810900000012345/044525104'
 const IP_ACC = '40802810900000054321/044525104'
@@ -107,5 +107,56 @@ describe('подпись вебхука по сохранённому JWK (TOCHK
     expect(() => verifyJwt(token({ aud: ['x', 'c-ooo'] }, tochka.privateKey), keys, check)).not.toThrow()
     expect(() => verifyJwt(token({ aud: 'evil' }, tochka.privateKey), keys, check)).toThrow(SignatureError)
     expect(() => verifyJwt(token({}, tochka.privateKey), keys, check)).toThrow(SignatureError)
+  })
+
+  describe('verifyWebhook: тело вебхука (строка JWT) → payload или null, без исключений', () => {
+    const now = Math.floor(Date.now() / 1000)
+    const body = { webhookType: 'incomingPayment', operationId: 'op-1', iss: 'tochka', aud: 'c-ooo', exp: now + 300 }
+    const keys = () => fileKeys(saveJwk(jwk)).keys()
+
+    it('валидная подпись сохранённым JWK → payload', async () => {
+      expect(verifyWebhook(token(body, tochka.privateKey), await keys())).toEqual(body)
+      expect(verifyWebhook(`${token(body, tochka.privateKey)}\n`, await keys(), { iss: 'tochka', aud: ['c-ooo', 'c-ip'] })).toEqual(body)
+    })
+
+    it('битая подпись → null', async () => {
+      const k = await keys()
+      const good = token(body, tochka.privateKey)
+      const [h, , s] = good.split('.')
+      const forged = Buffer.from(JSON.stringify({ ...body, operationId: 'op-2' })).toString('base64url')
+      expect(verifyWebhook(`${h}.${forged}.${s}`, k)).toBeNull()
+      expect(verifyWebhook(`${good.slice(0, -4)}AAAA`, k)).toBeNull()
+      expect(verifyWebhook(token(body, stranger.privateKey), k)).toBeNull()
+    })
+
+    it('просроченный токен → null', async () => {
+      expect(verifyWebhook(token({ ...body, exp: now - 1 }, tochka.privateKey), await keys())).toBeNull()
+    })
+
+    it('чужой iss / aud → null', async () => {
+      const k = await keys()
+      expect(verifyWebhook(token(body, tochka.privateKey), k, { iss: 'other' })).toBeNull()
+      expect(verifyWebhook(token(body, tochka.privateKey), k, { aud: 'evil' })).toBeNull()
+    })
+
+    it('alg=none / HS256 → null', async () => {
+      const k = await keys()
+      const p = Buffer.from(JSON.stringify(body)).toString('base64url')
+      for (const alg of ['none', 'HS256']) {
+        const h = Buffer.from(JSON.stringify({ alg, typ: 'JWT' })).toString('base64url')
+        expect(verifyWebhook(`${h}.${p}.`, k)).toBeNull()
+      }
+    })
+
+    it.each([
+      ['пустая строка', ''],
+      ['JSON вместо JWT', JSON.stringify(body)],
+      ['мусор', 'not a jwt'],
+      ['три части не-base64', '%%%.$$$.###'],
+      ['не JSON в заголовке', 'YWJj.YWJj.YWJj'],
+      ['не строка', 42 as unknown as string],
+    ])('мусор вместо JWT (%s) → null', async (_, raw) => {
+      expect(verifyWebhook(raw, await keys())).toBeNull()
+    })
   })
 })
