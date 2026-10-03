@@ -6,3 +6,6 @@ dist/
 # build
 dist/
 .claude/
+__pycache__/
+*.pyc
+.diskcheck.txt
