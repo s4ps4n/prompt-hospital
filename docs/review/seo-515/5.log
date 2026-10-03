@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: \#517 /llms.txt: заголовок, строка о компании, разделы и строки-ссылки
+not ok 1 - \#517 /llms.txt: заголовок, строка о компании, разделы и строки-ссылки
+  ---
+  duration_ms: 11.802024
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:1:3077'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    get (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:47:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:69:19)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: \#517 /llms.txt: noindex, черновики и служебные адреса не попадают
+not ok 2 - \#517 /llms.txt: noindex, черновики и служебные адреса не попадают
+  ---
+  duration_ms: 4.811914
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:1:4218'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    get (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:47:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:81:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: \#517 /llms.txt: каждая ссылка есть в карте сайта (один источник)
+not ok 3 - \#517 /llms.txt: каждая ссылка есть в карте сайта (один источник)
+  ---
+  duration_ms: 6.930096
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:1:4732'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    get (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:47:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:86:41)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: \#517 /llms.txt: каталог — разделами «Каталог» и «Товары»
+not ok 4 - \#517 /llms.txt: каталог — разделами «Каталог» и «Товары»
+  ---
+  duration_ms: 2.050313
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:1:5628'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    get (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:47:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/llms-txt.test.ts:93:26)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: \#517 строка о компании без описания главной — из настроек организации
+ok 5 - \#517 строка о компании без описания главной — из настроек организации
+  ---
+  duration_ms: 0.894527
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 1
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 40.029096

@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: \#516 isNoOpUpdate: те же значения (включая JSON в другом порядке ключей и Date) — без записи
+ok 1 - \#516 isNoOpUpdate: те же значения (включая JSON в другом порядке ключей и Date) — без записи
+  ---
+  duration_ms: 1.788453
+  type: 'test'
+  ...
+# Subtest: \#516 isNoOpUpdate: любое содержательное отличие — запись
+ok 2 - \#516 isNoOpUpdate: любое содержательное отличие — запись
+  ---
+  duration_ms: 0.208027
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 11.204815

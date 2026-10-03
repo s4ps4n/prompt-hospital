@@ -1,0 +1,232 @@
+TAP version 13
+# Subtest: \#516 jsonLdDates: publish из createdAt, modified из updatedAt; без updatedAt — createdAt
+ok 1 - \#516 jsonLdDates: publish из createdAt, modified из updatedAt; без updatedAt — createdAt
+  ---
+  duration_ms: 39.4555
+  type: 'test'
+  ...
+# Subtest: \#516 страница: dateModified в JSON-LD и видимое «Обновлено»
+not ok 2 - \#516 страница: dateModified в JSON-LD и видимое «Обновлено»
+  ---
+  duration_ms: 43.239532
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:2564'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:54:10)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:77:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+# Subtest: \#516 услуга: у Service-разметки есть даты
+not ok 3 - \#516 услуга: у Service-разметки есть даты
+  ---
+  duration_ms: 23.470673
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:3302'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:54:10)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:88:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+# Subtest: \#516 главная: dateModified — самая свежая правка по сайту, строки «Обновлено» нет
+not ok 4 - \#516 главная: dateModified — самая свежая правка по сайту, строки «Обновлено» нет
+  ---
+  duration_ms: 9.723807
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:3916'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:54:10)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:99:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+# Subtest: \#516 SEO-страница и новость: даты в разметке
+not ok 5 - \#516 SEO-страница и новость: даты в разметке
+  ---
+  duration_ms: 22.192595
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:4929'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:54:10)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:109:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+# Subtest: \#516 событие: даты в разметке Event
+ok 6 - \#516 событие: даты в разметке Event
+  ---
+  duration_ms: 6.626446
+  type: 'test'
+  ...
+# Subtest: \#516 карта сайта: lastmod у каждого адреса; у «/» — максимум по сайту; меняется с правкой
+not ok 7 - \#516 карта сайта: lastmod у каждого адреса; у «/» — максимум по сайту; меняется с правкой
+  ---
+  duration_ms: 5.192339
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:6011'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:54:10)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:133:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+# Subtest: \#516 каталог: lastmod раздела и товара из catalogSitemap доезжает в карту
+not ok 8 - \#516 каталог: lastmod раздела и товара из catalogSitemap доезжает в карту
+  ---
+  duration_ms: 2.523987
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:7577'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:157:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: \#516 товар и категория: узлы с датами в разметке
+not ok 9 - \#516 товар и категория: узлы с датами в разметке
+  ---
+  duration_ms: 2.356577
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:8326'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:175:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: \#516 главная без элемента home (собрана шаблоном) — dateModified всё равно есть
+not ok 10 - \#516 главная без элемента home (собрана шаблоном) — dateModified всё равно есть
+  ---
+  duration_ms: 2.809632
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:9778'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:54:10)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:191:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+# Subtest: \#519 пустой раздел (/news без новостей) в карте сайта — всё равно с lastmod (датой сайта)
+not ok 11 - \#519 пустой раздел (/news без новостей) в карте сайта — всё равно с lastmod (датой сайта)
+  ---
+  duration_ms: 7.381377
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:10463'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:54:10)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:199:9)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+# Subtest: \#513 своё SEO товара сильнее шаблона и формулы; пустое — не применяется
+not ok 12 - \#513 своё SEO товара сильнее шаблона и формулы; пустое — не применяется
+  ---
+  duration_ms: 6.239629
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:1:11216'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    serve (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:43:22)
+    title (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:237:11)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/packages/storefront/src/seo-dates.test.ts:242:21)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 2
+# fail 10
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 245.980289

@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: healthy input passes
+ok 1 - healthy input passes
+  ---
+  duration_ms: 2.472108
+  type: 'test'
+  ...
+# Subtest: invalid dateModified must be rejected
+not ok 2 - invalid dateModified must be rejected
+  ---
+  duration_ms: 1.292787
+  type: 'test'
+  location: '/home/hermes/prompt-hospital/docs/review/seo-515/probe-regressions.mjs:32:3'
+  failureType: 'testCodeFailure'
+  error: 'False success: {"bad":[],"checked":1}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/hermes/prompt-hospital/docs/review/seo-515/probe-regressions.mjs:34:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: invalid lastmod must be rejected
+not ok 3 - invalid lastmod must be rejected
+  ---
+  duration_ms: 0.453455
+  type: 'test'
+  location: '/home/hermes/prompt-hospital/docs/review/seo-515/probe-regressions.mjs:32:3'
+  failureType: 'testCodeFailure'
+  error: 'False success: {"bad":[],"checked":1}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/hermes/prompt-hospital/docs/review/seo-515/probe-regressions.mjs:34:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: relative llms link must not silently pass unchecked
+not ok 4 - relative llms link must not silently pass unchecked
+  ---
+  duration_ms: 0.40349
+  type: 'test'
+  location: '/home/hermes/prompt-hospital/docs/review/seo-515/probe-regressions.mjs:32:3'
+  failureType: 'testCodeFailure'
+  error: 'False success: {"bad":[],"checked":0}'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///home/hermes/prompt-hospital/docs/review/seo-515/probe-regressions.mjs:34:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 1
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 21.050946

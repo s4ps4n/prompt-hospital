@@ -1,0 +1,596 @@
+{"ts":"2026-09-29T12:34:57.501Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.510Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+TAP version 13
+{"ts":"2026-09-29T12:34:57.513Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.518Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.522Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.527Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.530Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.534Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.539Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.548Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.556Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.563Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.577Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.586Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.590Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.592Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.599Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.602Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.612Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.615Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.619Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.623Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.627Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.631Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+# Subtest: \#115 it-uu: наблюдаемость — /metrics (Prometheus) + X-Request-Id на ответе
+not ok 1 - \#115 it-uu: наблюдаемость — /metrics (Prometheus) + X-Request-Id на ответе
+  ---
+  duration_ms: 15.763175
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:1723'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:50:22)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:56:28)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: it-uu: /theme.css выводит ПОЛНУЮ палитру из 3 базовых цветов (линии/плашки тоже)
+not ok 2 - it-uu: /theme.css выводит ПОЛНУЮ палитру из 3 базовых цветов (линии/плашки тоже)
+  ---
+  duration_ms: 3.651138
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:2593'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:50:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:73:28)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: главная отдаёт HTML с брендом, темой и data-tenant
+not ok 3 - it-uu: главная отдаёт HTML с брендом, темой и data-tenant
+  ---
+  duration_ms: 3.010877
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:3767'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:50:22)
+    processTicksAndRejections (node:internal/process/task_queues:103:5)
+    runNextTicks (node:internal/process/task_queues:68:3)
+    process.processImmediate (node:internal/timers:452:9)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:86:28)
+    async Test.run (node:internal/test_runner/test:1054:7)
+  ...
+# Subtest: it-uu: новость отдаёт готовый HTML
+not ok 4 - it-uu: новость отдаёт готовый HTML
+  ---
+  duration_ms: 4.751889
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:4328'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:50:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:101:28)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: форма постит и уведомляет владельца
+not ok 5 - it-uu: форма постит и уведомляет владельца
+  ---
+  duration_ms: 4.483788
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:4690'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:50:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:112:45)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: GATE: магазина нет — checkout и payment недоступны (404)
+not ok 6 - GATE: магазина нет — checkout и payment недоступны (404)
+  ---
+  duration_ms: 4.320245
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:5354'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:50:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:128:28)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: видимая admin-страница становится пунктом меню в шапке SSR (home — нет)
+not ok 7 - it-uu: видимая admin-страница становится пунктом меню в шапке SSR (home — нет)
+  ---
+  duration_ms: 3.700512
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:5838'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:194:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: меню = Главная → контент-страницы (sortOrder/menuLabel) → Кейсы, Блог
+not ok 8 - it-uu: меню = Главная → контент-страницы (sortOrder/menuLabel) → Кейсы, Блог
+  ---
+  duration_ms: 3.675014
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:8912'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:236:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: SEO: meta robots по умолчанию index,follow; noIndex скрывает (meta + sitemap)
+not ok 9 - SEO: meta robots по умолчанию index,follow; noIndex скрывает (meta + sitemap)
+  ---
+  duration_ms: 4.685202
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:10515'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:262:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: чужая страница `home` НЕ переопределяет фирменную главную (гард от неверного сида)
+not ok 10 - it-uu: чужая страница `home` НЕ переопределяет фирменную главную (гард от неверного сида)
+  ---
+  duration_ms: 8.503459
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:11773'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    bootStatic (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:220:22)
+    processTicksAndRejections (node:internal/process/task_queues:103:5)
+    runNextTicks (node:internal/process/task_queues:68:3)
+    process.processImmediate (node:internal/timers:452:9)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:278:28)
+    async Test.run (node:internal/test_runner/test:1054:7)
+  ...
+# Subtest: seed:ituu purge: чужая страница `home` удаляется (идемпотентно)
+ok 11 - seed:ituu purge: чужая страница `home` удаляется (идемпотентно)
+  ---
+  duration_ms: 2.112662
+  type: 'test'
+  ...
+# Subtest: §5: статика отдаётся с кэш-заголовками (Cache-Control + ETag + 304)
+not ok 12 - §5: статика отдаётся с кэш-заголовками (Cache-Control + ETag + 304)
+  ---
+  duration_ms: 5.863581
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:14882'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    bootStatic (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:220:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:316:34)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: it-uu: статическая страница айтитека отдаётся через SSR-shell (шапка+модалка+active+SEO)
+not ok 13 - it-uu: статическая страница айтитека отдаётся через SSR-shell (шапка+модалка+active+SEO)
+  ---
+  duration_ms: 6.786132
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:16857'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    bootStatic (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:220:22)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:344:34)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+  ...
+# Subtest: it-uu: admin-page с slug статической страницы переопределяет её тело
+not ok 14 - it-uu: admin-page с slug статической страницы переопределяет её тело
+  ---
+  duration_ms: 13.981514
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:18727'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    bootStatic (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:220:22)
+    processTicksAndRejections (node:internal/process/task_queues:103:5)
+    runNextTicks (node:internal/process/task_queues:68:3)
+    process.processImmediate (node:internal/timers:452:9)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:366:28)
+    async Test.run (node:internal/test_runner/test:1054:7)
+  ...
+# Subtest: it-uu: блоки главной (услуги/показатели) рендерятся из контента и заменяют дефолты
+not ok 15 - it-uu: блоки главной (услуги/показатели) рендерятся из контента и заменяют дефолты
+  ---
+  duration_ms: 8.380074
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:19820'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:411:22)
+    processTicksAndRejections (node:internal/process/task_queues:103:5)
+    runNextTicks (node:internal/process/task_queues:68:3)
+    process.processImmediate (node:internal/timers:452:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: sitemap.xml и robots.txt генерируются движком из SSR-маршрутов
+not ok 16 - it-uu: sitemap.xml и robots.txt генерируются движком из SSR-маршрутов
+  ---
+  duration_ms: 3.775536
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:22560'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:439:22)
+    processTicksAndRejections (node:internal/process/task_queues:103:5)
+    runNextTicks (node:internal/process/task_queues:68:3)
+    process.processImmediate (node:internal/timers:452:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: форма contacts постит на /api/forms/contacts и уведомляет владельца
+not ok 17 - it-uu: форма contacts постит на /api/forms/contacts и уведомляет владельца
+  ---
+  duration_ms: 1.44062
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:24877'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    boot (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:50:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:458:38)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: seed:ituu идемпотентно создаёт 4 инфо-страницы; тело рендерится raw (без prose-hero)
+not ok 18 - seed:ituu идемпотентно создаёт 4 инфо-страницы; тело рендерится raw (без prose-hero)
+  ---
+  duration_ms: 7.167599
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:25747'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:494:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: seed:ituu сеет реальные блоки главной (services/reviews/stats), идемпотентно + рендерятся
+not ok 19 - seed:ituu сеет реальные блоки главной (services/reviews/stats), идемпотентно + рендерятся
+  ---
+  duration_ms: 3.721222
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:27928'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:522:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: seed:ituu юр-болванки (consent/cookie/requisites), идемпотентно + рендерятся
+not ok 20 - seed:ituu юр-болванки (consent/cookie/requisites), идемпотентно + рендерятся
+  ---
+  duration_ms: 9.475674
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:29563'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:548:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: OG-разметка: абсолютный og:image (1200×630) + twitter-карточка
+not ok 21 - OG-разметка: абсолютный og:image (1200×630) + twitter-карточка
+  ---
+  duration_ms: 3.518475
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:30950'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:571:22)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: cookie-баннер показывается только при включённой Метрике
+not ok 22 - cookie-баннер показывается только при включённой Метрике
+  ---
+  duration_ms: 3.299868
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:31994'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:593:22)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: seed:ituu идемпотентно создаёт 6 кейсов (повтор — пропуск)
+ok 23 - seed:ituu идемпотентно создаёт 6 кейсов (повтор — пропуск)
+  ---
+  duration_ms: 0.500324
+  type: 'test'
+  ...
+# Subtest: страница «Кейсы»: сетка собирается из case-элементов (пусто → статичный дефолт)
+not ok 24 - страница «Кейсы»: сетка собирается из case-элементов (пусто → статичный дефолт)
+  ---
+  duration_ms: 3.598798
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:33842'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:621:20)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+  ...
+# Subtest: §1: кейс с картинкой рендерит <picture> (avif+srcset+размеры+lazy); без — генерёжка-обложка
+not ok 25 - §1: кейс с картинкой рендерит <picture> (avif+srcset+размеры+lazy); без — генерёжка-обложка
+  ---
+  duration_ms: 3.621592
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:36391'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:691:22)
+    processTicksAndRejections (node:internal/process/task_queues:103:5)
+    runNextTicks (node:internal/process/task_queues:68:3)
+    process.processImmediate (node:internal/timers:452:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: GATE: граф зависимостей чист — нет payments-ru/cart-checkout
+ok 26 - GATE: граф зависимостей чист — нет payments-ru/cart-checkout
+  ---
+  duration_ms: 0.299561
+  type: 'test'
+  ...
+# Subtest: S1.9b: it-uu — меню из слота header, телефон/футер из областей; пусто → фолбэк вёрстки
+not ok 27 - S1.9b: it-uu — меню из слота header, телефон/футер из областей; пусто → фолбэк вёрстки
+  ---
+  duration_ms: 4.363919
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:39935'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:743:21)
+    processTicksAndRejections (node:internal/process/task_queues:103:5)
+    runNextTicks (node:internal/process/task_queues:68:3)
+    process.processImmediate (node:internal/timers:452:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+{"ts":"2026-09-29T12:34:57.663Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.674Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+{"ts":"2026-09-29T12:34:57.680Z","level":"info","msg":"Контент-сайт создан (storefront + forms, без магазина)"}
+# Subtest: S1.9b: it-uu — вёрсточные крошки выпилены, серверные строятся из меню (разметка + JSON-LD)
+not ok 28 - S1.9b: it-uu — вёрсточные крошки выпилены, серверные строятся из меню (разметка + JSON-LD)
+  ---
+  duration_ms: 37.419335
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:44032'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:797:22)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: it-uu: кейс с телом получает детальную страницу, карточка ссылается на неё
+not ok 29 - it-uu: кейс с телом получает детальную страницу, карточка ссылается на неё
+  ---
+  duration_ms: 5.748621
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:46268'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:854:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: \#516/\#517/\#519 it-uu: витрина носителя проходит пробу SEO-базы смоука (llms.txt, lastmod, dateModified)
+not ok 30 - \#516/\#517/\#519 it-uu: витрина носителя проходит пробу SEO-базы смоука (llms.txt, lastmod, dateModified)
+  ---
+  duration_ms: 5.079143
+  type: 'test'
+  location: '/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:1:49443'
+  failureType: 'uncaughtException'
+  error: 'listen EPERM: operation not permitted 0.0.0.0'
+  code: 'EPERM'
+  stack: |-
+    Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    listenInCluster (node:net:1998:12)
+    Server.listen (node:net:2103:7)
+    Function.listen (/home/hermes/engine-autopost/work/cms_teach/engine/node_modules/.pnpm/express@4.22.2/node_modules/express/lib/application.js:635:24)
+    TestContext.<anonymous> (/home/hermes/engine-autopost/work/cms_teach/engine/apps/clients/it-uu/src/app.test.ts:888:22)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..30
+# tests 30
+# suites 0
+# pass 3
+# fail 27
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 200.279355

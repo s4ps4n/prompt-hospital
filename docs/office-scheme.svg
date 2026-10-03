@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1560" viewBox="0 0 1100 1560" font-family="DejaVu Sans, Arial, sans-serif">
+  <rect width="1100" height="1560" fill="#f7f8fa"/>
+
+  <text x="550" y="42" text-anchor="middle" font-size="26" font-weight="bold" fill="#1a1a2e">Схема работы офиса «Промт Госпиталь»</text>
+  <text x="550" y="68" text-anchor="middle" font-size="14" fill="#666">путь задачи: от постановки до приёмки</text>
+
+  <!-- 1 -->
+  <rect x="330" y="95" width="440" height="62" rx="10" fill="#ffffff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="120" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">1. Постановка задачи</text>
+  <text x="550" y="141" text-anchor="middle" font-size="12" fill="#555">addTask вручную  ·  addPlan из плана Jev</text>
+  <text x="790" y="120" font-size="11" fill="#8a94a6">id · title · kind</text>
+  <text x="790" y="136" font-size="11" fill="#8a94a6">zone · dependsOn</text>
+
+  <line x1="550" y1="157" x2="550" y2="185" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#4a6fa5"/>
+    </marker>
+    <marker id="arrowR" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#c0392b"/>
+    </marker>
+    <marker id="arrowG" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#27ae60"/>
+    </marker>
+  </defs>
+
+  <!-- 2 -->
+  <rect x="330" y="185" width="440" height="58" rx="10" fill="#eef3fb" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="209" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">2. Выравнивание журнала</text>
+  <text x="550" y="229" text-anchor="middle" font-size="12" fill="#555">verify_journal: лечит рассинхрон «задача ↔ воркер»</text>
+
+  <line x1="550" y1="243" x2="550" y2="271" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 3 -->
+  <rect x="330" y="271" width="440" height="72" rx="10" fill="#fff8e6" stroke="#d4a017" stroke-width="2"/>
+  <text x="550" y="295" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">3. Декомпозиция (если decompose)</text>
+  <text x="550" y="315" text-anchor="middle" font-size="12" fill="#555">флаг decomposed ставится ДО вызова Jev — защита от дублей</text>
+  <text x="550" y="333" text-anchor="middle" font-size="12" fill="#555">план есть → подзадачи с зависимостями · пуст → идёт как есть</text>
+
+  <line x1="550" y1="343" x2="550" y2="371" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 4 -->
+  <rect x="150" y="371" width="800" height="120" rx="10" fill="#ffffff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="395" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">4. Три фильтра перед назначением</text>
+  <rect x="175" y="410" width="240" height="64" rx="8" fill="#f0f4f9" stroke="#9db3d0"/>
+  <text x="295" y="432" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">Зависимости</text>
+  <text x="295" y="450" text-anchor="middle" font-size="11" fill="#555">deps_ready: предки закрыты?</text>
+  <text x="295" y="465" text-anchor="middle" font-size="11" fill="#8a94a6">нет → ждёт предшественников</text>
+  <rect x="430" y="410" width="240" height="64" rx="8" fill="#f0f4f9" stroke="#9db3d0"/>
+  <text x="550" y="432" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">Зона</text>
+  <text x="550" y="450" text-anchor="middle" font-size="11" fill="#555">busy_zones: зона свободна?</text>
+  <text x="550" y="465" text-anchor="middle" font-size="11" fill="#8a94a6">занята → ждёт освобождения</text>
+  <rect x="685" y="410" width="240" height="64" rx="8" fill="#f0f4f9" stroke="#9db3d0"/>
+  <text x="805" y="432" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">Исполнитель</text>
+  <text x="805" y="450" text-anchor="middle" font-size="11" fill="#555">статус wait/done, нет задачи</text>
+  <text x="805" y="465" text-anchor="middle" font-size="11" fill="#8a94a6">w0 исключён</text>
+
+  <line x1="550" y1="491" x2="550" y2="519" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 5 -->
+  <rect x="330" y="519" width="440" height="58" rx="10" fill="#eef3fb" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="543" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">5. Триаж Jev (System 1)</text>
+  <text x="550" y="563" text-anchor="middle" font-size="12" fill="#555">кому отдать · repo · confidence</text>
+  <text x="790" y="543" font-size="11" fill="#8a94a6">Jev недоступен</text>
+  <text x="790" y="559" font-size="11" fill="#8a94a6">→ первый свободный</text>
+
+  <line x1="550" y1="577" x2="550" y2="605" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 6 -->
+  <rect x="330" y="605" width="440" height="58" rx="10" fill="#fdeaea" stroke="#c0392b" stroke-width="2"/>
+  <text x="550" y="629" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">6. Найм — только по решению владельца</text>
+  <text x="550" y="649" text-anchor="middle" font-size="12" fill="#555">нет исполнителя → заявка SR-N (автонайма НЕТ)</text>
+
+  <line x1="550" y1="663" x2="550" y2="691" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 7 -->
+  <rect x="150" y="691" width="800" height="86" rx="10" fill="#ffffff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="715" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">7. Рабочая папка — по смыслу задачи</text>
+  <rect x="175" y="728" width="240" height="36" rx="6" fill="#f0f4f9" stroke="#9db3d0"/>
+  <text x="295" y="750" text-anchor="middle" font-size="11" fill="#2c3e50">/home/hermes/orchestrator</text>
+  <rect x="430" y="728" width="240" height="36" rx="6" fill="#f0f4f9" stroke="#9db3d0"/>
+  <text x="550" y="750" text-anchor="middle" font-size="11" fill="#2c3e50">/home/hermes/cms_teach/engine</text>
+  <rect x="685" y="728" width="240" height="36" rx="6" fill="#f0f4f9" stroke="#9db3d0"/>
+  <text x="805" y="750" text-anchor="middle" font-size="11" fill="#2c3e50">/home/hermes/prompt-hospital</text>
+  <text x="295" y="772" text-anchor="middle" font-size="10" fill="#8a94a6">диспетчер, journal, jev, найм, зона</text>
+  <text x="550" y="772" text-anchor="middle" font-size="10" fill="#8a94a6">cms, каркас, seo, #5</text>
+  <text x="805" y="772" text-anchor="middle" font-size="10" fill="#8a94a6">всё остальное</text>
+
+  <line x1="550" y1="777" x2="550" y2="805" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 8 -->
+  <rect x="330" y="805" width="440" height="58" rx="10" fill="#f3ecfb" stroke="#8e44ad" stroke-width="2"/>
+  <text x="550" y="829" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">8. Тред находок → в промпт</text>
+  <text x="550" y="849" text-anchor="middle" font-size="12" fill="#555">последние 6 комментариев: «не повторяй ошибок»</text>
+
+  <line x1="550" y1="863" x2="550" y2="891" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 9 -->
+  <rect x="150" y="891" width="800" height="112" rx="10" fill="#ffffff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="915" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">9. Раннер — по ПРОВАЙДЕРУ, не по имени модели</text>
+  <rect x="175" y="928" width="240" height="62" rx="8" fill="#eaf5ea" stroke="#27ae60"/>
+  <text x="295" y="950" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">anthropic</text>
+  <text x="295" y="968" text-anchor="middle" font-size="11" fill="#555">claude CLI</text>
+  <text x="295" y="982" text-anchor="middle" font-size="10" fill="#8a94a6">acceptEdits</text>
+  <rect x="430" y="928" width="240" height="62" rx="8" fill="#eaf5ea" stroke="#27ae60"/>
+  <text x="550" y="950" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">openai</text>
+  <text x="550" y="968" text-anchor="middle" font-size="11" fill="#555">codex exec</text>
+  <text x="550" y="982" text-anchor="middle" font-size="10" fill="#8a94a6">workspace-write</text>
+  <rect x="685" y="928" width="240" height="62" rx="8" fill="#fdf3e6" stroke="#d4a017"/>
+  <text x="805" y="950" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">antigravity · openrouter</text>
+  <text x="805" y="968" text-anchor="middle" font-size="11" fill="#555">HTTP-шлюз</text>
+  <text x="805" y="982" text-anchor="middle" font-size="10" fill="#8a94a6">НЕ даёт инструментов</text>
+
+  <line x1="550" y1="1003" x2="550" y2="1031" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 10 -->
+  <rect x="330" y="1031" width="440" height="58" rx="10" fill="#ffffff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="1055" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">10. Запуск исполнителя</text>
+  <text x="550" y="1075" text-anchor="middle" font-size="12" fill="#555">+ обязательное требование прогнать тесты</text>
+
+  <line x1="550" y1="1089" x2="550" y2="1117" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 11 -->
+  <rect x="150" y="1117" width="800" height="96" rx="10" fill="#ffffff" stroke="#4a6fa5" stroke-width="2"/>
+  <text x="550" y="1141" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">11. Приёмка Jev</text>
+  <rect x="175" y="1156" width="360" height="44" rx="8" fill="#fdeaea" stroke="#c0392b"/>
+  <text x="355" y="1176" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">провал</text>
+  <text x="355" y="1192" text-anchor="middle" font-size="11" fill="#555">diagnose_failure → cause → action</text>
+  <rect x="565" y="1156" width="360" height="44" rx="8" fill="#eaf5ea" stroke="#27ae60"/>
+  <text x="745" y="1176" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">успех</text>
+  <text x="745" y="1192" text-anchor="middle" font-size="11" fill="#555">gatekeeper_review по свидетельству</text>
+
+  <line x1="550" y1="1213" x2="550" y2="1241" stroke="#4a6fa5" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 12 -->
+  <rect x="150" y="1241" width="800" height="110" rx="10" fill="#f0f7f2" stroke="#27ae60" stroke-width="2"/>
+  <text x="550" y="1265" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a2e">12. Итог</text>
+  <rect x="175" y="1280" width="245" height="58" rx="8" fill="#ffffff" stroke="#27ae60"/>
+  <text x="297" y="1302" text-anchor="middle" font-size="12" font-weight="bold" fill="#27ae60">approve</text>
+  <text x="297" y="1320" text-anchor="middle" font-size="11" fill="#555">complete — уходит из очереди</text>
+  <rect x="430" y="1280" width="245" height="58" rx="8" fill="#ffffff" stroke="#c0392b"/>
+  <text x="552" y="1302" text-anchor="middle" font-size="12" font-weight="bold" fill="#c0392b">reject</text>
+  <text x="552" y="1320" text-anchor="middle" font-size="11" fill="#555">failAttempt — попытка +1, диагноз в тред</text>
+  <rect x="685" y="1280" width="240" height="58" rx="8" fill="#ffffff" stroke="#d4a017"/>
+  <text x="805" y="1302" text-anchor="middle" font-size="12" font-weight="bold" fill="#d4a017">escalate_to_human</text>
+  <text x="805" y="1320" text-anchor="middle" font-size="11" fill="#555">ручная приёмка</text>
+
+  <!-- обратная петля -->
+  <path d="M150 1310 L95 1310 L95 224 L330 224" fill="none" stroke="#c0392b" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrowR)"/>
+  <text x="88" y="770" text-anchor="middle" font-size="12" fill="#c0392b" transform="rotate(-90 88 770)">reject → возврат в лоток (до 3 попыток)</text>
+
+  <!-- подвал -->
+  <rect x="150" y="1385" width="800" height="150" rx="10" fill="#ffffff" stroke="#c9d3e0"/>
+  <text x="550" y="1409" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a1a2e">Защита на каждом шаге</text>
+  <text x="175" y="1434" font-size="12" fill="#444">• Дубли планов — флаг decomposed ставится ДО вызова Jev</text>
+  <text x="175" y="1456" font-size="12" fill="#444">• Молчаливое закрытие — гейткипер судит по свидетельству (git diff), не по returncode</text>
+  <text x="175" y="1478" font-size="12" fill="#444">• Задача без тестов отклоняется — требование вшито в промпт раннера</text>
+  <text x="175" y="1500" font-size="12" fill="#444">• Рассинхрон журнала — verify_journal каждый тик приводит задача↔воркер к согласию</text>
+  <text x="175" y="1522" font-size="12" fill="#444">• Два воркера в одной зоне — busy_zones блокирует второй запуск</text>
+
+  <text x="550" y="1552" text-anchor="middle" font-size="11" fill="#8a94a6">Офис Промт Госпиталь · dispatch.py + jev_system1.py + journal.py · 30.09.2026</text>
+</svg>
