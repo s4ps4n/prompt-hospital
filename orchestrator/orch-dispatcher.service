@@ -1,0 +1,30 @@
+# Диспетчер оркестратора офиса prompthospital.site/hermes.
+# Работает на машине Hermes (тут CLI Claude/Codex, рабочие папки, ключ Jev),
+# журнал — на боевом через https://prompthospital.site/hermes (basic-auth, пользователь dispatcher).
+# Код: /home/hermes/orchestrator-dispatcher (забирается с боевого: /home/hermes/orchestrator-dispatcher/sync-from-prod.sh).
+[Unit]
+Description=Orchestrator dispatcher (prompthospital.site/hermes)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=hermes
+Group=hermes
+WorkingDirectory=/home/hermes/orchestrator-dispatcher
+EnvironmentFile=/home/hermes/orchestrator-dispatcher/dispatcher.env
+Environment="HOME=/home/hermes"
+Environment="PATH=/home/hermes/.local/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStartPost=-/usr/bin/python3 /home/hermes/orchestrator-dispatcher/notify.py start
+ExecStart=/usr/bin/flock -n -F /home/hermes/orchestrator-dispatcher/.dispatcher.lock /usr/bin/python3 -u /home/hermes/orchestrator-dispatcher/dispatch.py --loop 20
+ExecStopPost=-/usr/bin/python3 /home/hermes/orchestrator-dispatcher/notify.py stop
+Restart=always
+RestartSec=30
+KillMode=mixed
+TimeoutStopSec=90
+StandardOutput=append:/home/hermes/orchestrator-dispatcher/logs/dispatcher.log
+StandardError=append:/home/hermes/orchestrator-dispatcher/logs/dispatcher.log
+
+[Install]
+WantedBy=multi-user.target
