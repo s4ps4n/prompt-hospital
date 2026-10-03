@@ -1,12 +1,9 @@
 import { nextLang, useLanguage } from '../i18n'
 import { translations } from '../i18n/translations'
-import { COORDINATOR_ID } from '../journal/catalog'
-import type { Journal, WorkerStatus } from '../journal/types'
 import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
-import { FONT_MONO, STATUS_META, STATUS_ORDER, button } from './styles'
+import { FONT_MONO, button } from './styles'
 
 interface TopBarProps {
-  journal: Journal
   /** Текущий масштаб сцены (1 = 100%). */
   scale: number
   onAddModel: () => void
@@ -17,15 +14,8 @@ interface TopBarProps {
   onReset: () => void
 }
 
-/** Счётчики — по моделям, без координатора (его статус производный). */
-function counts(j: Journal): Record<WorkerStatus, number> {
-  const c: Record<WorkerStatus, number> = { run: 0, blocked: 0, wait: 0, done: 0 }
-  for (const w of j.workers) if (w.id !== COORDINATOR_ID) c[w.status]++
-  return c
-}
-
-export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoomIn, onJournal, onReset }: TopBarProps) {
-  const c = counts(journal)
+/** Компактная шапка: название и управление. Счётчики задач и плашка связи — в нижней панели (StatusBar). */
+export function TopBar({ scale, onAddModel, onZoomOut, onZoomFit, onZoomIn, onJournal, onReset }: TopBarProps) {
   const { lang, setLang, t } = useLanguage()
   const next = nextLang(lang)
   // Подсказка — на языке, на который переключаем («Switch to English» / «Переключить на русский»).
@@ -38,7 +28,7 @@ export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoo
         alignItems: 'center',
         gap: 12,
         flexWrap: 'wrap',
-        padding: '8px 12px',
+        padding: '4px 10px',
         background: UI.wood,
         border: `3px solid ${UI.console}`,
         borderRadius: 6,
@@ -59,31 +49,6 @@ export function TopBar({ journal, scale, onAddModel, onZoomOut, onZoomFit, onZoo
       >
         {t('top.title')}
       </h1>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {STATUS_ORDER.map((s) => (
-          <div
-            key={s}
-            data-counter={s}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '4px 8px',
-              background: OUTLINE,
-              borderRadius: 4,
-              color: UI.paper,
-              fontSize: 11,
-              fontFamily: FONT_MONO,
-              fontWeight: 700,
-            }}
-          >
-            <div style={{ width: 12, height: 10, border: `1.5px solid ${UI.paper}`, background: STATUS_META[s].screen }} />
-            <div>
-              {t(`status.${s}`)}: {c[s]}
-            </div>
-          </div>
-        ))}
-      </div>
       <div style={{ flex: 1 }} />
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <button type="button" className="ph-btn" style={button('primary')} onClick={onAddModel}>

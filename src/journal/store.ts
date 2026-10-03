@@ -34,8 +34,11 @@ export interface JournalStore {
   /** Счётчик записей в удалённый журнал (для отбрасывания устаревших ответов опроса). */
   epoch(): number
   isRemote(): boolean
-  /** Fallback на монитор: запись недоступна, check тоже отвечает READ_ONLY_ERR. */
-  setReadOnly(): void
+  /**
+   * Fallback на монитор: запись недоступна, check тоже отвечает READ_ONLY_ERR.
+   * `false` — API снова отвечает (успешный опрос /journal), запись возвращается.
+   */
+  setReadOnly(on?: boolean): void
   isReadOnly(): boolean
 }
 
@@ -98,8 +101,8 @@ export function createJournalStore(options: JournalStoreOptions = {}): JournalSt
     epoch: () => epoch,
     isRemote: () => remote !== null,
 
-    setReadOnly() {
-      readOnly = true
+    setReadOnly(on = true) {
+      readOnly = on
     },
 
     isReadOnly: () => readOnly,

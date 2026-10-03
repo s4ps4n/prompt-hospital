@@ -8,6 +8,13 @@ top.zoomFit,Вписать,Fit
 top.zoomTitle,Масштаб {pct}%,Zoom {pct}%
 top.journal,Журнал,Journal
 top.reset,Сброс,Reset
+counter.tasks,Задачи:,Tasks:
+counter.run,в работе,in progress
+counter.run.title,Задачи у исполнителей — текущие задачи моделей,Tasks being worked on — models' current tasks
+counter.blocked,заблокировано,blocked
+counter.blocked.title,"Задачи, снятые с ротации или заблокированные моделью","Tasks taken out of rotation or blocked by their model"
+counter.wait,ожидают,waiting
+counter.wait.title,Задачи в лотке Гермеса и в очередях моделей,Tasks in Hermes' tray and in models' queues
 status.run,в работе,running
 status.wait,ожидает,waiting
 status.blocked,заблокирован,blocked
@@ -68,8 +75,16 @@ modal.close,Закрыть,Close
 scene.freeRoom,＋ свободная комната,＋ free room
 sign.noTask,Нет текущей задачи,No current task
 sign.inTray,в лотке: {n},in tray: {n}
-msg.hint,Перетащите конверт из лотка Гермеса на комнату модели. Клик по комнате открывает карточку.,Drag an envelope from Hermes' tray onto a model's room. Click a room to open its card.
+msg.hint,Перетащите конверт из лотка на комнату модели · клик по комнате — карточка,Drag an envelope from the tray onto a model's room · click a room for its card
 msg.miss,Мимо — задача осталась на месте,Missed — the task stayed in place
 msg.resetRemote,"Сброс — только для локального офиса, не для журнала оркестратора","Reset is for the local office only, not for the orchestrator's journal"
 msg.resetConfirm,Сбросить офис к стартовому составу?,Reset the office to the starting lineup?
 msg.resetDone,Офис сброшен к стартовому составу,Office reset to the starting lineup
+status.label,Строка состояния,Status bar
+source.label,Источник данных офиса,Office data source
+source.demo,ДЕМО-ДАННЫЕ,DEMO DATA
+source.off,"связь с оркестратором не настроена (VITE_JOURNAL_URL не задан при сборке). Это макет, а не реальный журнал.","orchestrator link is not configured (VITE_JOURNAL_URL was not set at build time). This is a mock-up, not the real journal."
+source.connecting,"подключение к оркестратору {url}… Пока показан макет, а не реальный журнал.","connecting to the orchestrator {url}… Showing a mock-up, not the real journal."
+source.down,"оркестратор недоступен ({url}). Это макет, а не реальный журнал.","orchestrator is unreachable ({url}). This is a mock-up, not the real journal."
+source.live,Журнал оркестратора,Orchestrator journal
+source.stale,"Связь с оркестратором потеряна ({url}). Показан последний полученный журнал, данные могут быть устаревшими.","Lost connection to the orchestrator ({url}). Showing the last received journal; data may be out of date."

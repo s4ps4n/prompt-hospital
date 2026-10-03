@@ -36,3 +36,24 @@ export function statusCounts(j: Journal): Record<Worker['status'], number> {
   for (const w of j.workers) counts[w.status]++
   return counts
 }
+
+export type TaskCounts = { run: number; blocked: number; wait: number }
+
+/**
+ * Счётчики шапки — по задачам журнала (j.queue), не по моделям. Закрытая задача
+ * из очереди удаляется, поэтому «выполнено» отсюда не посчитать.
+ *  - blocked — задача снята с ротации (t.blocked) или модель заблокировала свою текущую;
+ *  - run     — текущая задача модели (worker.task);
+ *  - wait    — остальные: лоток и личные очереди моделей.
+ */
+export function taskCounts(j: Journal): TaskCounts {
+  const c: TaskCounts = { run: 0, blocked: 0, wait: 0 }
+  const holder = new Map(j.workers.filter((w) => w.task).map((w) => [w.task, w]))
+  for (const t of j.queue) {
+    const w = holder.get(t.id)
+    if (t.blocked || w?.status === 'blocked') c.blocked++
+    else if (w) c.run++
+    else c.wait++
+  }
+  return c
+}

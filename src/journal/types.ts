@@ -53,6 +53,8 @@ export interface Task {
   order: number
   assignedTo: WorkerId | null
   kind: AssignableRole | null
+  /** Снята с ротации, ждёт человека (blockTask / failAttempt оркестратора). Локальные операции не ставят. */
+  blocked?: boolean
 }
 
 export interface OpArgs {

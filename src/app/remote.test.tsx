@@ -181,13 +181,13 @@ describe('App: запись в журнал оркестратора (check → 
   let store: JournalStore
 
   /** GET /journal → WRITE; POST /op → reply. Возвращает мок fetch. */
-  async function mount(reply: OpReply, motion = true) {
+  async function mount(reply: OpReply, motion = true, pollMs = 0) {
     const fetch = vi.fn((_url: string, init?: RequestInit) =>
       init?.method === 'POST' ? reply(JSON.parse(String(init.body))) : ok(WRITE),
     )
     vi.stubGlobal('fetch', fetch)
     store = createJournalStore({ storage: createMemoryStorage() })
-    const dom = render(<App journalUrl="/journal" pollMs={0} motion={motion} store={store} />)
+    const dom = render(<App journalUrl="/journal" pollMs={pollMs} motion={motion} store={store} />)
     await act(() => vi.advanceTimersByTimeAsync(0))
     expect(store.isRemote()).toBe(true)
     return { fetch, dom }
@@ -273,5 +273,128 @@ describe('App: запись в журнал оркестратора (check → 
     fireEvent.click(screen.getByRole('button', { name: 'Сброс' }))
     expect(status().textContent).toContain(READ_ONLY_ERR)
     expect(posts(fetch)).toHaveLength(1)
+  })
+
+  it('API вернулось: успешный опрос /journal снимает read-only, запись снова идёт на сервер', async () => {
+    // Боевой сценарий: orchestrator-api перезапускался, POST /op получил 502 от nginx.
+    // Плашка снова зелёная — значит и перетаскивание должно снова работать, без перезагрузки страницы.
+    let down = true
+    const { fetch } = await mount(() => (down ? Promise.resolve(new Response('bad gateway', { status: 502 })) : ok({ ok: true, journal: AFTER })), false, 5000)
+    release(slot('T-2'), room('w3'))
+    await act(() => vi.advanceTimersByTimeAsync(0))
+    expect(store.isReadOnly()).toBe(true)
+
+    down = false
+    await act(() => vi.advanceTimersByTimeAsync(5000))
+    expect(store.isReadOnly()).toBe(false)
+    expect(document.querySelector('[data-source]')?.getAttribute('data-source')).toBe('live')
+
+    release(slot('T-2'), room('w3'))
+    await act(() => vi.advanceTimersByTimeAsync(0))
+    expect(posts(fetch)).toHaveLength(2)
+    expect(store.getJournal()).toEqual(AFTER)
+    expect(status().getAttribute('data-kind')).toBe('ok')
+  })
+
+  it('500 с {err} (journal.py упал на операции) — отказ операции в MessageBar, не «API недоступно»', async () => {
+    // server.py отвечает 500 {"err": stderr}, если journal.py вернул ненулевой код: сервер жив, отказала операция.
+    await mount(() => Promise.resolve(new Response(JSON.stringify({ err: 'Traceback: KeyError' }), { status: 500 })), false)
+    release(slot('T-2'), room('w3'))
+    await act(() => vi.advanceTimersByTimeAsync(0))
+    expect(status().getAttribute('data-kind')).toBe('err')
+    expect(status().textContent).toContain('Traceback: KeyError')
+    expect(status().textContent).not.toContain(OFFLINE_ERR)
+    expect(store.isReadOnly()).toBe(false)
+  })
+
+  it.each([401, 403])('POST /op → %i (Basic Auth) — просьба войти заново, офис не уходит в монитор', async (code) => {
+    const html = new Response('<html><title>401 Authorization Required</title></html>', { status: code, headers: { 'Content-Type': 'text/html' } })
+    await mount(() => Promise.resolve(html), false)
+    release(slot('T-2'), room('w3'))
+    await act(() => vi.advanceTimersByTimeAsync(0))
+    expect(status().getAttribute('data-kind')).toBe('err')
+    expect(status().textContent).toContain(String(code))
+    expect(status().textContent).toContain('войдите заново')
+    expect(status().textContent).not.toContain(OFFLINE_ERR)
+    expect(store.isReadOnly()).toBe(false)
+  })
+})
+
+describe('App: демо-данные заметны (источник журнала)', () => {
+  const source = () => document.querySelector('[data-source]')
+  const memStore = () => createJournalStore({ storage: createMemoryStorage() })
+
+  it('адрес журнала не задан — красная плашка «ДЕМО-ДАННЫЕ», связь не настроена', () => {
+    const fetch = stubFetch(() => ok(REMOTE))
+    render(<App journalUrl="" pollMs={0} motion={false} store={memStore()} />)
+
+    const banner = screen.getByRole('alert')
+    expect(banner.getAttribute('data-source')).toBe('demo')
+    expect(banner.textContent).toContain('ДЕМО-ДАННЫЕ')
+    expect(banner.textContent).toContain('связь с оркестратором не настроена')
+    expect(banner.textContent).toContain('VITE_JOURNAL_URL')
+    expect(banner.closest('footer')).not.toBeNull()
+    expect(banner.closest('header')).toBeNull()
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('адрес задан, оркестратор недоступен — плашка «ДЕМО-ДАННЫЕ» с адресом', async () => {
+    stubFetch(() => Promise.reject(new TypeError('Failed to fetch')))
+    render(<App journalUrl="http://127.0.0.1:8090/journal" pollMs={0} motion={false} store={memStore()} />)
+
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('недоступен'))
+    const banner = screen.getByRole('alert')
+    expect(banner.getAttribute('data-source')).toBe('demo')
+    expect(banner.textContent).toContain('ДЕМО-ДАННЫЕ')
+    expect(banner.textContent).toContain('http://127.0.0.1:8090/journal')
+  })
+
+  it('адрес задан, ответ не в форме журнала — тоже демо, не реальность', async () => {
+    stubFetch(() => ok({ hello: 'world' }))
+    render(<App journalUrl="/journal" pollMs={0} motion={false} store={memStore()} />)
+
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('недоступен'))
+    expect(source()!.getAttribute('data-source')).toBe('demo')
+  })
+
+  it('журнал оркестратора получен — плашки демо нет, есть признак живого журнала', async () => {
+    stubFetch(() => ok(REMOTE))
+    render(<App journalUrl="/journal" pollMs={0} motion={false} store={memStore()} />)
+
+    await waitFor(() => expect(source()!.getAttribute('data-source')).toBe('live'))
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(document.body.textContent).not.toContain('ДЕМО-ДАННЫЕ')
+    expect(source()!.textContent).toContain('Журнал оркестратора: /journal')
+    expect(source()!.closest('footer')).not.toBeNull()
+  })
+
+  it('связь потеряна после загрузки — предупреждение «данные могут быть устаревшими», не демо', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      let up = true
+      stubFetch(() => (up ? ok(REMOTE) : Promise.reject(new TypeError('Failed to fetch'))))
+      render(<App journalUrl="/journal" pollMs={1000} motion={false} store={memStore()} />)
+      await waitFor(() => expect(source()!.getAttribute('data-source')).toBe('live'))
+
+      up = false
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1000)
+      })
+      await waitFor(() => expect(source()!.getAttribute('data-source')).toBe('stale'))
+      const banner = screen.getByRole('alert')
+      expect(banner.textContent).toContain('Связь с оркестратором потеряна')
+      expect(banner.textContent).not.toContain('ДЕМО-ДАННЫЕ')
+      expect(banner.closest('footer')).not.toBeNull()
+      // реальные комнаты остаются
+      expect(room('w3')).not.toBeNull()
+
+      up = true
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1000)
+      })
+      await waitFor(() => expect(source()!.getAttribute('data-source')).toBe('live'))
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

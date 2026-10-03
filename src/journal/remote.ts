@@ -58,9 +58,13 @@ export function opArgList<K extends OpName>(name: K, args: OpArgs[K]): unknown[]
   return []
 }
 
+/** POST /op отклонён прокси (Basic Auth): сервер жив, браузер не прислал или потерял логин. */
+export const authErr = (status: number) => `Нет доступа к API записи (${status}): обновите страницу и войдите заново`
+
 /**
  * Ответ `POST /op`: применённый журнал, отказ сервера или `offline` —
- * API недоступен (сеть, 5xx, не JSON) и офис переходит в монитор.
+ * API недоступен (сеть, 5xx без JSON-ответа сервера, не JSON) и офис переходит в монитор.
+ * 500 с `{err}` — server.py жив, упала операция (journal.py): это отказ, а не недоступность.
  */
 export type PostOpResult = { ok: true; journal: Journal; out?: unknown } | { ok: false; err: string } | { ok: false; offline: true }
 
@@ -73,13 +77,18 @@ export async function postOp(url: string, name: OpName, args: unknown[]): Promis
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ name, args }),
     })
-    if (res.status >= 500) return { ok: false, offline: true }
+  } catch {
+    return { ok: false, offline: true }
+  }
+  if (res.status === 401 || res.status === 403) return { ok: false, err: authErr(res.status) }
+  try {
     data = await res.json()
   } catch {
     return { ok: false, offline: true }
   }
   const d = (typeof data === 'object' && data !== null ? data : {}) as Record<string, unknown>
   if (d.ok === true && isJournalShape(d.journal)) return { ok: true, journal: d.journal, out: d.out }
-  if (d.ok === false && typeof d.err === 'string') return { ok: false, err: d.err }
+  if (d.ok !== true && typeof d.err === 'string') return { ok: false, err: d.err }
+  if (res.status >= 500) return { ok: false, offline: true }
   return { ok: false, err: `Неожиданный ответ API (${res.status})` }
 }

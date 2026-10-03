@@ -277,6 +277,7 @@ describe('App: отрисовка — функция от журнала', () =>
     expect(dom.container.querySelector('[data-task-slot="T-12"]')).toBeNull()
     expect($('[data-envelope="T-12"]').getAttribute('data-drop')).toBe('w3')
     expect($('[data-counter="run"]').textContent).toContain('в работе: 2')
+    expect($('[data-counter="wait"]').textContent).toBe('ожидают: 6')
   })
 
   it('«Журнал» показывает JSON-дамп с операциями', () => {
@@ -284,6 +285,83 @@ describe('App: отрисовка — функция от журнала', () =>
     fireEvent.click(screen.getByRole('button', { name: 'Журнал' }))
     const dump = within(screen.getByRole('dialog', { name: 'Журнал оркестратора' })).getByText(/"operations"/)
     expect(dump.textContent).toContain('"op": "assign"')
+  })
+
+  it('Escape закрывает окно (журнал, каталог): иначе оно перекрывает шапку и кнопки «не отвечают»', () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Журнал' }))
+    expect(screen.queryByRole('dialog')).toBeTruthy()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: '＋ Модель' }))
+    expect(screen.queryByRole('dialog')).toBeTruthy()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+})
+
+describe('App: размещение — шапка компактная, журнал и статус в нижней панели', () => {
+  const header = () => $('header')
+  const footer = () => $('footer')
+
+  it('шапка: название и кнопки управления, без счётчиков задач и плашки связи', () => {
+    expect(header().textContent).toContain('Prompt Hospital')
+    for (const b of ['＋ Модель', 'Вписать', 'Журнал', 'Сброс', 'EN']) expect(header().textContent).toContain(b)
+    expect(header().querySelector('[data-counter]')).toBeNull()
+    expect(header().querySelector('[data-source]')).toBeNull()
+    expect(header().textContent).not.toContain('Задачи:')
+  })
+
+  it('нижняя панель: подсказка, счётчики задач и плашка связи; панель — последняя в офисе, после сцены', () => {
+    expect(footer().textContent).toContain('Задачи:')
+    for (const s of ['run', 'blocked', 'wait']) expect(footer().querySelector(`[data-counter="${s}"]`)).not.toBeNull()
+    expect(footer().querySelector('[data-source]')).not.toBeNull()
+    expect(footer().contains(message())).toBe(true)
+    expect(message().textContent).toContain('Перетащите конверт')
+    expect(message().querySelector('[data-counter]')).toBeNull()
+    const scene = $('[data-scene-scale]')
+    expect(scene.compareDocumentPosition(footer()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(dom.container.querySelectorAll('[data-counter]')).toHaveLength(3)
+    expect(dom.container.querySelectorAll('[data-source]')).toHaveLength(1)
+  })
+
+  it('офис по высоте экрана: main — ровно 100vh, средний ряд сжимается (без скролла страницы)', () => {
+    const main = $('main') as HTMLElement
+    expect(main.style.height).toBe('100vh')
+    expect(main.style.minHeight).toBe('')
+    const row = $('[data-scene-scale]').parentElement as HTMLElement
+    expect(row.style.minHeight).toBe('0px')
+  })
+})
+
+describe('App: счётчики в нижней панели — задачи, а не модели', () => {
+  const counter = (s: string) => $(`[data-counter="${s}"]`).textContent
+
+  it('стартовый журнал: в работе 1, заблокировано 1, ожидают 7; счётчика «выполнено» нет', () => {
+    expect(dom.container.querySelector('footer')?.textContent).toContain('Задачи:')
+    expect(counter('run')).toBe('в работе: 1')
+    expect(counter('blocked')).toBe('заблокировано: 1')
+    expect(counter('wait')).toBe('ожидают: 7')
+    expect(dom.container.querySelector('[data-counter="done"]')).toBeNull()
+  })
+
+  it('3 задачи в очереди и 2 модели в статусе done → ожидают 3, «выполнено: 2» не показывается', () => {
+    const j = store.getJournal()
+    act(() => {
+      store.loadRemote({
+        ...j,
+        workers: [
+          { ...j.workers[0], status: 'run', task: null },
+          { ...j.workers[1], status: 'done', task: null },
+          { ...j.workers[2], status: 'done', task: null },
+        ],
+        queue: j.queue.filter((t) => t.assignedTo === null).slice(0, 3),
+      })
+    })
+    expect(counter('wait')).toBe('ожидают: 3')
+    expect(counter('run')).toBe('в работе: 0')
+    expect(counter('blocked')).toBe('заблокировано: 0')
+    expect(dom.container.querySelector('footer')?.textContent).not.toMatch(/выполнено/)
   })
 })
 

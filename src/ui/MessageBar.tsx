@@ -10,7 +10,7 @@ export interface Message {
 
 const COLOR: Record<MessageKind, string> = { ok: UI.ok, err: UI.error, info: UI.paper }
 
-/** Нижняя строка: текст OpResult.msg / OpResult.err или подсказка. */
+/** Строка сообщения в нижней панели: текст OpResult.msg / OpResult.err или подсказка. */
 export function MessageBar({ message }: { message: Message | null }) {
   const t = useT()
   return (
@@ -21,16 +21,14 @@ export function MessageBar({ message }: { message: Message | null }) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
-        padding: '8px 12px',
-        background: UI.console,
-        border: `3px solid ${UI.wood}`,
-        borderRadius: 6,
+        flex: '1 1 320px',
+        minWidth: 0,
+        padding: '4px 6px',
         fontFamily: FONT_MONO,
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: 700,
         color: message ? COLOR[message.kind] : UI_EXTRA.hint,
-        minHeight: 40,
+        minHeight: 28,
         boxSizing: 'border-box',
       }}
     >

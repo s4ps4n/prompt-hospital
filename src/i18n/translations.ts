@@ -13,6 +13,13 @@ export type TKey =
   | 'top.zoomTitle'
   | 'top.journal'
   | 'top.reset'
+  | 'counter.tasks'
+  | 'counter.run'
+  | 'counter.run.title'
+  | 'counter.blocked'
+  | 'counter.blocked.title'
+  | 'counter.wait'
+  | 'counter.wait.title'
   | 'status.run'
   | 'status.wait'
   | 'status.blocked'
@@ -78,6 +85,14 @@ export type TKey =
   | 'msg.resetRemote'
   | 'msg.resetConfirm'
   | 'msg.resetDone'
+  | 'status.label'
+  | 'source.label'
+  | 'source.demo'
+  | 'source.off'
+  | 'source.connecting'
+  | 'source.down'
+  | 'source.live'
+  | 'source.stale'
 
 export const translations: Record<Lang, Record<TKey, string>> = {
   'ru': {
@@ -90,6 +105,13 @@ export const translations: Record<Lang, Record<TKey, string>> = {
     'top.zoomTitle': 'Масштаб {pct}%',
     'top.journal': 'Журнал',
     'top.reset': 'Сброс',
+    'counter.tasks': 'Задачи:',
+    'counter.run': 'в работе',
+    'counter.run.title': 'Задачи у исполнителей — текущие задачи моделей',
+    'counter.blocked': 'заблокировано',
+    'counter.blocked.title': 'Задачи, снятые с ротации или заблокированные моделью',
+    'counter.wait': 'ожидают',
+    'counter.wait.title': 'Задачи в лотке Гермеса и в очередях моделей',
     'status.run': 'в работе',
     'status.wait': 'ожидает',
     'status.blocked': 'заблокирован',
@@ -150,11 +172,19 @@ export const translations: Record<Lang, Record<TKey, string>> = {
     'scene.freeRoom': '＋ свободная комната',
     'sign.noTask': 'Нет текущей задачи',
     'sign.inTray': 'в лотке: {n}',
-    'msg.hint': 'Перетащите конверт из лотка Гермеса на комнату модели. Клик по комнате открывает карточку.',
+    'msg.hint': 'Перетащите конверт из лотка на комнату модели · клик по комнате — карточка',
     'msg.miss': 'Мимо — задача осталась на месте',
     'msg.resetRemote': 'Сброс — только для локального офиса, не для журнала оркестратора',
     'msg.resetConfirm': 'Сбросить офис к стартовому составу?',
     'msg.resetDone': 'Офис сброшен к стартовому составу',
+    'status.label': 'Строка состояния',
+    'source.label': 'Источник данных офиса',
+    'source.demo': 'ДЕМО-ДАННЫЕ',
+    'source.off': 'связь с оркестратором не настроена (VITE_JOURNAL_URL не задан при сборке). Это макет, а не реальный журнал.',
+    'source.connecting': 'подключение к оркестратору {url}… Пока показан макет, а не реальный журнал.',
+    'source.down': 'оркестратор недоступен ({url}). Это макет, а не реальный журнал.',
+    'source.live': 'Журнал оркестратора',
+    'source.stale': 'Связь с оркестратором потеряна ({url}). Показан последний полученный журнал, данные могут быть устаревшими.',
   },
   'en': {
     'lang.switchTo': 'Switch to English',
@@ -166,6 +196,13 @@ export const translations: Record<Lang, Record<TKey, string>> = {
     'top.zoomTitle': 'Zoom {pct}%',
     'top.journal': 'Journal',
     'top.reset': 'Reset',
+    'counter.tasks': 'Tasks:',
+    'counter.run': 'in progress',
+    'counter.run.title': 'Tasks being worked on — models\' current tasks',
+    'counter.blocked': 'blocked',
+    'counter.blocked.title': 'Tasks taken out of rotation or blocked by their model',
+    'counter.wait': 'waiting',
+    'counter.wait.title': 'Tasks in Hermes\' tray and in models\' queues',
     'status.run': 'running',
     'status.wait': 'waiting',
     'status.blocked': 'blocked',
@@ -226,10 +263,18 @@ export const translations: Record<Lang, Record<TKey, string>> = {
     'scene.freeRoom': '＋ free room',
     'sign.noTask': 'No current task',
     'sign.inTray': 'in tray: {n}',
-    'msg.hint': 'Drag an envelope from Hermes\' tray onto a model\'s room. Click a room to open its card.',
+    'msg.hint': 'Drag an envelope from the tray onto a model\'s room · click a room for its card',
     'msg.miss': 'Missed — the task stayed in place',
     'msg.resetRemote': 'Reset is for the local office only, not for the orchestrator\'s journal',
     'msg.resetConfirm': 'Reset the office to the starting lineup?',
     'msg.resetDone': 'Office reset to the starting lineup',
+    'status.label': 'Status bar',
+    'source.label': 'Office data source',
+    'source.demo': 'DEMO DATA',
+    'source.off': 'orchestrator link is not configured (VITE_JOURNAL_URL was not set at build time). This is a mock-up, not the real journal.',
+    'source.connecting': 'connecting to the orchestrator {url}… Showing a mock-up, not the real journal.',
+    'source.down': 'orchestrator is unreachable ({url}). This is a mock-up, not the real journal.',
+    'source.live': 'Orchestrator journal',
+    'source.stale': 'Lost connection to the orchestrator ({url}). Showing the last received journal; data may be out of date.',
   },
 }

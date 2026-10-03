@@ -21,13 +21,14 @@ import {
   DragGhost,
   FONT_UI,
   JournalModal,
-  MessageBar,
   SceneView,
+  StatusBar,
   TRAY_DROP,
   TopBar,
   Tray,
   WorkerCard,
   type CatalogChoice,
+  type JournalSource,
 } from '../ui'
 import type { ScreenPoint } from '../animations'
 import { LanguageProvider, useT } from '../i18n'
@@ -35,7 +36,7 @@ import { UI_EXTRA } from '../theme/colors'
 import { decideDrop, flightTarget, type DropHit } from './dnd'
 import { useDrag } from './useDrag'
 import { useFlights } from './useFlights'
-import { useJournal, useMessage, useRemoteJournal } from './useJournal'
+import { useJournal, useMessage, useRemoteJournal, type LinkStatus } from './useJournal'
 import { useZoom } from './useZoom'
 import './app.css'
 
@@ -50,6 +51,16 @@ export interface AppProps {
   opUrl?: string
   /** Период опроса journalUrl, мс; 0 — только при старте. */
   pollMs?: number
+}
+
+/**
+ * Источник журнала для плашки. Демо — всё, что не журнал оркестратора: стор ещё ни разу не получил /journal.
+ * isRemote() читается в рендере: loadRemote меняет журнал, и useJournal перерисовывает офис.
+ */
+function journalSource(remote: boolean, link: LinkStatus, url: string | undefined): JournalSource {
+  if (remote && url) return { kind: link === 'down' ? 'stale' : 'live', url }
+  if (!url || link === 'off') return { kind: 'demo', reason: 'off' }
+  return { kind: 'demo', reason: link === 'down' ? 'down' : 'connecting', url }
 }
 
 /** Приложение целиком: офис внутри контекста языка интерфейса. */
@@ -74,8 +85,9 @@ function Office({
 }: AppProps) {
   const t = useT()
   const [store] = useState(() => injected ?? createJournalStore())
-  useRemoteJournal(store, journalUrl, pollMs)
+  const link = useRemoteJournal(store, journalUrl, pollMs)
   const journal = useJournal(store)
+  const source = journalSource(store.isRemote(), link, journalUrl)
   const [message, say] = useMessage()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [catalog, setCatalog] = useState<CatalogChoice | null>(null)
@@ -172,18 +184,17 @@ function Office({
   return (
     <main
       style={{
-        minHeight: '100vh',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
-        padding: 8,
+        gap: 6,
+        padding: 6,
         boxSizing: 'border-box',
         background: UI_EXTRA.backdrop,
         fontFamily: FONT_UI,
       }}
     >
       <TopBar
-        journal={journal}
         scale={scale}
         onAddModel={openCatalog}
         onZoomOut={zoomOut}
@@ -192,7 +203,8 @@ function Office({
         onJournal={() => setJournalOpen(true)}
         onReset={reset}
       />
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'stretch', flex: 1, minHeight: 'calc(100vh - 128px)' }}>
+      {/* Средний ряд забирает всю высоту между шапкой и нижней панелью: страница не скроллится, скроллятся сцена и лоток. */}
+      <div className="ph-office-row" style={{ display: 'flex', gap: 6, alignItems: 'stretch', flex: '1 1 0', minHeight: 0, overflow: 'auto' }}>
         <Tray journal={journal} over={overDrop === TRAY_DROP} run={run} onStartDrag={start} />
         <SceneView
           journal={journal}
@@ -219,7 +231,7 @@ function Office({
           />
         )}
       </div>
-      <MessageBar message={message} />
+      <StatusBar journal={journal} message={message} source={source} />
 
       {catalog && <CatalogModal initial={catalog} onConfirm={addWorker} onClose={() => setCatalog(null)} />}
       {journalOpen && <JournalModal journal={journal} onClose={() => setJournalOpen(false)} />}

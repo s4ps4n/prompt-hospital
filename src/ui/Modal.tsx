@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { useT } from '../i18n'
 import { OUTLINE, UI, UI_EXTRA } from '../theme/colors'
 import { miniButton, panel } from './styles'
@@ -12,6 +12,14 @@ interface ModalProps {
 
 export function Modal({ title, width, onClose, children }: ModalProps) {
   const t = useT()
+  // Escape закрывает окно, как клик по подложке.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
   return (
     <div
       onClick={onClose}
