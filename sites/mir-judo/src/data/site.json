@@ -1,0 +1,17 @@
+{
+  "_comment": "Глобальные настройки сайта. В Каркасе это NAP и реквизиты из админки (владелец). Значения-заглушки помечены TODO.",
+  "name": "Мир дзюдо",
+  "baseUrl": "https://mir-judo.ru",
+  "city": "Улан-Удэ",
+  "phone": "+7 (3012) 00-00-00",
+  "phoneHref": "tel:+73012000000",
+  "whatsapp": "https://wa.me/73012000000",
+  "telegram": "https://t.me/mir_judo",
+  "email": "info@mir-judo.ru",
+  "address": "г. Улан-Удэ, адрес уточняется",
+  "hours": "Пн–Сб 10:00–19:00",
+  "legal": "ИП / ООО — реквизиты из настроек сайта",
+  "partner": "Клуб дзюдо «ИППОН», Улан-Удэ",
+  "orderEndpoint": "",
+  "_todo": ["phone", "whatsapp", "telegram", "email", "address", "legal", "baseUrl"]
+}

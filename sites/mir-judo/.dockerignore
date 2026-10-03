@@ -1,0 +1,4 @@
+dist
+node_modules
+deploy/.env
+deploy/letsencrypt
